@@ -1,0 +1,6 @@
+__pycache__
+.coverage*
+.mypy_cache
+*.egg-info
+dist/
+.venv

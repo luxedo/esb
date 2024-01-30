@@ -1,0 +1,93 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "esb"
+dynamic = ["version"]
+description = 'Script your way to rescue Christmas as part of the ElfScript Brigade team.'
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE.md"}
+scripts = { esb = "esb.cli:main" }
+keywords = ["Advent of Code", "CLI", "AoC", "Elf", "Elves", "ElfScript Brigade"]
+authors = [
+  { name = "Luiz Eduardo Amaral", email = "luizamaral306@gmail.com" },
+]
+maintainers = [
+  { name = "Luiz Eduardo Amaral", email = "luizamaral306@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Environment :: Console",
+  "Topic :: Software Development :: Code Generators",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/luxedo/esb/README.md"
+Repository = "https://github.com/luxedo/esb.git"
+Issues = "https://github.com/luxedo/esb/issues"
+Source = "https://github.com/luxedo/esb"
+
+[tool.hatch.version]
+path = "src/esb/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pre-commit>3.1",
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:esb tests}"
+
+[tool.coverage.run]
+source_pkgs = ["esb", "tests"]
+branch = true
+parallel = true
+omit = [
+  "esb/__about__.py",
+]
+
+[tool.coverage.paths]
+esb = ["src/esb", "*/esb/src/esb"]
+tests = ["tests", "*/esb/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+line-length = 120
