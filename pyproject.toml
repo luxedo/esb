@@ -40,7 +40,7 @@ Issues = "https://github.com/luxedo/esb/issues"
 Source = "https://github.com/luxedo/esb"
 
 [tool.hatch.version]
-path = "src/esb/__about__.py"
+path = "src/esb/__init__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -74,9 +74,7 @@ check = "mypy --install-types --non-interactive {args:esb tests}"
 source_pkgs = ["esb", "tests"]
 branch = true
 parallel = true
-omit = [
-  "esb/__about__.py",
-]
+omit = []
 
 [tool.coverage.paths]
 esb = ["src/esb", "*/esb/src/esb"]
@@ -91,3 +89,10 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 120
+ignore = ["TRY"]
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint]
+preview = true

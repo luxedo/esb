@@ -22,6 +22,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from .cli import main
 
-main()
+from esb.cli import main
+
+if __name__ == "__main__":
+    main()
