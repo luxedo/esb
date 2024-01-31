@@ -7,26 +7,26 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 `esb` is a CLI tool to help us _elves_ to save christmas for the
 [Advent Of Code](https://adventofcode.com/) yearly events
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
-
-
-Copyright (C) 2024 Luiz Eduardo Amaral <luizamaral306@gmail.com>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import argparse
 from datetime import datetime
 from enum import Enum
 from zoneinfo import ZoneInfo
+
+from esb.commands import new
+
+
+class Command(Enum):
+    new = 0
+    fetch = 1
+    test = 2
+    run = 3
+    dashboard = 4
+
+
+class Languages(Enum):
+    python = 0
 
 
 def _aoc_year(value: str):
@@ -77,18 +77,8 @@ def _aoc_day(value):
 
 
 def esb_parser() -> argparse.ArgumentParser:
-    class Command(Enum):
-        init = 0
-        fetch = 1
-        test = 2
-        run = 3
-        dashboard = 4
-
-    class Languages(Enum):
-        python = 0
-
     cmd_descriptions = {
-        Command.init: "Initializes the ESB repo tool",
+        Command.new: "Initializes the ESB repo tool",
         Command.fetch: "Fetches problem statement and data",
         Command.test: "Runs test cases",
         Command.run: "Runs with real input",
@@ -103,6 +93,7 @@ def esb_parser() -> argparse.ArgumentParser:
         title="command",
         description="What do you want to do?",
         required=True,
+        dest="command",
     )
     parsers = {}
     for cmd in Command:
@@ -126,13 +117,12 @@ def esb_parser() -> argparse.ArgumentParser:
 
 def main():
     parser = esb_parser()
-    _args = parser.parse_args()
+    args = parser.parse_args()
+    command = Command[args.command]
 
-    # cookie = environ.get("AOC_SESSION_COOKIE")
-
-    # spec = lang_specs[args.lang]
-    # command = Command[args.command]
-    # match command:
+    match command:
+        case Command.new:
+            new()
     #     case Command.run | Command.test:
     #         aoc_main(spec, RunMode[args.command], args.year, args.day)
     #     case Command.fetch:
@@ -141,6 +131,3 @@ def main():
     #         update_main_template(spec, args.year, args.day, cookie)
     #     case _:
     #         raise ValueError(f"Command '{args.command}' not found.")
-
-
-# main()

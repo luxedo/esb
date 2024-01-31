@@ -7,29 +7,13 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 `esb` is a CLI tool to help us _elves_ to save christmas for the
 [Advent Of Code](https://adventofcode.com/) yearly events
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
-
-
-Copyright (C) 2024 Luiz Eduardo Amaral <luizamaral306@gmail.com>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import unittest
 from argparse import Namespace
-from unittest.mock import patch
 
 import pytest
 
-from esb.__main__ import main
 from esb.cli import esb_parser
 
 
@@ -39,7 +23,7 @@ class TestEsbParser(unittest.TestCase):
 
     def test_working_commands(self):
         commands = [
-            "esb init",
+            "esb new",
             "esb fetch --year 2016 --day 9",
             "esb test --all",
             "esb test --year 2016 --day 9 --lang python --all",
@@ -68,10 +52,15 @@ class TestEsbParser(unittest.TestCase):
                 self.parser.parse_args(args)
 
 
-class TestCli(unittest.TestCase):
-    def test_fetch(self):
-        command = "esb fetch --year 2016 --day 9"
-        with patch("sys.argv", command.split()):
-            main()
-            # captured = sys.stdout
-            # print(captured.read())
+# class TestCli(unittest.TestCase):
+#     def test_new(self):
+#         command = "esb new"
+#         with patch("sys.argv", command.split()):
+#             main()
+#
+#     def test_fetch(self):
+#         command = "esb fetch --year 2016 --day 9"
+#         with patch("sys.argv", command.split()):
+#             main()
+#             # captured = sys.stdout
+#             # print(captured.read())

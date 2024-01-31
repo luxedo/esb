@@ -6,6 +6,7 @@
 1. Get more badges, coverage, pipeline
 1. ~~Logo~~
 1. Test #Currently supported languages hyperlinkn in README
+1. Check if MyPy is working
 1. MVP
     1. Argument parser
     1. Fetch

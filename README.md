@@ -17,15 +17,16 @@ In the bureaucratic workshop of Santa's IT department, where the spirit of Chris
 This tool allows us _elves_ to:
 
 1. Fetch puzzle statement and puzzle data
-2. Create code boilerplate<sup>\*[Check supported languages](##...)</sup>
+2. Create code boilerplate<sup>\*[Check supported languages](#currently-supported-languages)</sup>
 3. Test run and submit solutions
-4. [Shiny dashboards](...)
+4. Shiny dashboards
 
 ## Table of Contents
 
 - [Installation](##installation)
 - [Usage](##usage)
-- [Currently supported languages](##...)
+- [Currently supported languages](#currently-supported-languages)
+- [Dashboards](#dashboards)
 - [License](##license)
 
 ## Installation
@@ -113,6 +114,11 @@ for each language and how to create your own boilerplate.
 - Rust
 - Elixir
 - _Create your own_
+
+## Dashboards
+
+* Dash A
+* Dash B
 
 ## License
 

@@ -9,4 +9,17 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
-__version__ = "0.1.0"
+import shutil
+from pathlib import Path
+
+PACKAGE_ROOT = Path(__file__).parent
+BLANK_ROOT = PACKAGE_ROOT.parent / "blank"
+
+
+def new():
+    cwd = Path.cwd()
+    for item in BLANK_ROOT.iterdir():
+        if item.is_dir():
+            shutil.copytree(item, cwd / item.name)
+        else:
+            shutil.copy(item, cwd)
