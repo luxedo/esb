@@ -9,6 +9,8 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
+from __future__ import annotations
+
 import http.client
 import shutil
 from html.parser import HTMLParser
@@ -76,15 +78,15 @@ def _load_cookie() -> str:
     if dotenv.is_file():
         with dotenv.open() as fp:
             match [line.split("=")[1] for line in fp.read().split("\n") if line.startswith(sess_env)]:
-                case [cookie]:
-                    return cookie
-    cookie = environ.get(sess_env)
-    match cookie:
+                case [dot_cookie]:
+                    return dot_cookie
+    env_cookie: str | None = environ.get(sess_env)
+    match env_cookie:
         case None:
             message = f"Could not find {sess_env}"
             raise ValueError(message)
-        case str(c):
-            return c
+        case str(_):
+            return env_cookie
 
 
 def _fetch_url(host: str, route: str, cookie: str) -> str:

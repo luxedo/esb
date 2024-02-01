@@ -47,6 +47,7 @@ dependencies = [
   "pre-commit>3.1",
   "coverage[toml]>=6.5",
   "pytest",
+  "mypy>=1.0.0",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -59,16 +60,10 @@ cov = [
   "test-cov",
   "cov-report",
 ]
+check = "mypy --install-types --non-interactive {args:src/esb tests}"
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.9", "3.10", "3.11", "3.12"]
-
-[tool.hatch.envs.types]
-dependencies = [
-  "mypy>=1.0.0",
-]
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:esb tests}"
 
 [tool.coverage.run]
 source_pkgs = ["esb", "tests"]

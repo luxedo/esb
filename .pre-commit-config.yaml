@@ -16,9 +16,17 @@ repos:
         types: [python]
         pass_filenames: false
         verbose: true
+      - id: check
+        name: check
+        entry: hatch run check
+        language: python
+        types: [python]
+        pass_filenames: false
+        verbose: true
       - id: cov
         name: cov
         entry: hatch run cov
         language: python
         types: [python]
         pass_filenames: false
+        verbose: true
