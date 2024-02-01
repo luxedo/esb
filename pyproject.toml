@@ -89,7 +89,7 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 120
-ignore = ["TRY"]
+ignore = ["TRY", "ARG002"]
 
 [tool.ruff.format]
 preview = true

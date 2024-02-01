@@ -14,7 +14,7 @@ from datetime import datetime
 from enum import Enum
 from zoneinfo import ZoneInfo
 
-from esb.commands import new
+from esb.commands import fetch, new
 
 
 class Command(Enum):
@@ -123,6 +123,11 @@ def main():
     match command:
         case Command.new:
             new()
+        case Command.fetch:
+            fetch(args.year, args.day)
+        case _:
+            message = "Should never reach here :thinking_face:"
+            raise ValueError(message)
     #     case Command.run | Command.test:
     #         aoc_main(spec, RunMode[args.command], args.year, args.day)
     #     case Command.fetch:
