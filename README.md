@@ -1,5 +1,7 @@
 # ESB - ElfScript Brigade
 
+> ⚠️ This project is under development! It hasn't been released yet
+
 > Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 <img src="doc/logo/png/logo-color-small.png" alt="ElfScript Brigade Logo"/>
@@ -10,16 +12,15 @@
 
 In the bureaucratic workshop of Santa's IT department, where the spirit of Christmas and the magic of coding converge, a special group of coding elves emerged known as the **ElfScript Brigade**. These skilled and whimsical elves were bestowed with the mission of safeguarding the joyous essence of Christmas through the power of scripting and coding.
 
-
-
 `esb` is a CLI tool to help us _elves_ to save Christmas for the [Advent Of Code](https://adventofcode.com/) yearly events (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 
 This tool allows us _elves_ to:
 
 1. Fetch puzzle statement and puzzle data
-2. Create code boilerplate<sup>\*[Check supported languages](#currently-supported-languages)</sup>
+2. Create language agnostic boilerplate code<sup>\*[Check supported languages](#currently-supported-languages)</sup>
 3. Test run and submit solutions
 4. Shiny dashboards
+5. [Follows the rules of automation](#rules-of-automation)
 
 ## Table of Contents
 
@@ -27,25 +28,44 @@ This tool allows us _elves_ to:
 - [Usage](##usage)
 - [Currently supported languages](#currently-supported-languages)
 - [Dashboards](#dashboards)
+- [FAQ](#faq)
+- [Rules of Automation](#rules-of-automation)
 - [License](##license)
 
 ## Installation
 
-```console
+```shell
 pip install esb
 ```
 
 ## Usage
 
+> ### TLDR;
+>
+> ```shell
+> mkdir my_aoc_repo && cd my_aoc_repo
+>
+> # Initializes ESB repo
+> esb new
+>
+> # Create boilerplate code and fetches input data
+> esb start --lang rust --year 2023 --day 13
+>
+> # Run code and submit answer
+> esb run --lang rust --year 2023 --day 13 --submit
+>
+> # Collect stars!
+> ```
+
 ### Initializing the repository
 
 Create a `git` repository and initialize an `esb` repository too.
 
-```console
+```shell
 mkdir my_aoc_repo
 cd my_aoc_repo
 git init
-esb init
+esb new
 git commit -m  "I now pledge to help, and I will forever help, saving christmas."
 ```
 
@@ -55,7 +75,7 @@ Set your credentials by locating your session cookie or save it in a `.env` file
 
 @TODO: Show how to get the cookie
 
-```console
+```shell
 export AOC_SESSION_COOKIE="<my_current_cookie>"
 # Or
 echo "<my_current_cookie>" > .env
@@ -65,16 +85,23 @@ echo "<my_current_cookie>" > .env
 
 Downloads puzzle statement, data and correct answers (when applicable).
 
-```console
-export AOC_SESSION_COOKIE="<my_current_cookie>"
+```shell
 esb fetch --year 2016 --day 9
+```
+
+### Creating boilerplate code
+
+Run `start` command to create code for the given language. It also fetches data if necessary
+
+```shell
+esb start --lang rust --year 2023 --day 13
 ```
 
 ### Running tests
 
 Runs tests or selected tests
 
-```console
+```shell
 # Run all
 esb test --all
 
@@ -89,10 +116,16 @@ esb test --year 2016 --day 9 --lang rust --all
 
 Runs the code for the given input. Also can submit solutions.
 
-```console
+```shell
 esb run --year 2016 --day 9 --lang rust
 
 esb run --year 2016 --day 9 --lang rust --submit
+```
+
+### Check your progress in the command line
+
+```shell
+esb status
 ```
 
 ### The dashboards
@@ -100,7 +133,7 @@ esb run --year 2016 --day 9 --lang rust --submit
 The dashboards are created automatically when events happen. It's possible to generate
 again by running:
 
-```console
+```shell
 esb dashboard
 ```
 
@@ -113,12 +146,37 @@ for each language and how to create your own boilerplate.
 - Python
 - Rust
 - Elixir
-- _Create your own_
+- [_Create your own_](doc/ESBPv1.0.md)
 
 ## Dashboards
 
-* Dash A
-* Dash B
+- Dash A
+- Dash B
+
+## FAQ
+
+- **This tool is so stupid! I can hack my stats anytime I want!**
+
+  > As _Acting Brigade Chief_, I have no powers nor will to enforce any regulatory actions against cheating. I leave this job to Santa's higher council and, of course, the guilt of leaving kids without their gifts.
+
+- **Can I use this tool to bash the servers**
+
+  > **No!**.
+
+- **But, why python 3.11? What about my Debian friends?**
+
+  > Because the developer wanted to some of the newest features
+
+
+
+## Rules of Automation
+
+ElfScript Brigade does follow the [automation guidelines](https://www.reddit.com/r/adventofcode/wiki/faqs/automation) on the [/r/adventofcode](https://www.reddit.com/r/adventofcode) community wiki
+Specifically:
+
+Once inputs are downloaded, they are cached locally in the `data` directory.
+If you suspect your input is corrupted, you can manually request a fresh copy using `esb fetch ... --force`
+The User-Agent header for the HTTP requests is set to me since I maintain this tool :)
 
 ## License
 
@@ -131,7 +189,7 @@ for each language and how to create your own boilerplate.
 > (at your option) any later version.
 > This program is distributed in the hope that it will be useful,
 > but WITHOUT ANY WARRANTY; without even the implied warranty of
-> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 > GNU General Public License for more details.
 > You should have received a copy of the GNU General Public License
-> along with this program.  If not, see <http://www.gnu.org/licenses/>.
+> along with this program. If not, see <http://www.gnu.org/licenses/>.

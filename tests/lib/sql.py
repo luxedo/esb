@@ -1,0 +1,20 @@
+"""
+SPDX-FileCopyrightText: 2024-present Luiz Eduardo Amaral <luizamaral306@gmail.com>
+SPDX-License-Identifier: GPL-3.0-or-later
+
+ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
+
+`esb` is a CLI tool to help us _elves_ to save christmas for the
+[Advent Of Code](https://adventofcode.com/) yearly events
+(Thank you [Eric 😉!](https://twitter.com/ericwastl)).
+"""
+
+from esb.db import SqlConnection
+
+
+def reset_sql_connection(fn):
+    def wrapper(*args, **kwargs):
+        SqlConnection.clear_instances()
+        return fn(*args, **kwargs)
+
+    return wrapper

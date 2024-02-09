@@ -31,7 +31,7 @@ classifiers = [
   "Environment :: Console",
   "Topic :: Software Development :: Code Generators",
 ]
-dependencies = []
+dependencies = ["rich==13.7.0", "beautifulsoup4==4.12.3"]
 
 [project.urls]
 Documentation = "https://github.com/luxedo/esb/README.md"
@@ -54,7 +54,7 @@ test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
 cov-report = [
   "- coverage combine",
-  "coverage report",
+  "coverage report -m",
 ]
 cov = [
   "test-cov",
@@ -63,7 +63,7 @@ cov = [
 check = "mypy --install-types --non-interactive {args:src/esb tests}"
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12"]
+python = ["3.11", "3.12"]
 
 [tool.coverage.run]
 source_pkgs = ["esb", "tests"]

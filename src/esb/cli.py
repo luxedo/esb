@@ -11,25 +11,18 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 import argparse
 from datetime import datetime
-from enum import Enum
+from enum import Enum, auto
 from zoneinfo import ZoneInfo
 
-from esb.commands import fetch, new
+from esb import __version__
+from esb import commands as esb_commands
+from esb.langs import Languages
 
 
-class Command(Enum):
-    new = 0
-    fetch = 1
-    test = 2
-    run = 3
-    dashboard = 4
-
-
-class Languages(Enum):
-    python = 0
-
-
-def _aoc_year(value: str):
+###########################################################
+# Parser Types
+###########################################################
+def aoc_year(value: str):
     # @TODO: Implement logic to get up to the current day
     aoc_first_year = 2015
 
@@ -54,7 +47,7 @@ def _aoc_year(value: str):
         raise argparse.ArgumentTypeError(message) from exc
 
 
-def _aoc_day(value):
+def aoc_day(value):
     day_01 = 1
     day_25 = 25
     if value == "all":
@@ -76,18 +69,41 @@ def _aoc_day(value):
         raise argparse.ArgumentTypeError(message) from exc
 
 
+###########################################################
+# Parser
+###########################################################
+class Command(Enum):
+    new = auto()
+    fetch = auto()
+    start = auto()
+    show = auto()
+    status = auto()
+    test = auto()
+    run = auto()
+    dashboard = auto()
+
+
 def esb_parser() -> argparse.ArgumentParser:
     cmd_descriptions = {
         Command.new: "Initializes the ESB repo tool",
         Command.fetch: "Fetches problem statement and data",
+        Command.start: "Prepares boilerplate code for the given language and day",
+        Command.show: "Show problem statement and answers",
+        Command.status: "Checks progress",
         Command.test: "Runs test cases",
         Command.run: "Runs with real input",
         Command.dashboard: "Rebuilds the dashboard",
     }
 
-    parser = argparse.ArgumentParser(
-        description="Script your way to rescue Christmas as part of the ElfScript Brigade team."
+    description = (
+        "Script your way to rescue Christmas as part of the ElfScript Brigade team.\n\n"
+        "`esb` is a CLI tool to help us _elves_ to save Christmas for the [Advent Of Code](https://adventofcode.com/)"
+        "yearly events (Thank you [Eric 😉!](https://twitter.com/ericwastl)).\n"
+        "For more information visit https://github.com/luxedo/esb"
     )
+    parser = argparse.ArgumentParser(description=description)
+
+    parser.add_argument("-v", "--version", action="version", version=f"%(prog)s {__version__}")
 
     subparsers = parser.add_subparsers(
         title="command",
@@ -98,15 +114,25 @@ def esb_parser() -> argparse.ArgumentParser:
     parsers = {}
     for cmd in Command:
         parsers[cmd] = subparsers.add_parser(cmd.name, description=cmd_descriptions[cmd])
-
         if cmd == Command.fetch:
-            parsers[cmd].add_argument("-y", "--year", required=True, type=_aoc_year, help="AoC year")
-            parsers[cmd].add_argument("-d", "--day", required=True, type=_aoc_day, help="AoC day")
+            parsers[cmd].add_argument(
+                "-f",
+                "--force",
+                action="store_true",
+                help="Ignore cache and fetch again",
+            )
+
+        if cmd in {Command.fetch, Command.start, Command.show}:
+            parsers[cmd].add_argument("-y", "--year", required=True, type=aoc_year, help="AoC year")
+            parsers[cmd].add_argument("-d", "--day", required=True, type=aoc_day, help="AoC day")
+
+        if cmd == Command.start:
+            parsers[cmd].add_argument("-l", "--lang", required=True, choices=[lang.name for lang in Languages])
 
         if cmd in {Command.test, Command.run}:
             parsers[cmd].add_argument("-l", "--lang", choices=[lang.name for lang in Languages])
-            parsers[cmd].add_argument("-y", "--year", type=_aoc_year, help="AoC year")
-            parsers[cmd].add_argument("-d", "--day", type=_aoc_day, help="AoC day")
+            parsers[cmd].add_argument("-y", "--year", type=aoc_year, help="AoC year")
+            parsers[cmd].add_argument("-d", "--day", type=aoc_day, help="AoC day")
             parsers[cmd].add_argument("-a", "--all", action="store_true", help="Runs all selected")
 
         if cmd == Command.run:
@@ -115,6 +141,9 @@ def esb_parser() -> argparse.ArgumentParser:
     return parser
 
 
+###########################################################
+# CLI main
+###########################################################
 def main():
     parser = esb_parser()
     args = parser.parse_args()
@@ -122,9 +151,15 @@ def main():
 
     match command:
         case Command.new:
-            new()
+            esb_commands.new()
         case Command.fetch:
-            fetch(args.year, args.day)
+            esb_commands.fetch(args.year, args.day, force=args.force)
+        case Command.start:
+            esb_commands.start(args.language, args.year, args.day)
+        case Command.show:
+            esb_commands.show(args.year, args.day)
+        case Command.status:
+            esb_commands.status()
         case _:
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)

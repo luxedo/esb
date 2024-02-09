@@ -12,17 +12,37 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import http.client
+import re
 import shutil
-from html.parser import HTMLParser
+import sys
+import uuid
+from datetime import datetime
 from itertools import product
 from os import environ
 from pathlib import Path
 from textwrap import wrap
+from typing import TYPE_CHECKING
 
-from esb.paths import input_path, statement_path
+from bs4 import BeautifulSoup
+from rich.console import Console
+
+from esb import __version__
+from esb import paths as esb_paths
+from esb.db import ElvenCrisisArchive
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from typing import Any
+
+    from esb.langs import Languages
 
 PACKAGE_ROOT = Path(__file__).parent
 BLANK_ROOT = PACKAGE_ROOT.parent / "blank"
+COLOR_INFO = "bold green"
+COLOR_ERROR = "bold red"
+COLOR_WARN = "bold yellow"
+console_err = Console(stderr=True)
+console_out = Console()
 
 
 ###########################################################
@@ -30,6 +50,12 @@ BLANK_ROOT = PACKAGE_ROOT.parent / "blank"
 ###########################################################
 def is_esb_repo(fn):
     def wrapper(*args, **kwargs):
+        if not ElvenCrisisArchive.has_db():
+            console_err.print(
+                "Fatal: this is not an ElfScript Brigade repo.",
+                style=COLOR_ERROR,
+            )
+            sys.exit(2)
         return fn(*args, **kwargs)
 
     # @TODO
@@ -40,7 +66,137 @@ def is_esb_repo(fn):
 # Commands
 ###########################################################
 def new():
+    console_err.print("Initializing a new ElfScript Brigade repository", style=COLOR_INFO)
     cwd = Path.cwd()
+
+    if len(_repo_conflicts(cwd)) > 0:
+        console_err.print(
+            "Directory not clean! Cannot initialize. Please start the repo in a (somewhat) clean directory.",
+            style=COLOR_ERROR,
+        )
+        sys.exit(1)
+
+    try:
+        _copy_blank_repo(cwd)
+    except OSError:
+        console_err.print("Something went wrong! Could not copy", style=COLOR_ERROR)
+        sys.exit(1)
+
+    db = ElvenCrisisArchive()
+
+    db.Tables.create_tables()
+
+    db.BrigadistaInfo(brigadista_id=str(uuid.uuid4()), creation_date=datetime.now().astimezone()).insert()
+
+    console_err.print(
+        "ESB repo is ready! Thank you for saving Christmas [italic]Elf[/italic]",
+        style=COLOR_INFO,
+    )
+
+
+@is_esb_repo
+def fetch(years: list[int], days: list[int], *, force: bool = False):
+    db = ElvenCrisisArchive()
+    for year, day in product(years, days):
+        ds = db.SolutionStatus.find_single({"year": year, "day": day})
+        if not force and ds is not None and ds.pt2_answer is not None:
+            console_err.print(
+                f"Fetch for year {year} day {day:02} is already complete!",
+                style=COLOR_INFO,
+            )
+            continue
+
+        host = "adventofcode.com"
+        cookie = _load_cookie()
+
+        st_route = f"/{year}/day/{day}"
+        st_html = _fetch_url(host, st_route, cookie)
+        statement, pt1_answer, pt2_answer = _parse_body(st_html)
+        st_file = esb_paths.statement_path(year, day)
+        st_file.parent.mkdir(parents=True, exist_ok=True)
+        st_file.write_text(statement)
+
+        db.SolutionStatus(year=year, day=day, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert_or_replace()
+
+        input_file = esb_paths.input_path(year, day)
+        if not force and input_file.is_file():
+            console_err.print(
+                f"Input for year {year} day {day:02} already cached",
+                style=COLOR_INFO,
+            )
+            continue
+        input_route = f"{st_route}/input"
+        puzzle_input = _fetch_url(host, input_route, cookie)
+        input_file.parent.mkdir(parents=True, exist_ok=True)
+        input_file.write_text(puzzle_input)
+        console_err.print(
+            f"Fetched year {year} day {day:02}!",
+            style=COLOR_INFO,
+        )
+
+
+@is_esb_repo
+def start(lang: Languages, years: list[int], days: list[int]):
+    for year, day in product(years, days):
+        _copy_boilerplate(lang, year, day)
+
+
+@is_esb_repo
+def show(years: list[int], days: list[int]):
+    db = ElvenCrisisArchive()
+    for year, day in product(years, days):
+        statement_file = esb_paths.statement_path(year, day)
+        ds = db.SolutionStatus.find_single({"year": year, "day": day})
+        match (ds, statement_file.is_file()):
+            case (None, _) | (_, False):
+                console_err.print(
+                    f"Input for year {year} day {day:02} not cached. Please fetch first",
+                    style=COLOR_ERROR,
+                )
+            case (sstats, True):
+                not_solved = "<Not solved yet>"
+                console_out.print(statement_file.read_text())
+                console_out.print()
+                console_out.print(f"Solution pt1: {sstats.pt1_answer or not_solved}")
+                console_out.print(f"console_out pt2: {sstats.pt2_answer or not_solved}")
+
+
+@is_esb_repo
+def status():
+    cwd = Path.cwd()
+    db = ElvenCrisisArchive()
+    info = db.BrigadistaInfo.fetch_single()
+    console_out.print(
+        f"ElfScript Brigade\n\nBrigadista ID: {info.brigadista_id}\nIn Duty Since: {info.creation_date}",
+        style=COLOR_INFO,
+    )
+    console_out.print(
+        "\n\nSERVICE STARS",
+        style=COLOR_ERROR,
+    )
+
+    db = ElvenCrisisArchive()
+    for year, summary in _years_summary(db, cwd).items():
+        console_out.print(
+            f"\n{year}\n",
+            style=COLOR_ERROR,
+        )
+        console_out.print(
+            f"{summary}\n",
+            style=COLOR_WARN,
+        )
+
+
+###########################################################
+# Helper functions
+###########################################################
+def _repo_conflicts(cwd):
+    return [
+        cwd / item.name for item in BLANK_ROOT.iterdir() if (cwd / item.name).is_dir() or (cwd / item.name).is_file()
+    ]
+
+
+def _copy_blank_repo(cwd):
     for item in BLANK_ROOT.iterdir():
         if item.is_dir():
             shutil.copytree(item, cwd / item.name)
@@ -48,29 +204,6 @@ def new():
             shutil.copy(item, cwd)
 
 
-@is_esb_repo
-def fetch(years: list[int], days: list[int]):
-    for year, day in product(years, days):
-        host = "adventofcode.com"
-        cookie = _load_cookie()
-
-        st_route = f"/{year}/day/{day}"
-        st_html = _fetch_url(host, st_route, cookie)
-        statement = _parse_body(st_html)
-        st_file = statement_path(year, day)
-        st_file.parent.mkdir(parents=True, exist_ok=True)
-        st_file.write_text(statement)
-
-        input_route = f"{st_route}/input"
-        puzzle_input = _fetch_url(host, input_route, cookie)
-        input_file = input_path(year, day)
-        input_file.parent.mkdir(parents=True, exist_ok=True)
-        input_file.write_text(puzzle_input)
-
-
-###########################################################
-# Helper functions
-###########################################################
 def _load_cookie() -> str:
     cwd = Path.cwd()
     sess_env = "AOC_SESSION_COOKIE"
@@ -79,7 +212,7 @@ def _load_cookie() -> str:
         with dotenv.open() as fp:
             match [line.split("=")[1] for line in fp.read().split("\n") if line.startswith(sess_env)]:
                 case [dot_cookie]:
-                    return dot_cookie
+                    return dot_cookie.removeprefix('"').removesuffix('"')
     env_cookie: str | None = environ.get(sess_env)
     match env_cookie:
         case None:
@@ -91,12 +224,15 @@ def _load_cookie() -> str:
 
 def _fetch_url(host: str, route: str, cookie: str) -> str:
     conn = http.client.HTTPSConnection(host)
-    conn.request("GET", route, headers={"Cookie": f"session={cookie}"})
+    conn.request(
+        "GET",
+        route,
+        headers={
+            "Cookie": f"session={cookie}",
+            "User-Agent": f"ElfScipt Brigade/{__version__}; github.com/luxedo/esb by luizamaral306@gmail.com",
+        },
+    )
     res = conn.getresponse()
-    # print(res)
-    # print(res.status)
-    # print(res.read().decode("utf-8"))
-    # print(host, route)
     http_ok = 200
     if res.status != http_ok:
         message = "Could not fetch! Maybe your cookie have expired"
@@ -104,26 +240,56 @@ def _fetch_url(host: str, route: str, cookie: str) -> str:
     return res.read().decode("utf-8")
 
 
-def _parse_body(body: str) -> str:
-    class AoCHTMLParser(HTMLParser):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.tags = []
-            self.text = ""
+def _parse_body(body: str) -> tuple[str, str | None, str | None]:
+    soup = BeautifulSoup(body, "html.parser")
+    statement = ""
+    for article in soup.find_all("article"):
+        for p in article.find_all("p"):
+            statement += p.get_text() + "\n\n"
+    statement = "\n".join("\n".join(wrap(line, width=100)) for line in statement.strip().split("\n"))
 
-        def handle_starttag(self, tag, attrs):
-            self.tags.append(tag)
-            if tag == "p":
-                self.text += "\n"
+    ans_re = re.compile("Your puzzle answer was")
+    pt1, pt2 = None, None
+    match [ans.next_element.get_text() for ans in soup.find_all(string=ans_re)]:
+        case [spt1, spt2]:
+            pt1, pt2 = spt1, spt2
+        case [spt1]:
+            pt1 = spt1
+        case []:
+            pass
 
-        def handle_endtag(self, tag):
-            self.tags.pop()
+    return statement, pt1, pt2
 
-        def handle_data(self, data):
-            if "article" in self.tags:
-                self.text += data
 
-    p = AoCHTMLParser()
-    p.feed(body)
-    description_pt1 = p.text.strip()
-    return "\n".join("\n".join(wrap(line, width=100)) for line in description_pt1.split("\n"))
+def _groupby(rows: Iterable, key: str) -> dict[Any, Any]:
+    ret: dict[Any, Any] = {}
+    for row in rows:
+        ret.setdefault(getattr(row, key), []).append(row)
+    return ret
+
+
+def _count_stars(rows: Iterable) -> dict[int, dict[int, int]]:
+    return {
+        year: {
+            day: 0 if s.pt1_answer is None else 1 if s.pt2_answer is None else 2
+            for day, [s] in _groupby(rows, "day").items()
+        }
+        for year, rows in _groupby(rows, "year").items()
+    }
+
+
+def _years_summary(db: ElvenCrisisArchive, _cwd: Path) -> dict[int, str]:
+    stats = db.SolutionStatus.fetch_all()
+    year_stars = _count_stars(stats)
+
+    ret = {}
+    for year, days in year_stars.items():
+        days_str = " ".join([f"{day:02}" for day in range(1, 26)])
+        stars_str = " ".join([f"{'*' * days.get(day, 0):<2}" for day in range(1, 26)])
+        summary = f"{stars_str}\n{days_str}"
+        ret[year] = summary
+    return ret
+
+
+def _copy_boilerplate(_lang: Languages, _year: int, _day: int):
+    pass
