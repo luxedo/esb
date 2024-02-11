@@ -27,7 +27,11 @@
     ~~1. Feedback when running outside of an ESB repo~~
     1. Run anywhere inside the repo
     ~~1. Add caching to fetch and --force flag~~
+    1. Fix \<code\> blocks in fetch
 1. Optional features
     1. Loading icon on slow operations
     1. esb new beautiful ASCII art
+    ~~1. Range arguments~~
     ~~1. Add `--version` cli flag~~
+    1. Concurrent fetch requests
+    1. Handle day 25 star

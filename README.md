@@ -3,6 +3,8 @@
 > ⚠️ This project is under development! It hasn't been released yet
 
 > Script your way to rescue Christmas as part of the ElfScript Brigade team.
+>
+> This tool transforms Advent of Code into a CLI adventure
 
 <img src="doc/logo/png/logo-color-small.png" alt="ElfScript Brigade Logo"/>
 
@@ -87,6 +89,9 @@ Downloads puzzle statement, data and correct answers (when applicable).
 
 ```shell
 esb fetch --year 2016 --day 9
+
+# Hint: Use brace expansion for fetching multiple days or years
+esb fetch --year 2023 --day {1..25}
 ```
 
 ### Creating boilerplate code
@@ -161,7 +166,7 @@ for each language and how to create your own boilerplate.
 
 - **Can I use this tool to bash the servers**
 
-  > **No!**.
+  > ## **No!**.
 
 - **But, why python 3.11? What about my Debian friends?**
 

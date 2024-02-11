@@ -19,7 +19,6 @@ import pytest
 from esb.cli import aoc_day, aoc_year, esb_parser, main
 from esb.commands import new
 from esb.paths import input_path, statement_path
-from tests.lib.sql import reset_sql_connection
 from tests.lib.temporary import TestWithTemporaryDirectory
 
 ROOT_DIR = Path(__file__).parent
@@ -30,7 +29,7 @@ class TestParserTypes(unittest.TestCase):
     def test_aoc_day_single(self):
         for day in range(1, 26):
             with self.subTest(aoc_day=day):
-                assert aoc_day(str(day)) == [day]
+                assert aoc_day(str(day)) == day
 
     def test_aoc_day_error(self):
         for day in [0, 26, "twenty-seven"]:
@@ -45,7 +44,7 @@ class TestParserTypes(unittest.TestCase):
     def test_aoc_year_single(self):
         for year in range(2015, 2024):
             with self.subTest(aoc_year=year):
-                assert aoc_year(str(year)) == [year]
+                assert aoc_year(str(year)) == year
 
     def test_aoc_year_error(self):
         for year in [2014, 2031, "twenty-seven"]:
@@ -97,7 +96,6 @@ class TestEsbParser(unittest.TestCase):
 
 
 class TestCliNew(TestWithTemporaryDirectory):
-    @reset_sql_connection
     def test_new(self):
         command = "esb new"
 
@@ -111,7 +109,6 @@ class TestCliFetch(TestWithTemporaryDirectory):
     TEST_DAY = 9
 
     @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-    @reset_sql_connection
     def test_fetch(self, mock_fetch_url):
         new()
 
@@ -135,7 +132,6 @@ class TestCliFetch(TestWithTemporaryDirectory):
 #     TEST_DAY = 9
 #
 #     @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-#     @reset_sql_connection
 #     def test_fetch(self, mock_fetch_url):
 #         new()
 #         # fetch([self.TEST_YEAR], [self.TEST_DAY])

@@ -84,7 +84,7 @@ def new():
 
     db = ElvenCrisisArchive()
 
-    db.Tables.create_tables()
+    db.create_tables()
 
     db.BrigadistaInfo(brigadista_id=str(uuid.uuid4()), creation_date=datetime.now().astimezone()).insert()
 
@@ -116,7 +116,7 @@ def fetch(years: list[int], days: list[int], *, force: bool = False):
         st_file.parent.mkdir(parents=True, exist_ok=True)
         st_file.write_text(statement)
 
-        db.SolutionStatus(year=year, day=day, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert_or_replace()
+        db.SolutionStatus(year=year, day=day, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert(replace=True)
 
         input_file = esb_paths.input_path(year, day)
         if not force and input_file.is_file():
@@ -145,25 +145,24 @@ def start(lang: Languages, years: list[int], days: list[int]):
 def show(years: list[int], days: list[int]):
     db = ElvenCrisisArchive()
     for year, day in product(years, days):
-        statement_file = esb_paths.statement_path(year, day)
         ds = db.SolutionStatus.find_single({"year": year, "day": day})
-        match (ds, statement_file.is_file()):
-            case (None, _) | (_, False):
-                console_err.print(
-                    f"Input for year {year} day {day:02} not cached. Please fetch first",
-                    style=COLOR_ERROR,
-                )
-            case (sstats, True):
-                not_solved = "<Not solved yet>"
-                console_out.print(statement_file.read_text())
-                console_out.print()
-                console_out.print(f"Solution pt1: {sstats.pt1_answer or not_solved}")
-                console_out.print(f"console_out pt2: {sstats.pt2_answer or not_solved}")
+        statement_file = esb_paths.statement_path(year, day)
+        if ds is None or not statement_file.is_file():
+            console_err.print(
+                f"Input for year {year} day {day:02} not cached. Please fetch first",
+                style=COLOR_ERROR,
+            )
+            continue
+
+        not_solved = "<Not solved yet>"
+        console_out.print(statement_file.read_text())
+        console_out.print()
+        console_out.print(f"Solution pt1: {ds.pt1_answer or not_solved}")
+        console_out.print(f"console_out pt2: {ds.pt2_answer or not_solved}")
 
 
 @is_esb_repo
 def status():
-    cwd = Path.cwd()
     db = ElvenCrisisArchive()
     info = db.BrigadistaInfo.fetch_single()
     console_out.print(
@@ -172,17 +171,15 @@ def status():
     )
     console_out.print(
         "\n\nSERVICE STARS",
-        style=COLOR_ERROR,
+        style=COLOR_WARN,
     )
 
-    db = ElvenCrisisArchive()
-    for year, summary in _years_summary(db, cwd).items():
+    cwd = Path.cwd()
+    ys = _years_summary(db, cwd)
+    for year in sorted(ys.keys(), reverse=True):
+        summary = ys[year]
         console_out.print(
-            f"\n{year}\n",
-            style=COLOR_ERROR,
-        )
-        console_out.print(
-            f"{summary}\n",
+            f"\n{summary}\n{year}",
             style=COLOR_WARN,
         )
 

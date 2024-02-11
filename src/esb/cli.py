@@ -41,7 +41,7 @@ def aoc_year(value: str):
             message = f"{value} is not a valid AoC year. Please try from 2015 up to {now.year - 1}."
             raise argparse.ArgumentTypeError(message)
 
-        return [ivalue]
+        return ivalue
     except ValueError as exc:
         message = f"{value} is not a valid AoC year"
         raise argparse.ArgumentTypeError(message) from exc
@@ -63,7 +63,7 @@ def aoc_day(value):
             message = f"{value} is not a valid AoC day. Please try from 1 up to 25."
             raise argparse.ArgumentTypeError(message)
 
-        return [ivalue]
+        return ivalue
     except ValueError as exc:
         message = f"{value} is not a valid AoC day"
         raise argparse.ArgumentTypeError(message) from exc
@@ -123,16 +123,21 @@ def esb_parser() -> argparse.ArgumentParser:
             )
 
         if cmd in {Command.fetch, Command.start, Command.show}:
-            parsers[cmd].add_argument("-y", "--year", required=True, type=aoc_year, help="AoC year")
-            parsers[cmd].add_argument("-d", "--day", required=True, type=aoc_day, help="AoC day")
+            parsers[cmd].add_argument("-y", "--year", required=True, nargs="+", type=aoc_year, help="AoC year")
+            parsers[cmd].add_argument("-d", "--day", required=True, nargs="+", type=aoc_day, help="AoC day")
 
         if cmd == Command.start:
-            parsers[cmd].add_argument("-l", "--lang", required=True, choices=[lang.name for lang in Languages])
+            parsers[cmd].add_argument(
+                "-l",
+                "--language",
+                required=True,
+                choices=[lang.name for lang in Languages],
+            )
 
         if cmd in {Command.test, Command.run}:
-            parsers[cmd].add_argument("-l", "--lang", choices=[lang.name for lang in Languages])
-            parsers[cmd].add_argument("-y", "--year", type=aoc_year, help="AoC year")
-            parsers[cmd].add_argument("-d", "--day", type=aoc_day, help="AoC day")
+            parsers[cmd].add_argument("-l", "--language", choices=[lang.name for lang in Languages])
+            parsers[cmd].add_argument("-y", "--year", nargs="+", type=aoc_year, help="AoC year")
+            parsers[cmd].add_argument("-d", "--day", nargs="+", type=aoc_day, help="AoC day")
             parsers[cmd].add_argument("-a", "--all", action="store_true", help="Runs all selected")
 
         if cmd == Command.run:

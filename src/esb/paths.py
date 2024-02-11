@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def year_path(year: int) -> Path:
-    return Path.cwd() / "data" / "year" / f"{year}"
+    return Path.cwd() / ".cache" / f"{year}"
 
 
 def statement_path(year: int, day: int) -> Path:
