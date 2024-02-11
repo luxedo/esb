@@ -10,8 +10,12 @@
 ~~1. Check if MyPy is working~~
 1. MVP
     ~~1. Argument parser~~
-    1. Fetch
-    1. Copy boilerplate
+    1. Fetch command
+        ~~1. Fix \<code\> blocks in fetch~~
+        1. Fetch from personal times
+    ~~1. Show statement command~~
+    1. start command - copy boilerplate
+    1. status command
     1. Run and test
     1. Boilerplate Python
     1. Boilerplate Rust
@@ -27,7 +31,6 @@
     ~~1. Feedback when running outside of an ESB repo~~
     1. Run anywhere inside the repo
     ~~1. Add caching to fetch and --force flag~~
-    1. Fix \<code\> blocks in fetch
 1. Optional features
     1. Loading icon on slow operations
     1. esb new beautiful ASCII art
@@ -35,3 +38,6 @@
     ~~1. Add `--version` cli flag~~
     1. Concurrent fetch requests
     1. Handle day 25 star
+    1. aoc_parser types: Check day correctly
+    1. Mock fetch properly
+    1. Test CLI

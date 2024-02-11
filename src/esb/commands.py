@@ -241,7 +241,7 @@ def _parse_body(body: str) -> tuple[str, str | None, str | None]:
     soup = BeautifulSoup(body, "html.parser")
     statement = ""
     for article in soup.find_all("article"):
-        for p in article.find_all("p"):
+        for p in article.find_all(recursive=False):
             statement += p.get_text() + "\n\n"
     statement = "\n".join("\n".join(wrap(line, width=100)) for line in statement.strip().split("\n"))
 

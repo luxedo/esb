@@ -46,40 +46,40 @@ class TestSqlConnection(TestWithTemporaryDirectory):
 
 class TestTable(TestWithTemporaryDirectory):
     @dataclass(unsafe_hash=True)
-    class TestSqlTable(db.Table):
+    class SantaTable(db.Table):
         idx: int
         value: int
         text: str
 
     db_path: str = "my_test.sqlite"
-    row0: TestSqlTable = TestSqlTable(idx=1, value=123, text="abc")
-    row1: TestSqlTable = TestSqlTable(idx=2, value=456, text="def")
-    row2: TestSqlTable = TestSqlTable(idx=3, value=789, text="ghi")
+    row0: SantaTable = SantaTable(idx=1, value=123, text="abc")
+    row1: SantaTable = SantaTable(idx=2, value=456, text="def")
+    row2: SantaTable = SantaTable(idx=3, value=789, text="ghi")
 
     def setUp(self):
         super().setUp()
         self.sql = db.SqlConnection(self.db_path)
-        self.TestSqlTable.bind_connection(self.sql)
-        self.sql.cur.execute("CREATE TABLE TestSqlTable (idx INTEGER NOT NULL PRIMARY KEY, value, text)")
+        self.SantaTable.bind_connection(self.sql)
+        self.sql.cur.execute("CREATE TABLE SantaTable (idx INTEGER NOT NULL PRIMARY KEY, value, text)")
         self.sql.con.commit()
 
     def test_unbound_table_shoud_raise_exception(self):
-        self.TestSqlTable.disconnect()
+        self.SantaTable.disconnect()
         with pytest.raises(ValueError, match="Table not bound"):
             self.row0.insert()
 
     def test_insert(self):
-        assert len(list(self.TestSqlTable.fetch_all())) == 0
+        assert len(list(self.SantaTable.fetch_all())) == 0
         self.row0.insert()
-        assert len(list(self.TestSqlTable.fetch_all())) == 1
+        assert len(list(self.SantaTable.fetch_all())) == 1
         self.row1.insert()
-        assert len(list(self.TestSqlTable.fetch_all())) == 2
+        assert len(list(self.SantaTable.fetch_all())) == 2
 
     def test_insert_with_replace(self):
         self.row0.insert(replace=True)
         row0_copy = replace(self.row0, value=321)
         row0_copy.insert(replace=True)
-        frow0 = self.TestSqlTable.fetch_single()
+        frow0 = self.SantaTable.fetch_single()
         assert self.row0 != frow0
         assert row0_copy == frow0
 
@@ -87,7 +87,7 @@ class TestTable(TestWithTemporaryDirectory):
         self.row0.insert(replace=True)
         row0_copy = replace(self.row0, value=321)
         row0_copy.update(key={"idx": self.row0.idx})
-        frow0 = self.TestSqlTable.fetch_single()
+        frow0 = self.SantaTable.fetch_single()
         assert self.row0 != frow0
         assert row0_copy == frow0
 
@@ -95,35 +95,35 @@ class TestTable(TestWithTemporaryDirectory):
         self.row0.insert()
         self.row1.insert()
         self.row2.insert()
-        assert set(self.TestSqlTable.fetch_all()) == {
+        assert set(self.SantaTable.fetch_all()) == {
             self.row0,
             self.row1,
             self.row2,
         }
 
     def test_fetch_one(self):
-        assert self.TestSqlTable.fetch_one() is None
+        assert self.SantaTable.fetch_one() is None
         self.row0.insert()
         self.row1.insert()
-        frow0 = self.TestSqlTable.fetch_one()
+        frow0 = self.SantaTable.fetch_one()
         assert frow0 == self.row0
         assert id(frow0) != id(self.row0)
 
     def test_fetch_single(self):
         self.row0.insert()
-        frow0 = self.TestSqlTable.fetch_single()
+        frow0 = self.SantaTable.fetch_single()
         assert frow0 == self.row0
         assert id(frow0) != id(self.row0)
 
     def test_fetch_single_cannot_have_no_rows(self):
         with pytest.raises(RuntimeError, match="should have one row"):
-            self.TestSqlTable.fetch_single()
+            self.SantaTable.fetch_single()
 
     def test_fetch_single_cannot_have_more_than_one_row(self):
         self.row0.insert()
         self.row1.insert()
         with pytest.raises(RuntimeError, match="should have one row"):
-            self.TestSqlTable.fetch_single()
+            self.SantaTable.fetch_single()
 
     def test_find_int(self):
         self.row0.insert()
@@ -131,7 +131,7 @@ class TestTable(TestWithTemporaryDirectory):
         row0_copy.insert()
         self.row1.insert()
 
-        find0 = list(self.TestSqlTable.find({"value": 123}))
+        find0 = list(self.SantaTable.find({"value": 123}))
         assert len(find0) == 2
         assert set(find0) == {self.row0, row0_copy}
 
@@ -141,56 +141,56 @@ class TestTable(TestWithTemporaryDirectory):
         row0_copy.insert()
         self.row1.insert()
 
-        find0 = list(self.TestSqlTable.find({"text": "abc"}))
+        find0 = list(self.SantaTable.find({"text": "abc"}))
         assert len(find0) == 2
         assert set(find0) == {self.row0, row0_copy}
 
     def test_find_cannot_pass_empty_dictionary(self):
         with pytest.raises(ValueError, match="empty dictionary"):
-            list(self.TestSqlTable.find({}))
+            list(self.SantaTable.find({}))
 
     def test_find_one(self):
         self.row0.insert()
         replace(self.row0, idx=4).insert()
         self.row1.insert()
 
-        row0 = self.TestSqlTable.find_one({"text": "abc"})
+        row0 = self.SantaTable.find_one({"text": "abc"})
         assert self.row0 == row0
 
     def test_find_one_no_match(self):
         self.row0.insert()
         self.row1.insert()
 
-        row0 = self.TestSqlTable.find_one({"text": "no-match"})
+        row0 = self.SantaTable.find_one({"text": "no-match"})
         assert row0 is None
 
     def test_find_one_cannot_pass_empty_dictionary(self):
         with pytest.raises(ValueError, match="empty dictionary"):
-            self.TestSqlTable.find_one({})
+            self.SantaTable.find_one({})
 
     def test_find_single(self):
         self.row0.insert()
         self.row1.insert()
 
-        row0 = self.TestSqlTable.find_single({"text": "abc"})
+        row0 = self.SantaTable.find_single({"text": "abc"})
         assert self.row0 == row0
 
     def test_find_single_no_match(self):
         self.row0.insert()
         self.row1.insert()
 
-        row0 = self.TestSqlTable.find_single({"text": "no-match"})
+        row0 = self.SantaTable.find_single({"text": "no-match"})
         assert row0 is None
 
     def test_find_single_cannot_pass_empty_dictionary(self):
         with pytest.raises(ValueError, match="empty dictionary"):
-            self.TestSqlTable.find_single({})
+            self.SantaTable.find_single({})
 
     def test_find_single_cannot_have_more_than_one_row(self):
         self.row0.insert()
         replace(self.row0, idx=4).insert()
         with pytest.raises(RuntimeError, match="should have found one or zero rows"):
-            self.TestSqlTable.find_single({"text": "abc"})
+            self.SantaTable.find_single({"text": "abc"})
 
 
 class TestElvenCrisisArchive(TestWithTemporaryDirectory):
