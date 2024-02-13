@@ -1,44 +1,59 @@
 # FIREPLACE v1.0
-> Festive Intervention and Response Protocol for Elf Coding Expertise v1.0
+> Festive Intervention and Response Protocol for Elf Coding Emergencies v1.0
 
 ## Introduction
-At the heart of the ElfScript Brigade's operations lies the _Fireplace Protocol Version 1.0_ (FIREPLACEv1.0), a whimsical yet powerful communication system. This protocol serves as the enchanted conduit through which the coding elves exchange solutions and tackle challenges that may threaten the festive spirit.
+At the heart of the ElfScript Brigade's operational endeavors resides the _Fireplace Protocol Version 1.0_ (FIREPLACEv1.0), an enchanting and robust communication system. This protocol serves as the magical conduit through which coding elves engage in the exchange of solutions and collaborative efforts to overcome challenges that could potentially dampen the Christmas spirit.
 
-## Abstract
-The FIREPLACEv1.0 allows the use of the `esb` tool for any PROGRAM that follows this protocol.
+The FIREPLACEv1.0 allows the use of the `esb` tooling for solving Advent of Code problems.
 
-## Program requirements
-Any PROGRAM That folllows FIREPLACEv1.0:
+## Protocol Definition
+### Premises
+* This protocol is tailored to assist coding elves in solving [Advent of Code](https://adventofcode.com/) problems.
+* Each problem consists of _PROBLEM DATA_, usually stored in a file, and an _ANSWER_ that should effectively solve the problem.
+* The _RUNNING TIME_ of a _PROGRAM_  is the time the program took to execute, starting before parsing `stdin` data and ending just before returning the answer in `stdout`.
 
-1. MUST Receive problem inputs via `stdin`.
-1. MUST Accept two arguments:
-    1. `--part` or `-p` required argument with values of either `1` or `2`.
-    1. `--args` or `-a` optional positional arguments @TODO: Why need args?
-1. MUST Return the answer via `stdout`.
-1. MUST Return an exit code of `0` on successful execution. Any other code is considered an error.
-1. MAY log a _running time_ via `stderr`.
-    1. _running time_ IS the time the program took to execute, starting before parsing `stdin` data and ending before returning the answer in `stdout`
-    1. A _running time_ is represented by two _running time markers_ printed in `stdout`. One for _start time_, and other for _end time_.
-    1. A _running time marker_ MUST be represented by it's _numeric value_ followed by a space and then a _unit_ eg: `12 ms`.
-    1. A _running time marker_ _unit_ should be a [metric prefix](https://en.wikipedia.org/wiki/Metric_prefix) followed by `seconds`. It may be abbreviated to it's symbol followed by `s`. Here's a micro `μ` symbol, you're welcome.
-    1. Each _running time marker_ MUST be shown in a single line without any other characters
-    1.  _running time marker_ __start time_ MUST be identified with the string `SRTM=` just before the time and the unit
-    1.  _running time marker_ __end time_ MUST be identified with the string `ERTM=` just before the time and the unit
+### Requirements
+Any _PROGRAM_ implementing FIREPLACEv1.0 should receive the _PROBLEM DATA_ as input and return the _ANSWER_ as an output. The following requirements must be adhered to:
 
+1. The _PROGRAM_ **MUST** receive _PROBLEM DATA_ via `stdin`.
+1. The _PROGRAM_ **MUST** accept two arguments:
+    1. `--part` or `-p`, a required argument with values of either `1` or `2`.
+    1. `--args` or `-a`, optional positional arguments<sup>*</sup>.
+1. The _PROGRAM_ **MUST** return the _ANSWER_ via `stdout`.
+1. The _PROGRAM_ **MUST** return an exit code of `0` on successful execution. Any other code is considered an error.
+1. The _PROGRAM_ **MAY** log a _RUNNING TIME_ via `stderr`.
+    1. A _RUNNING TIME_ **MUST** be represented by two _RUNNING TIME MARKERS_ printed in `stdout`: one for _START TIME_, and other for _END TIME_.
+    1. A _RUNNING TIME MARKER_ **MUST** be represented the following three elements sepearated by an spaces and ending with a line break:
+        1. It's prefix, either of `SRTM` for _START TIME_ or `ERTM` for _END TIME_.
+        1. it's _NUMERIC VALUE_.
+        1. It's _UNIT_ in [metric prefix](https://en.wikipedia.org/wiki/Metric_prefix) followed by `seconds`, OR it's abbreviated symbol followed by `s`. Here's a micro `μ` symbol; you're welcome.
 
-Examples:
+<sup>*</sup> Some Advent of Code problems have different parameters for tests and for the _PROBLEM DATA_. As in [year 2023 day 21](https://adventofcode.com/2023/day/21), If that's the case, positional arguments are passed through the `--arg`.
+
+## Examples:
+
+Running programs
+
 ```shell
 cat problem_data.txt | ./my_program --part 1
 1234
 ```
+
 ```shell
 ./my_program --part 1 < problem_data.txt
 1234
 ```
 
+Running programs with running time
 ```shell
-./my_program --part 1 --args < problem_data.txt
-SRTM=12 ms
+./my_program --part 1 --args a b c < problem_data.txt
+SRTM 12 ms
 1234
-ERTM=7632 milliseconds
+ERTM 7632 milliseconds
+```
+```shell
+cat problem_data.txt | ./my_program --part 2
+SRTM 24 ms
+1234
+ERTM 6833 milliseconds
 ```
