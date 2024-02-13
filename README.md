@@ -151,7 +151,9 @@ for each language and how to create your own boilerplate.
 - Python
 - Rust
 - Elixir
-- [_Create your own_](doc/ESBPv1.0.md)
+- [_Create your own_](doc/FIREPLACEv1.0.md)
+
+Any program that supports the [FIREPLACEv1](doc/FIREPLACEv1.0.md) prococol can use `esb` tooling.
 
 ## Dashboards
 

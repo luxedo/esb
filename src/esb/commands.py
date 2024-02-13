@@ -21,28 +21,30 @@ from itertools import product
 from os import environ
 from pathlib import Path
 from textwrap import wrap
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from bs4 import BeautifulSoup
 from rich.console import Console
 
 from esb import __version__
-from esb import paths as esb_paths
 from esb.db import ElvenCrisisArchive
+from esb.paths import BLANK_ROOT, CachePaths, LangPaths, pad_day
+from esb.protocol import fireplacev1_0 as fp1_0
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from typing import Any
 
-    from esb.langs import Languages
+    from esb.langs import LangSpec
 
-PACKAGE_ROOT = Path(__file__).parent
-BLANK_ROOT = PACKAGE_ROOT.parent / "blank"
+
 COLOR_INFO = "bold green"
 COLOR_ERROR = "bold red"
 COLOR_WARN = "bold yellow"
 console_err = Console(stderr=True)
 console_out = Console()
+
+AocParts = Literal[1, 2]
 
 
 ###########################################################
@@ -97,11 +99,12 @@ def new():
 @is_esb_repo
 def fetch(years: list[int], days: list[int], *, force: bool = False):
     db = ElvenCrisisArchive()
+    cwd = Path.cwd()
     for year, day in product(years, days):
         ds = db.SolutionStatus.find_single({"year": year, "day": day})
         if not force and ds is not None and ds.pt2_answer is not None:
             console_err.print(
-                f"Fetch for year {year} day {day:02} is already complete!",
+                f"Fetch for year {year} day {pad_day(day)} is already complete!",
                 style=COLOR_INFO,
             )
             continue
@@ -112,16 +115,16 @@ def fetch(years: list[int], days: list[int], *, force: bool = False):
         st_route = f"/{year}/day/{day}"
         st_html = _fetch_url(host, st_route, cookie)
         statement, pt1_answer, pt2_answer = _parse_body(st_html)
-        st_file = esb_paths.statement_path(year, day)
+        st_file = CachePaths(cwd).statement_path(year, day)
         st_file.parent.mkdir(parents=True, exist_ok=True)
         st_file.write_text(statement)
 
         db.SolutionStatus(year=year, day=day, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert(replace=True)
 
-        input_file = esb_paths.input_path(year, day)
+        input_file = CachePaths(cwd).input_path(year, day)
         if not force and input_file.is_file():
             console_err.print(
-                f"Input for year {year} day {day:02} already cached",
+                f"Input for year {year} day {pad_day(day)} already cached",
                 style=COLOR_INFO,
             )
             continue
@@ -130,35 +133,45 @@ def fetch(years: list[int], days: list[int], *, force: bool = False):
         input_file.parent.mkdir(parents=True, exist_ok=True)
         input_file.write_text(puzzle_input)
         console_err.print(
-            f"Fetched year {year} day {day:02}!",
+            f"Fetched year {year} day {pad_day(day)}!",
             style=COLOR_INFO,
         )
 
 
 @is_esb_repo
-def start(lang: Languages, years: list[int], days: list[int]):
+def start(lang: LangSpec, years: list[int], days: list[int]):
+    # db = ElvenCrisisArchive()
     for year, day in product(years, days):
-        _copy_boilerplate(lang, year, day)
+        start_day(lang, year, day)
+
+
+def start_day(lang: LangSpec, year: int, day: int):
+    _copy_boilerplate(lang, year, day)
 
 
 @is_esb_repo
 def show(years: list[int], days: list[int]):
     db = ElvenCrisisArchive()
     for year, day in product(years, days):
-        ds = db.SolutionStatus.find_single({"year": year, "day": day})
-        statement_file = esb_paths.statement_path(year, day)
-        if ds is None or not statement_file.is_file():
-            console_err.print(
-                f"Input for year {year} day {day:02} not cached. Please fetch first",
-                style=COLOR_ERROR,
-            )
-            continue
+        show_day(db, year, day)
 
-        not_solved = "<Not solved yet>"
-        console_out.print(statement_file.read_text())
-        console_out.print()
-        console_out.print(f"Solution pt1: {ds.pt1_answer or not_solved}")
-        console_out.print(f"console_out pt2: {ds.pt2_answer or not_solved}")
+
+def show_day(db: ElvenCrisisArchive, year: int, day: int):
+    ds = db.SolutionStatus.find_single({"year": year, "day": day})
+    cwd = Path.cwd()
+    statement_file = CachePaths(cwd).statement_path(year, day)
+    if ds is None or not statement_file.is_file():
+        console_err.print(
+            f"Input for year {year} day {pad_day(day)} not cached. Please fetch first",
+            style=COLOR_ERROR,
+        )
+        return
+
+    not_solved = "<Not solved yet>"
+    console_out.print(statement_file.read_text())
+    console_out.print()
+    console_out.print(f"Solution pt1: {ds.pt1_answer or not_solved}")
+    console_out.print(f"console_out pt2: {ds.pt2_answer or not_solved}")
 
 
 @is_esb_repo
@@ -166,11 +179,15 @@ def status():
     db = ElvenCrisisArchive()
     info = db.BrigadistaInfo.fetch_single()
     console_out.print(
-        f"ElfScript Brigade\n\nBrigadista ID: {info.brigadista_id}\nIn Duty Since: {info.creation_date}",
+        "ELFSCRIPT BRIGADE STATUS REPORT\n",
+        style=COLOR_ERROR,
+    )
+    console_out.print(
+        f"Brigadista ID: {info.brigadista_id}\nIn Duty Since: {info.creation_date}\n",
         style=COLOR_INFO,
     )
     console_out.print(
-        "\n\nSERVICE STARS",
+        "SERVICE STARS",
         style=COLOR_WARN,
     )
 
@@ -182,6 +199,65 @@ def status():
             f"\n{summary}\n{year}",
             style=COLOR_WARN,
         )
+
+
+@is_esb_repo
+def run(
+    lang: LangSpec,
+    part: fp1_0.FPPart,
+    years: list[int],
+    days: list[int],
+    *,
+    submit: bool = False,
+):
+    cwd = Path.cwd()
+    db = ElvenCrisisArchive()
+    for year, day in product(years, days):
+        ds = db.SolutionStatus.find_single({"year": year, "day": day})
+        if ds is None:
+            console_err.print(
+                f"Could not find input for year {year} day {pad_day(day)}. Please fetch first.",
+                style=COLOR_ERROR,
+            )
+
+        day_input = CachePaths(cwd).input_path(year, day)
+        day_wd = LangPaths(cwd).day_source(lang, year, day)  # @TODO: Chose working directory according with LangSpec
+        command = [*lang.command, lang.source(year, day)]
+        result = fp1_0.exec_protocol(command, part, day_wd, day_input)
+        match result.status:
+            case fp1_0.FPStatus.Ok:
+                pass
+            case fp1_0.FPStatus.InputDoesNotExists:
+                console_err.print(
+                    (
+                        f"\nCould not find input for year {year} day {pad_day(day)}. "
+                        "Data seems corrupted. Please fetch again with --force"
+                    ),
+                    style=COLOR_ERROR,
+                )
+                sys.exit(2)
+            case fp1_0.FPStatus.ProtocolError:
+                console_err.print(
+                    f"\nSolution for year {year} day {pad_day(day)} does not follow FIREPLACE protocol.",
+                    style=COLOR_ERROR,
+                )
+                sys.exit(2)
+
+        attempt = result.stdout.strip()
+        answer = ds.get_answer(part)
+        if answer is not None:
+            if attempt == answer:
+                console_out.print(f"✔ Answer pt{part}: {attempt}", style=COLOR_INFO)
+            else:
+                console_out.print(
+                    f"✘ Answer pt{part}: {attempt}. Expected: {answer}",
+                    style=COLOR_ERROR,
+                )
+        elif submit:
+            # @TODO: implement submit
+            ...
+        else:
+            console_out.print(f"Answer pt{part}: {attempt}", style=COLOR_WARN)
 
 
 ###########################################################
@@ -281,12 +357,12 @@ def _years_summary(db: ElvenCrisisArchive, _cwd: Path) -> dict[int, str]:
 
     ret = {}
     for year, days in year_stars.items():
-        days_str = " ".join([f"{day:02}" for day in range(1, 26)])
+        days_str = " ".join([f"{pad_day(day)}" for day in range(1, 26)])
         stars_str = " ".join([f"{'*' * days.get(day, 0):<2}" for day in range(1, 26)])
         summary = f"{stars_str}\n{days_str}"
         ret[year] = summary
     return ret
 
 
-def _copy_boilerplate(_lang: Languages, _year: int, _day: int):
+def _copy_boilerplate(_lang: LangSpec, _year: int, _day: int):
     pass

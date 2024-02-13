@@ -12,11 +12,13 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 import argparse
 from datetime import datetime
 from enum import Enum, auto
+from typing import get_args
 from zoneinfo import ZoneInfo
 
 from esb import __version__
 from esb import commands as esb_commands
-from esb.langs import Languages
+from esb.langs import LangMap
+from esb.protocol.fireplacev1_0 import FPPart
 
 
 ###########################################################
@@ -47,7 +49,7 @@ def aoc_year(value: str):
         raise argparse.ArgumentTypeError(message) from exc
 
 
-def aoc_day(value):
+def aoc_day(value: str):
     day_01 = 1
     day_25 = 25
     if value == "all":
@@ -67,6 +69,15 @@ def aoc_day(value):
     except ValueError as exc:
         message = f"{value} is not a valid AoC day"
         raise argparse.ArgumentTypeError(message) from exc
+
+
+class AocLangAction(argparse.Action):
+    def __init__(self, lmap: LangMap, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lmap = lmap
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        setattr(namespace, self.dest, self.lmap.get(value))
 
 
 ###########################################################
@@ -111,6 +122,7 @@ def esb_parser() -> argparse.ArgumentParser:
         required=True,
         dest="command",
     )
+    lmap = LangMap.load_defaults()
     parsers = {}
     for cmd in Command:
         parsers[cmd] = subparsers.add_parser(cmd.name, description=cmd_descriptions[cmd])
@@ -131,17 +143,30 @@ def esb_parser() -> argparse.ArgumentParser:
                 "-l",
                 "--language",
                 required=True,
-                choices=[lang.name for lang in Languages],
+                choices=lmap.names,
             )
 
         if cmd in {Command.test, Command.run}:
-            parsers[cmd].add_argument("-l", "--language", choices=[lang.name for lang in Languages])
+            parsers[cmd].add_argument(
+                "-l",
+                "--language",
+                required=True,
+                action=AocLangAction,
+                lmap=lmap,
+                choices=lmap.names,
+            )
             parsers[cmd].add_argument("-y", "--year", nargs="+", type=aoc_year, help="AoC year")
             parsers[cmd].add_argument("-d", "--day", nargs="+", type=aoc_day, help="AoC day")
-            parsers[cmd].add_argument("-a", "--all", action="store_true", help="Runs all selected")
 
         if cmd == Command.run:
             parsers[cmd].add_argument("-s", "--submit", action="store_true", help="Submits solution")
+            parsers[cmd].add_argument(
+                "-p",
+                "--parts",
+                choices=get_args(FPPart),
+                type=int,
+                help="Run for part 1 or part 2",
+            )
 
     return parser
 
@@ -165,6 +190,8 @@ def main():
             esb_commands.show(args.year, args.day)
         case Command.status:
             esb_commands.status()
+        case Command.run:
+            esb_commands.run(args.language, args.parts, args.year, args.day)
         case _:
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)

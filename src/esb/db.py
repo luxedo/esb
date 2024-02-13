@@ -21,6 +21,8 @@ if TYPE_CHECKING:
     from datetime import datetime
     from typing import Any, ClassVar, Self
 
+    from esb.protocol.fireplacev1_0 import FPPart
+
 
 @dataclass
 class SqlConnection:
@@ -190,6 +192,7 @@ class Table:
         )
         self._sql.cur.execute(query, d)
         self._sql.con.commit()
+        return self
 
     @check_connection
     def update(self, key: dict):
@@ -219,6 +222,16 @@ class SolutionStatus(Table):
     day: int
     pt1_answer: str | None
     pt2_answer: str | None
+
+    def get_answer(self, part: FPPart):
+        match part:
+            case 1:
+                return self.pt1_answer
+            case 2:
+                return self.pt2_answer
+            case _:
+                message = f"Part {part} does not exist"
+                raise KeyError(message)
 
 
 class ElvenCrisisArchive:

@@ -1,0 +1,6 @@
+{
+  "name": "python",
+  "template": "template.py",
+  "extension": "py",
+  "command": ["python"]
+}

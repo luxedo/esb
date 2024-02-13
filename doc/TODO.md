@@ -31,6 +31,7 @@
     ~~1. Feedback when running outside of an ESB repo~~
     1. Run anywhere inside the repo
     ~~1. Add caching to fetch and --force flag~~
+    1. Handle command product exceptions
 1. Optional features
     1. Loading icon on slow operations
     1. esb new beautiful ASCII art
@@ -41,3 +42,5 @@
     1. aoc_parser types: Check day correctly
     1. Mock fetch properly
     1. Test CLI
+    1. Standardize exit codes
+    1. Redo parser
