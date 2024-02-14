@@ -19,14 +19,16 @@ Any _PROGRAM_ implementing FIREPLACEv1.0 should receive the _PROBLEM DATA_ as in
 1. The _PROGRAM_ **MUST** accept two arguments:
     1. `--part` or `-p`, a required argument with values of either `1` or `2`.
     1. `--args` or `-a`, optional positional arguments<sup>*</sup>.
-1. The _PROGRAM_ **MUST** return the _ANSWER_ via `stdout`.
+1. The _PROGRAM_ **MUST** return the _ANSWER_ followed by a line break via `stdout`.
 1. The _PROGRAM_ **MUST** return an exit code of `0` on successful execution. Any other code is considered an error.
-1. The _PROGRAM_ **MAY** log a _RUNNING TIME_ via `stderr`.
-    1. A _RUNNING TIME_ **MUST** be represented by two _RUNNING TIME MARKERS_ printed in `stdout`: one for _START TIME_, and other for _END TIME_.
-    1. A _RUNNING TIME MARKER_ **MUST** be represented the following three elements sepearated by an spaces and ending with a line break:
-        1. It's prefix, either of `SRTM` for _START TIME_ or `ERTM` for _END TIME_.
-        1. it's _NUMERIC VALUE_.
-        1. It's _UNIT_ in [metric prefix](https://en.wikipedia.org/wiki/Metric_prefix) followed by `seconds`, OR it's abbreviated symbol followed by `s`. Here's a micro `μ` symbol; you're welcome.
+1. The _PROGRAM_ **MAY** log a _RUNNING TIME_ followed by a line break via `stdout` after the _ANSWER_.
+1. The _RUNNING TIME_ **MUST** be represented the following three elements sepearated by an spaces and ending with a line break:
+    1. It's prefix of `RT`.
+    1. it's _NUMERIC VALUE_.
+    1. It's _UNIT_ in [metric prefix](https://en.wikipedia.org/wiki/Metric_prefix) followed by `seconds`, OR it's abbreviated symbol followed by `s`. Here's a micro `μ` symbol; you're welcome.
+    1. Example: `RT 123 ns`
+1. The _PROGRAM_ **MUST NOT** print other data besides the _ANSER_ and the _RUNNING TIME_
+1. The _PROGRAM_ **MAY** output data in `stderr`. Any data in this stream will be ignored.
 
 <sup>*</sup> Some Advent of Code problems have different parameters for tests and for the _PROBLEM DATA_. As in [year 2023 day 21](https://adventofcode.com/2023/day/21), If that's the case, positional arguments are passed through the `--arg`.
 

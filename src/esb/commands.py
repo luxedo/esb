@@ -243,7 +243,7 @@ def run(
                 )
                 sys.exit(2)
 
-        attempt = result.stdout.strip()
+        attempt = result.answer
         answer = ds.get_answer(part)
         if answer is not None:
             if attempt == answer:

@@ -54,3 +54,4 @@
 1. Document development guidelines
 1. Implement  test
     1. Get tests from HTML
+1. Improve "does not follow FIREPLACE protocol" messages

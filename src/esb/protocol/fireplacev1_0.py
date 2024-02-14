@@ -16,7 +16,10 @@ import asyncio
 import sys
 from dataclasses import dataclass
 from enum import Enum, auto
+from time import perf_counter_ns
 from typing import TYPE_CHECKING, Any, Callable, Literal
+
+from esb.protocol.metric_prefix import MetricPrefix
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -55,78 +58,28 @@ def run_solutions(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
         help="Run solution part 1 or part 2",
     )
     args = parser.parse_args()
+    t0 = perf_counter_ns()
     ans = _run_solution(args.part, solve_pt1, solve_pt2)
-    sys.stdout.write(f"{ans}")
+    sys.stdout.write(f"{ans}\n")
+    dt = perf_counter_ns() - t0
+    sys.stdout.write(f"RT {dt} ns\n")
 
 
 ###########################################################
 # Protocol runner
 ###########################################################
-class MetricPrefix(Enum):
-    quetta = 30
-    Q = 30  # noqa: PIE796
-    ronna = 27
-    R = 27  # noqa: PIE796
-    yotta = 24
-    Y = 24  # noqa: PIE796
-    zetta = 21
-    Z = 21  # noqa: PIE796
-    exa = 18
-    E = 18  # noqa: PIE796
-    peta = 15
-    P = 15  # noqa: PIE796
-    tera = 12
-    T = 12  # noqa: PIE796
-    giga = 9
-    G = 9  # noqa: PIE796
-    mega = 6
-    M = 6  # noqa: PIE796
-    kilo = 3
-    k = 3  # noqa: PIE796
-    hecto = 2
-    h = 2  # noqa: PIE796
-    deca = 1
-    da = 1  # noqa: PIE796
-    _ = 0
-    deci = -1
-    d = -1  # noqa: PIE796
-    centi = -2
-    c = -2  # noqa: PIE796
-    milli = -3
-    m = -3  # noqa: PIE796
-    micro = -6
-    μ = -6  # noqa: PIE796 PLC2401
-    nano = -9
-    n = -9  # noqa: PIE796
-    pico = -12
-    p = -12  # noqa: PIE796
-    femto = -15
-    f = -15  # noqa: PIE796
-    atto = -18
-    a = -18  # noqa: PIE796
-    zepto = -21
-    z = -21  # noqa: PIE796
-    yocto = -24
-    y = -24  # noqa: PIE796
-    ronto = -27
-    r = -27  # noqa: PIE796
-    quecto = -30
-    q = -30  # noqa: PIE796
-
-
 class FPStatus(Enum):
     Ok = auto()
     InputDoesNotExists = auto()
     ProtocolError = auto()
 
 
-@dataclass(frozen=True)
+@dataclass
 class FPResult:
     status: FPStatus
-    stdout: str = ""
-    stderr: str = ""
-    time: int | None = None
-    time_unit: MetricPrefix | None = None
+    answer: str | None = None
+    running_time: int | None = None
+    unit: MetricPrefix | None = None
 
 
 FPPart = Literal[1, 2]
@@ -147,15 +100,12 @@ async def _read_output(stream, threshold, print_stream):
     return ret, lines
 
 
-async def _exec_protocol_command(
-    cmd: list[str], cwd: Path, day_input: Path
-) -> tuple[int, tuple[str, int], tuple[str, int]]:
+async def _exec_protocol_command(cmd: list[str], cwd: Path, day_input: Path) -> tuple[int, tuple[str, int]]:
     proc = await asyncio.create_subprocess_exec(
         *cmd,
         cwd=cwd,
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
     )
 
     if proc.stdin is None:
@@ -165,12 +115,21 @@ async def _exec_protocol_command(
     proc.stdin.write(day_input.read_text().encode())
     proc.stdin.close()
 
-    # Wait for the process to complete and tasks to finish
-    return await asyncio.gather(
-        proc.wait(),
-        _read_output(proc.stdout, threshold=1, print_stream=sys.stdout),
-        _read_output(proc.stderr, threshold=0, print_stream=sys.stderr),
-    )
+    return await asyncio.gather(proc.wait(), _read_output(proc.stdout, threshold=2, print_stream=sys.stdout))
+
+
+def _parse_running_time(running_time_line: str) -> tuple[int, MetricPrefix]:
+    try:
+        match running_time_line.split():
+            case ["RT", running_time_str, unit_str]:
+                running_time = int(running_time_str)
+                unit = MetricPrefix.parse(unit_str, "second", "s")
+                return running_time, unit
+    except Exception as exc:  # noqa: BLE001
+        message = f"Could not parse running time for '{running_time_line}'"
+        raise ValueError(message) from exc
+    message = f"Could not parse running time for '{running_time_line}'"
+    raise ValueError(message)
 
 
 def exec_protocol(command: list[str], part: FPPart, cwd: Path, day_input: Path) -> FPResult:
@@ -178,12 +137,26 @@ def exec_protocol(command: list[str], part: FPPart, cwd: Path, day_input: Path) 
         return FPResult(status=FPStatus.InputDoesNotExists)
 
     cmd = [*command, "--part", f"{part}"]
-    exitcode, (stdout, out_lines), (stderr, err_lines) = asyncio.run(_exec_protocol_command(cmd, cwd, day_input))
-    status = FPStatus.Ok
-    success_exit = 0
-    stdout_max_lines = 1
-    stderr_max_lines = 2
-    if exitcode != success_exit or out_lines > stdout_max_lines or err_lines > stderr_max_lines:
-        status = FPStatus.ProtocolError
+    exitcode, (stdout, out_lines) = asyncio.run(_exec_protocol_command(cmd, cwd, day_input))
 
-    return FPResult(status, stdout, stderr)
+    success_exit = 0
+    stdout_lines = [1, 2]
+    if exitcode != success_exit or out_lines not in stdout_lines:
+        return FPResult(status=FPStatus.ProtocolError)
+
+    answer = None
+    running_time = None
+    unit = None
+    match stdout.strip().split("\n"):
+        case [ans, running_time_line]:
+            answer = ans
+            try:
+                running_time, unit = _parse_running_time(running_time_line)
+            except ValueError:
+                return FPResult(status=FPStatus.ProtocolError)
+        case [ans]:
+            answer = ans
+        case _:
+            return FPResult(status=FPStatus.ProtocolError)
+
+    return FPResult(status=FPStatus.Ok, answer=answer, running_time=running_time, unit=unit)
