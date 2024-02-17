@@ -28,7 +28,7 @@ from rich.console import Console
 
 from esb import __version__
 from esb.db import ElvenCrisisArchive
-from esb.paths import BLANK_ROOT, CachePaths, LangPaths, pad_day
+from esb.paths import BLANK_ROOT, CacheSled, pad_day
 from esb.protocol import fireplacev1_0 as fp1_0
 
 if TYPE_CHECKING:
@@ -99,7 +99,6 @@ def new():
 @is_esb_repo
 def fetch(years: list[int], days: list[int], *, force: bool = False):
     db = ElvenCrisisArchive()
-    cwd = Path.cwd()
     for year, day in product(years, days):
         ds = db.SolutionStatus.find_single({"year": year, "day": day})
         if not force and ds is not None and ds.pt2_answer is not None:
@@ -111,17 +110,18 @@ def fetch(years: list[int], days: list[int], *, force: bool = False):
 
         host = "adventofcode.com"
         cookie = _load_cookie()
+        cache_sled = CacheSled()
 
         st_route = f"/{year}/day/{day}"
         st_html = _fetch_url(host, st_route, cookie)
         statement, pt1_answer, pt2_answer = _parse_body(st_html)
-        st_file = CachePaths(cwd).statement_path(year, day)
+        st_file = cache_sled.path("statement", year, day)
         st_file.parent.mkdir(parents=True, exist_ok=True)
         st_file.write_text(statement)
 
         db.SolutionStatus(year=year, day=day, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert(replace=True)
 
-        input_file = CachePaths(cwd).input_path(year, day)
+        input_file = cache_sled.path("input", year, day)
         if not force and input_file.is_file():
             console_err.print(
                 f"Input for year {year} day {pad_day(day)} already cached",
@@ -140,13 +140,30 @@ def fetch(years: list[int], days: list[int], *, force: bool = False):
 
 @is_esb_repo
 def start(lang: LangSpec, years: list[int], days: list[int]):
-    # db = ElvenCrisisArchive()
+    db = ElvenCrisisArchive()
     for year, day in product(years, days):
-        start_day(lang, year, day)
+        start_day(db, lang, year, day)
 
 
-def start_day(lang: LangSpec, year: int, day: int):
-    _copy_boilerplate(lang, year, day)
+def start_day(db: ElvenCrisisArchive, lang: LangSpec, year: int, day: int):
+    match db.LanguageStatus.find_single({"year": year, "day": day, "language": lang.name}):
+        case db.LanguageStatus(started=True):
+            console_err.print(
+                f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. '
+                "If you wish to overwrite run the command with --force flag.",
+                style=COLOR_ERROR,
+            )
+            sys.exit(2)
+    # cf = CodeFurnace(lang)
+    # _copy_boilerplate(lang, year, day)
+    # db.LanguageStatus(
+    #     year=year,
+    #     day=day,
+    #     language=lang.name,
+    #     started=True,
+    #     finished_pt1=False,
+    #     finished_pt2=False,
+    # ).insert()
 
 
 @is_esb_repo
@@ -158,8 +175,8 @@ def show(years: list[int], days: list[int]):
 
 def show_day(db: ElvenCrisisArchive, year: int, day: int):
     ds = db.SolutionStatus.find_single({"year": year, "day": day})
-    cwd = Path.cwd()
-    statement_file = CachePaths(cwd).statement_path(year, day)
+    cache_sled = CacheSled()
+    statement_file = cache_sled.path("statement", year, day)
     if ds is None or not statement_file.is_file():
         console_err.print(
             f"Input for year {year} day {pad_day(day)} not cached. Please fetch first",
@@ -210,7 +227,6 @@ def run(
     *,
     submit: bool = False,
 ):
-    cwd = Path.cwd()
     db = ElvenCrisisArchive()
     for year, day in product(years, days):
         ds = db.SolutionStatus.find_single({"year": year, "day": day})
@@ -220,9 +236,10 @@ def run(
                 style=COLOR_ERROR,
             )
 
-        day_input = CachePaths(cwd).input_path(year, day)
-        day_wd = LangPaths(cwd).day_source(lang, year, day)  # @TODO: Chose working directory according with LangSpec
-        command = [*lang.command, lang.source(year, day)]
+        cache_sled = CacheSled()
+        command = lang.run_command(year=year, day=day)
+        day_wd = lang.sled.day_dir(year=year, day=day)
+        day_input = cache_sled.path("input", year, day)
         result = fp1_0.exec_protocol(command, part, day_wd, day_input)
         match result.status:
             case fp1_0.FPStatus.Ok:

@@ -143,6 +143,8 @@ def esb_parser() -> argparse.ArgumentParser:
                 "-l",
                 "--language",
                 required=True,
+                action=AocLangAction,
+                lmap=lmap,
                 choices=lmap.names,
             )
 

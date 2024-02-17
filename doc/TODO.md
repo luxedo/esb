@@ -2,7 +2,7 @@
 ## MVP
 
 ~~1. Document FIREPLACE Protocol~~
-1. Implement FIREPLACE for Python
+~~1. Implement FIREPLACE for Python~~
 1. Document boilerplates
 ~~1. Argument parser~~
 1. Fetch command

@@ -85,7 +85,7 @@ exclude_lines = [
 [tool.ruff]
 line-length = 120
 ignore = ["TRY", "ARG002"]
-include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py"]
+include = ["pyproject.toml", "src/esb/*.py", "tests/**/*.py"]
 
 
 [tool.ruff.format]

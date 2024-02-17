@@ -234,6 +234,21 @@ class SolutionStatus(Table):
                 raise KeyError(message)
 
 
+@dataclass(unsafe_hash=True)
+class LanguageStatus(Table):
+    year: int
+    day: int
+    language: str
+    started: bool
+    finished_pt1: bool
+    finished_pt2: bool
+
+    def __post_init__(self):
+        self.started = bool(self.started)
+        self.finished_pt1 = bool(self.finished_pt1)
+        self.finished_pt2 = bool(self.finished_pt2)
+
+
 class ElvenCrisisArchive:
     db_path = "ElvenCrisisArchive.sqlite"
 
@@ -249,10 +264,20 @@ class ElvenCrisisArchive:
                                 pt2_answer TEXT,
                                 PRIMARY KEY (year, day)
                             )""",
+        LanguageStatus: """CREATE TABLE {table_name} (
+                                year INTEGER NOT NULL,
+                                day INTEGER NOT NULL,
+                                language TEXT,
+                                started INT,
+                                finished_pt1 INT,
+                                finished_pt2 INT,
+                                PRIMARY KEY (year, day, language)
+                            )""",
     }
 
     BrigadistaInfo = BrigadistaInfo
     SolutionStatus = SolutionStatus
+    LanguageStatus = LanguageStatus
 
     def __repr__(self):
         return f'{self.__class__.__name__}("{self.db_path}")'  # pragma: no cover
