@@ -27,6 +27,7 @@ from bs4 import BeautifulSoup
 from rich.console import Console
 
 from esb import __version__
+from esb.boiler import CodeFurnace
 from esb.db import ElvenCrisisArchive
 from esb.paths import BLANK_ROOT, CacheSled, pad_day
 from esb.protocol import fireplacev1_0 as fp1_0
@@ -88,7 +89,7 @@ def new():
 
     db.create_tables()
 
-    db.BrigadistaInfo(brigadista_id=str(uuid.uuid4()), creation_date=datetime.now().astimezone()).insert()
+    db.ECABrigadista(brigadista_id=str(uuid.uuid4()), creation_date=datetime.now().astimezone()).insert()
 
     console_err.print(
         "ESB repo is ready! Thank you for saving Christmas [italic]Elf[/italic]",
@@ -100,70 +101,14 @@ def new():
 def fetch(years: list[int], days: list[int], *, force: bool = False):
     db = ElvenCrisisArchive()
     for year, day in product(years, days):
-        ds = db.SolutionStatus.find_single({"year": year, "day": day})
-        if not force and ds is not None and ds.pt2_answer is not None:
-            console_err.print(
-                f"Fetch for year {year} day {pad_day(day)} is already complete!",
-                style=COLOR_INFO,
-            )
-            continue
-
-        host = "adventofcode.com"
-        cookie = _load_cookie()
-        cache_sled = CacheSled()
-
-        st_route = f"/{year}/day/{day}"
-        st_html = _fetch_url(host, st_route, cookie)
-        statement, pt1_answer, pt2_answer = _parse_body(st_html)
-        st_file = cache_sled.path("statement", year, day)
-        st_file.parent.mkdir(parents=True, exist_ok=True)
-        st_file.write_text(statement)
-
-        db.SolutionStatus(year=year, day=day, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert(replace=True)
-
-        input_file = cache_sled.path("input", year, day)
-        if not force and input_file.is_file():
-            console_err.print(
-                f"Input for year {year} day {pad_day(day)} already cached",
-                style=COLOR_INFO,
-            )
-            continue
-        input_route = f"{st_route}/input"
-        puzzle_input = _fetch_url(host, input_route, cookie)
-        input_file.parent.mkdir(parents=True, exist_ok=True)
-        input_file.write_text(puzzle_input)
-        console_err.print(
-            f"Fetched year {year} day {pad_day(day)}!",
-            style=COLOR_INFO,
-        )
+        fetch_day(db, year, day, force=force)
 
 
 @is_esb_repo
-def start(lang: LangSpec, years: list[int], days: list[int]):
+def start(lang: LangSpec, years: list[int], days: list[int], *, force: bool = False):
     db = ElvenCrisisArchive()
     for year, day in product(years, days):
-        start_day(db, lang, year, day)
-
-
-def start_day(db: ElvenCrisisArchive, lang: LangSpec, year: int, day: int):
-    match db.LanguageStatus.find_single({"year": year, "day": day, "language": lang.name}):
-        case db.LanguageStatus(started=True):
-            console_err.print(
-                f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. '
-                "If you wish to overwrite run the command with --force flag.",
-                style=COLOR_ERROR,
-            )
-            sys.exit(2)
-    # cf = CodeFurnace(lang)
-    # _copy_boilerplate(lang, year, day)
-    # db.LanguageStatus(
-    #     year=year,
-    #     day=day,
-    #     language=lang.name,
-    #     started=True,
-    #     finished_pt1=False,
-    #     finished_pt2=False,
-    # ).insert()
+        start_day(db, lang, year, day, force=force)
 
 
 @is_esb_repo
@@ -173,28 +118,121 @@ def show(years: list[int], days: list[int]):
         show_day(db, year, day)
 
 
+###########################################################
+# Commands per Day
+###########################################################
+def fetch_day(db: ElvenCrisisArchive, year: int, day: int, *, force: bool = False):
+    ds = db.ECASolution.find_single({"year": year, "day": day})
+    if not force and ds is not None and ds.pt2_answer is not None:
+        console_err.print(
+            f"Fetch for year {year} day {pad_day(day)} is already complete!",
+            style=COLOR_INFO,
+        )
+        return
+
+    host = "adventofcode.com"
+    cookie = _load_cookie()
+    cache_sled = CacheSled()
+
+    st_route = f"/{year}/day/{day}"
+    st_html = _fetch_url(host, st_route, cookie)
+    statement, pt1_answer, pt2_answer = _parse_body(st_html)
+    st_file = cache_sled.path("statement", year, day)
+    st_file.parent.mkdir(parents=True, exist_ok=True)
+    st_file.write_text(statement)
+
+    db.ECASolution(year=year, day=day, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert(replace=True)
+    [_, title, *_] = statement.split("---")
+    db.ECAProblem(year=year, day=day, title=title.strip(), url=host + st_route).insert(replace=True)
+
+    input_file = cache_sled.path("input", year, day)
+    if not force and input_file.is_file():
+        console_err.print(
+            f"Input for year {year} day {pad_day(day)} already cached",
+            style=COLOR_INFO,
+        )
+        return
+    input_route = f"{st_route}/input"
+    puzzle_input = _fetch_url(host, input_route, cookie)
+    input_file.parent.mkdir(parents=True, exist_ok=True)
+    input_file.write_text(puzzle_input)
+    console_err.print(
+        f"Fetched year {year} day {pad_day(day)}!",
+        style=COLOR_INFO,
+    )
+
+
+def start_day(db: ElvenCrisisArchive, lang: LangSpec, year: int, day: int, *, force: bool):
+    day_problem = db.ECAProblem.find_single({"year": year, "day": day})
+    match (day_problem, force):
+        case (_, True) | (None, _):
+            fetch_day(db, year, day, force=force)
+            day_problem = db.ECAProblem.find_single({"year": year, "day": day})
+
+    day_language = db.ECALanguage.find_single({"year": year, "day": day, "language": lang.name})
+    match day_language:
+        case db.ECALanguage(started=True):
+            console_err.print(
+                f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. '
+                "If you wish to overwrite run the command with --force flag.",
+                style=COLOR_ERROR,
+            )
+            return
+        # @TODO: Handle started=False
+
+    cf = CodeFurnace(lang)
+    cf.start(year, day, day_problem.title, day_problem.url)
+
+    db.ECALanguage(
+        year=year,
+        day=day,
+        language=lang.name,
+        started=True,
+        finished_pt1=False,
+        finished_pt2=False,
+    ).insert()
+
+
 def show_day(db: ElvenCrisisArchive, year: int, day: int):
-    ds = db.SolutionStatus.find_single({"year": year, "day": day})
+    ds = db.ECASolution.find_single({"year": year, "day": day})
     cache_sled = CacheSled()
     statement_file = cache_sled.path("statement", year, day)
-    if ds is None or not statement_file.is_file():
+    if ds is None:
         console_err.print(
-            f"Input for year {year} day {pad_day(day)} not cached. Please fetch first",
+            f"Solution for year {year} day {pad_day(day)} not cached. Please fetch first",
             style=COLOR_ERROR,
         )
         return
 
-    not_solved = "<Not solved yet>"
-    console_out.print(statement_file.read_text())
+    if not statement_file.is_file():
+        console_err.print("Problem not fetched yet!", style=COLOR_ERROR)
+    else:
+        console_out.print(statement_file.read_text())
+
+    not_solved = "<'Not solved yet'>"
     console_out.print()
-    console_out.print(f"Solution pt1: {ds.pt1_answer or not_solved}")
-    console_out.print(f"console_out pt2: {ds.pt2_answer or not_solved}")
+    if ds.pt1_answer is not None:
+        console_out.print(f"Solution pt1: {ds.pt1_answer}", style=COLOR_INFO)
+    else:
+        console_out.print(f"Solution pt1: {not_solved}", style=COLOR_ERROR)
+    if ds.pt2_answer is not None:
+        console_out.print(f"Solution pt2: {ds.pt2_answer}", style=COLOR_INFO)
+    else:
+        console_out.print(f"Solution pt2: {not_solved}", style=COLOR_ERROR)
+
+    dl = db.ECALanguage.find({"year": year, "day": day})
+    if dl is not None:
+        console_out.print()
+        console_out.print("Languages:", style=COLOR_INFO)
+    for eca_language in dl:
+        stars = int(eca_language.finished_pt1) + int(eca_language.finished_pt2)
+        console_out.print(f"{eca_language.language}: [yellow]{'*' * stars}[/yellow]", style=COLOR_INFO)
 
 
 @is_esb_repo
 def status():
     db = ElvenCrisisArchive()
-    info = db.BrigadistaInfo.fetch_single()
+    info = db.ECABrigadista.fetch_single()
     console_out.print(
         "ELFSCRIPT BRIGADE STATUS REPORT\n",
         style=COLOR_ERROR,
@@ -229,52 +267,81 @@ def run(
 ):
     db = ElvenCrisisArchive()
     for year, day in product(years, days):
-        ds = db.SolutionStatus.find_single({"year": year, "day": day})
-        if ds is None:
+        run_day(db, lang, part, year, day, submit=submit)
+
+
+def run_day(
+    db: ElvenCrisisArchive,
+    lang: LangSpec,
+    part: fp1_0.FPPart,
+    year: int,
+    day: int,
+    *,
+    submit: bool,
+):
+    dl = db.ECALanguage.find_single({"year": year, "day": day, "language": lang.name})
+    if dl is None:
+        console_err.print(
+            f"Could not find code for year {year} day {pad_day(day)}. Please start first with:",
+            style=COLOR_ERROR,
+        )
+        console_err.print(
+            f"esb start --year {year} --day {day} --lang {lang.name}",
+        )
+        return
+
+    ds = db.ECASolution.find_single({"year": year, "day": day})
+    if ds is None:
+        console_err.print(
+            f"Could not find input for year {year} day {pad_day(day)}. Please fetch first.",
+            style=COLOR_ERROR,
+        )
+        console_err.print(
+            f"esb fetch --year {year} --day {day}",
+        )
+        return
+
+    cache_sled = CacheSled()
+    command = lang.build_command(year=year, day=day)
+    day_wd = lang.sled.day_dir(year=year, day=day)
+    day_input = cache_sled.path("input", year, day)
+    result = fp1_0.exec_protocol(command, part, day_wd, day_input)
+    match result.status:
+        case fp1_0.FPStatus.Ok:
+            pass
+        case fp1_0.FPStatus.InputDoesNotExists:
             console_err.print(
-                f"Could not find input for year {year} day {pad_day(day)}. Please fetch first.",
+                (
+                    f"\nCould not find input for year {year} day {pad_day(day)}. "
+                    "Data seems corrupted. Please fetch again with --force"
+                ),
                 style=COLOR_ERROR,
             )
+            return
+        case fp1_0.FPStatus.ProtocolError:
+            console_err.print(
+                f"\nSolution for year {year} day {pad_day(day)} does not follow FIREPLACE protocol.",
+                style=COLOR_ERROR,
+            )
+            return
 
-        cache_sled = CacheSled()
-        command = lang.run_command(year=year, day=day)
-        day_wd = lang.sled.day_dir(year=year, day=day)
-        day_input = cache_sled.path("input", year, day)
-        result = fp1_0.exec_protocol(command, part, day_wd, day_input)
-        match result.status:
-            case fp1_0.FPStatus.Ok:
-                pass
-            case fp1_0.FPStatus.InputDoesNotExists:
-                console_err.print(
-                    (
-                        f"\nCould not find input for year {year} day {pad_day(day)}. "
-                        "Data seems corrupted. Please fetch again with --force"
-                    ),
-                    style=COLOR_ERROR,
-                )
-                sys.exit(2)
-            case fp1_0.FPStatus.ProtocolError:
-                console_err.print(
-                    f"\nSolution for year {year} day {pad_day(day)} does not follow FIREPLACE protocol.",
-                    style=COLOR_ERROR,
-                )
-                sys.exit(2)
-
-        attempt = result.answer
-        answer = ds.get_answer(part)
-        if answer is not None:
-            if attempt == answer:
-                console_out.print(f"✔ Answer pt{part}: {attempt}", style=COLOR_INFO)
-            else:
-                console_out.print(
-                    f"✘ Answer pt{part}: {attempt}. Expected: {answer}",
-                    style=COLOR_ERROR,
-                )
-        elif submit:
-            # @TODO: implement submit
-            ...
+    attempt = result.answer
+    answer = ds.get_answer(part)
+    if answer is not None:
+        if attempt == answer:
+            console_out.print(f"✔ Answer pt{part}: {attempt}", style=COLOR_INFO)
+            dl.set_solved(part)
         else:
-            console_out.print(f"Answer pt{part}: {attempt}", style=COLOR_WARN)
+            console_out.print(
+                f"✘ Answer pt{part}: {attempt}. Expected: {answer}",
+                style=COLOR_ERROR,
+            )
+            dl.set_unsolved(part)
+    elif submit:
+        # @TODO: implement submit
+        ...
+    else:
+        console_out.print(f"Answer pt{part}: {attempt}", style=COLOR_WARN)
 
 
 ###########################################################
@@ -369,7 +436,7 @@ def _count_stars(rows: Iterable) -> dict[int, dict[int, int]]:
 
 
 def _years_summary(db: ElvenCrisisArchive, _cwd: Path) -> dict[int, str]:
-    stats = db.SolutionStatus.fetch_all()
+    stats = db.ECASolution.fetch_all()
     year_stars = _count_stars(stats)
 
     ret = {}

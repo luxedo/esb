@@ -126,7 +126,7 @@ def esb_parser() -> argparse.ArgumentParser:
     parsers = {}
     for cmd in Command:
         parsers[cmd] = subparsers.add_parser(cmd.name, description=cmd_descriptions[cmd])
-        if cmd == Command.fetch:
+        if cmd in {Command.fetch, Command.start}:
             parsers[cmd].add_argument(
                 "-f",
                 "--force",
@@ -165,6 +165,7 @@ def esb_parser() -> argparse.ArgumentParser:
             parsers[cmd].add_argument(
                 "-p",
                 "--parts",
+                required=True,
                 choices=get_args(FPPart),
                 type=int,
                 help="Run for part 1 or part 2",
@@ -187,7 +188,7 @@ def main():
         case Command.fetch:
             esb_commands.fetch(args.year, args.day, force=args.force)
         case Command.start:
-            esb_commands.start(args.language, args.year, args.day)
+            esb_commands.start(args.language, args.year, args.day, force=args.force)
         case Command.show:
             esb_commands.show(args.year, args.day)
         case Command.status:

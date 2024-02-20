@@ -16,7 +16,7 @@
 1. Implement  test
     1. Where will we store tests?
 1. Document boilerplate creation
-1. Boilerplate Python
+~~1. Boilerplate Python~~
 1. Boilerplate Rust
 1. Boilerplate Elixir
 1. Boilerplate Lua ~~@Should I do?~~

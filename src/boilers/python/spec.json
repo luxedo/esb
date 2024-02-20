@@ -3,5 +3,5 @@
   "files": {
     "main.py": "aoc_{year}_{day}.py"
   },
-  "command": ["python", "{main.py}"]
+  "command": ["python", "{filenames[main.py]}"]
 }

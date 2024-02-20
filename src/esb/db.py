@@ -196,11 +196,11 @@ class Table:
 
     @check_connection
     def update(self, key: dict):
-        d = self.to_dict()
-        set_values = {k: v for k, v in d.items() if k not in key}
+        d = self.to_dict() | key
+        where_values = {k: v for k, v in d.items() if k not in key}
 
-        where_params = self.query_named_placeholders(key, sep=", ")
-        set_params = self.query_named_placeholders(set_values, sep=", ")
+        where_params = self.query_named_placeholders(where_values, sep=" AND ")
+        set_params = self.query_named_placeholders(key, sep=", ")
 
         query = f"UPDATE {self.__class__.__name__} SET {set_params} WHERE {where_params}"  # noqa: S608
         self._sql.cur.execute(query, d)
@@ -211,13 +211,13 @@ class Table:
 # Main DB Interface
 ###########################################################
 @dataclass(unsafe_hash=True)
-class BrigadistaInfo(Table):
+class ECABrigadista(Table):
     brigadista_id: str
     creation_date: datetime
 
 
 @dataclass(unsafe_hash=True)
-class SolutionStatus(Table):
+class ECASolution(Table):
     year: int
     day: int
     pt1_answer: str | None
@@ -235,7 +235,15 @@ class SolutionStatus(Table):
 
 
 @dataclass(unsafe_hash=True)
-class LanguageStatus(Table):
+class ECAProblem(Table):
+    year: int
+    day: int
+    title: str
+    url: str
+
+
+@dataclass(unsafe_hash=True)
+class ECALanguage(Table):
     year: int
     day: int
     language: str
@@ -244,27 +252,41 @@ class LanguageStatus(Table):
     finished_pt2: bool
 
     def __post_init__(self):
+        super().__post_init__()
         self.started = bool(self.started)
         self.finished_pt1 = bool(self.finished_pt1)
         self.finished_pt2 = bool(self.finished_pt2)
+
+    def set_solved(self, part: FPPart):
+        self.update({f"finished_pt{part}": True})
+
+    def set_unsolved(self, part: FPPart):
+        self.update({f"finished_pt{part}": False})
 
 
 class ElvenCrisisArchive:
     db_path = "ElvenCrisisArchive.sqlite"
 
     tables: ClassVar[dict[type[Table], str]] = {
-        BrigadistaInfo: """CREATE TABLE {table_name} (
+        ECABrigadista: """CREATE TABLE {table_name} (
                                 brigadista_id CHARACTER(36),
                                 creation_date TIMESTAMP NOT NULL
                             )""",
-        SolutionStatus: """CREATE TABLE {table_name} (
+        ECAProblem: """CREATE TABLE {table_name} (
+                                year INTEGER NOT NULL,
+                                day INTEGER NOT NULL,
+                                title TEXT,
+                                url TEXT,
+                                PRIMARY KEY (year, day)
+                            )""",
+        ECASolution: """CREATE TABLE {table_name} (
                                 year INTEGER NOT NULL,
                                 day INTEGER NOT NULL,
                                 pt1_answer TEXT,
                                 pt2_answer TEXT,
                                 PRIMARY KEY (year, day)
                             )""",
-        LanguageStatus: """CREATE TABLE {table_name} (
+        ECALanguage: """CREATE TABLE {table_name} (
                                 year INTEGER NOT NULL,
                                 day INTEGER NOT NULL,
                                 language TEXT,
@@ -274,10 +296,10 @@ class ElvenCrisisArchive:
                                 PRIMARY KEY (year, day, language)
                             )""",
     }
-
-    BrigadistaInfo = BrigadistaInfo
-    SolutionStatus = SolutionStatus
-    LanguageStatus = LanguageStatus
+    ECABrigadista = ECABrigadista
+    ECAProblem = ECAProblem
+    ECASolution = ECASolution
+    ECALanguage = ECALanguage
 
     def __repr__(self):
         return f'{self.__class__.__name__}("{self.db_path}")'  # pragma: no cover
@@ -286,8 +308,6 @@ class ElvenCrisisArchive:
         self.sql = SqlConnection(self.db_path)
         for table in self.tables:
             table.bind_connection(self.sql)
-        # self.BrigadistaInfo = BrigadistaInfo
-        # self.SolutionStatus = SolutionStatus
 
     def create_tables(self):
         for table, create_table_query in self.tables.items():

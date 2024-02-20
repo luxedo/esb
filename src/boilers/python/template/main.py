@@ -3,8 +3,10 @@ ElfScript Brigade
 
 Python Solution
 
-Advent Of Code {year}. Day {day}: {problem_title}
-{problem_url}
+Advent Of Code {year}:
+{problem_title}
+
+https://{problem_url}
 """
 
 from typing import Any

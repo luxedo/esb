@@ -36,13 +36,17 @@ class LangSpec:
     def __post_init__(self):
         self.sled = LangSled(name=self.name, files=self.files)
 
-    def run_command(self, year: int, day: int) -> list[str]:
+    def build_command(self, year: int, day: int) -> list[str]:
         return [self.replace_files(c, year, day) for c in self.command]
 
     def replace_files(self, c: str, year: int, day: int) -> str:
-        for src, dst in self.sled.boiler_map(year, day).items():
-            c = c.replace(f"{{{src.name}}}", dst.name)
-        return c
+        filenames = {k.name: v.name for k, v in self.sled.boiler_map(year, day).items()}
+        replace_mapping = {
+            "year": year,
+            "day": day,
+            "filenames": filenames,
+        }
+        return c.format_map(replace_mapping)
 
 
 @dataclass

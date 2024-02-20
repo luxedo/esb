@@ -62,10 +62,10 @@ class TestEsbParser(unittest.TestCase):
             "esb fetch --year 2016 --day 9",
             "esb start --lang python --year 2016 --day 9",
             "esb test --year 2016 --day 9 --lang python",
-            "esb run --year 2016 --day 9 --lang python",
-            "esb run --year 2016 --day 9 --lang python",
-            "esb run --year 2016 --day 9 --lang python --submit",
-            "esb run -y 2016 -d 9 -l python -s",
+            "esb run --year 2016 --day 9 --lang python --part 1",
+            "esb run --year 2016 --day 9 --lang python -p 2",
+            "esb run --year 2016 --day 9 --lang python -p 1 --submit",
+            "esb run -y 2016 -d 9 -l python -s --part 2",
             "esb dashboard",
         ]
         for command in commands:
@@ -81,6 +81,7 @@ class TestEsbParser(unittest.TestCase):
             "esb fetch --year 2016 --day 40",
             "esb wrong_command",
             "esb start --year 2016 --day 9",
+            "esb run --year 2016 --day 9",
         ]
         for command in commands:
             [_, *args] = command.split()

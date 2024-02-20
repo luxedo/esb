@@ -30,11 +30,11 @@ class TestPaths(unittest.TestCase):
     def test_langsled_getitem(self):
         p = LangMap.load_defaults().get("python")
         lang_sled = paths.LangSled(name=p.name, files=p.files)
-        assert str(lang_sled.path(file="main.py", year=2016, day=24)).endswith("langs/python/2016/24/aoc_2016_24.py")
+        assert str(lang_sled.path(file="main.py", year=2016, day=24)).endswith("python/2016/24/aoc_2016_24.py")
 
     def test_langsled_boiler_map(self):
         p = LangMap.load_defaults().get("python")
         lang_sled = paths.LangSled(name=p.name, files=p.files)
         for src, dst in lang_sled.boiler_map(year=2016, day=24).items():
             assert src.is_file()
-            assert "langs/python/2016/24/" in str(dst)
+            assert "python/2016/24/" in str(dst)

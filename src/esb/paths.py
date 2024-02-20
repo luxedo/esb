@@ -14,12 +14,12 @@ from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).parent
 BLANK_DIR = "blank"
-LANGS_DIR = "langs"
+SOLUTIONS_DIR = "solutions"
 BOILER_DIR = "boilers"
 CACHE_DIR = ".cache"
 BOILER_TEMPLATE = "template"
 BLANK_ROOT = PACKAGE_ROOT.parent / BLANK_DIR
-LANGS_ROOT = PACKAGE_ROOT.parent / LANGS_DIR
+SOLUTIONS_ROOT = PACKAGE_ROOT.parent / SOLUTIONS_DIR
 BOILER_ROOT = PACKAGE_ROOT.parent / BOILER_DIR
 SPEC_FILENAME = "spec.json"
 
@@ -77,10 +77,20 @@ class LangSled(YearSled):
     files: SledFiles
 
     def __post_init__(self):
-        self.subdirs = [LANGS_DIR, self.name]
+        self.subdirs = [SOLUTIONS_DIR, self.name]
+
+    @property
+    def boiler_subdir(self) -> Path:
+        return BOILER_ROOT / self.name / BOILER_TEMPLATE
 
     def boiler_source(self, filename: str) -> Path:
-        return BOILER_ROOT / self.name / BOILER_TEMPLATE / filename
+        return self.boiler_subdir / filename
 
     def boiler_map(self, year: int, day: int) -> dict[Path, Path]:
         return {self.boiler_source(file): self.path(file=file, year=year, day=day) for file in self.files}
+
+    def copied_source(self, year: int, day: int, filename: str) -> Path:
+        return self.day_dir(year, day) / filename
+
+    def copied_map(self, year: int, day: int) -> dict[Path, Path]:
+        return {self.copied_source(year, day, file): self.path(file=file, year=year, day=day) for file in self.files}
