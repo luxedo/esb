@@ -56,3 +56,4 @@
     1. Get tests from HTML
 1. Improve "does not follow FIREPLACE protocol" messages
 1. Move `pad_day` to a better place
+1. Put command instructions for errors

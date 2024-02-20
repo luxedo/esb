@@ -9,6 +9,8 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -41,23 +43,25 @@ class YearSled:
     filenames.
     """
 
-    root_dir: Path = field(init=False)
+    root_dir: Path | None = field(init=False)
     subdirs: SledSubdirs = field(init=False)
     files: SledFiles = field(init=False)
 
     def __post_init__(self):
         self.root_dir = self.find_root(Path.cwd())
 
-    def find_root(self, cwd: Path) -> Path:
+    def find_root(self, cwd: Path) -> Path | None:
         if cwd == Path("/"):
-            message = "Could not find an ESB repo in the current path"
-            raise ValueError(message)
+            return None
         if ElvenCrisisArchive.has_db():
             return cwd
         return self.find_root(cwd.parent)
 
     @property
     def subdir(self) -> Path:
+        if self.root_dir is None:
+            message = "Could not find an ESB repo in the current path"
+            raise ValueError(message)
         return self.root_dir.joinpath(*self.subdirs)
 
     def year_dir(self, year: int) -> Path:

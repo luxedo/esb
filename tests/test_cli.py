@@ -9,14 +9,18 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
+import io
 import unittest
 from argparse import ArgumentTypeError, Namespace
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
-from esb.cli import aoc_day, aoc_year, esb_parser
-from tests.lib.temporary import TestWithInitializedEsbRepo
+from esb.cli import aoc_day, aoc_year, esb_parser, main
+from esb.langs import LangMap
+from esb.paths import CacheSled
+from tests.lib.temporary import TestWithInitializedEsbRepo, TestWithTemporaryDirectory
 
 ROOT_DIR = Path(__file__).parent
 
@@ -89,82 +93,109 @@ class TestEsbParser(TestWithInitializedEsbRepo):
                 self.parser.parse_args(args)
 
 
-# class TestCli(TestWithTemporaryDirectory):
-#     TEST_EXAMPLE_STATEMENT = (ROOT_DIR / "mock" / "example.html").read_text()
-#     TEST_YEAR = 2020
-#     TEST_DAY = 9
-#
-#     def test_new(self):
-#         command = "esb new"
-#
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#     @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-#     def test_fetch(self, mock_fetch_url):
-#         command = "esb new"
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#         statement_file = statement_path(self.TEST_YEAR, self.TEST_DAY)
-#         input_file = input_path(self.TEST_YEAR, self.TEST_DAY)
-#         assert not statement_file.is_file()
-#         assert not input_file.is_file()
-#
-#         command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#         assert mock_fetch_url.called
-#         assert statement_file.is_file()
-#         assert input_file.is_file()
-#
-#     @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-#     @patch("sys.stderr", new_callable=io.StringIO)
-#     @patch("sys.stdout", new_callable=io.StringIO)
-#     def test_start(self, _, stderr, stdout):
-#         command = "esb new"
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#         command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#         command = (
-#             f"esb start --year {self.TEST_YEAR} --day {self.TEST_DAY} --lang python"
-#         )
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#     @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-#     @patch("sys.stderr", new_callable=io.StringIO)
-#     @patch("sys.stdout", new_callable=io.StringIO)
-#     def test_status(self, _, stderr, stdout):
-#         command = "esb new"
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#         command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#         command = "esb status"
-#         with patch("sys.argv", command.split()):
-#             main()
-#     @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-#     @patch("sys.stderr", new_callable=io.StringIO)
-#     @patch("sys.stdout", new_callable=io.StringIO)
-#     def test_show(self, _, stderr, stdout):
-#         command = "esb new"
-#         with patch("sys.argv", command.split()):
-#             main()
-#
-#         command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-#         with patch("sys.argv", command.split()):
-#             main()
-#         print(stdout.read())
-#
-#         command = f"esb show --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-#         with patch("sys.argv", command.split()):
-#             main()
+class TestCli(TestWithTemporaryDirectory):
+    """
+    Commands:
+
+    new
+    fetch
+    start
+    show
+    status
+    test
+    run
+    dashboard
+    """
+
+    TEST_EXAMPLE_STATEMENT = (ROOT_DIR / "mock" / "example.html").read_text()
+    TEST_YEAR = 2020
+    TEST_DAY = 9
+
+    @patch("sys.stderr", new_callable=io.StringIO)
+    @patch("sys.stdout", new_callable=io.StringIO)
+    def test_new(self, _stderr, stdout):  # noqa: PT019
+        command = "esb new"
+
+        with patch("sys.argv", command.split()):
+            main()
+
+        text = stdout.getvalue()
+        assert "Thank you for saving Christmas" in text, text
+
+    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("sys.stderr", new_callable=io.StringIO)
+    @patch("sys.stdout", new_callable=io.StringIO)
+    def test_fetch(self, stdout, _stderr, mock_fetch_url):  # noqa: PT019
+        command = "esb new"
+        with patch("sys.argv", command.split()):
+            main()
+
+        cs = CacheSled()
+        statement_file = cs.path("statement", self.TEST_YEAR, self.TEST_DAY)
+        input_file = cs.path("input", self.TEST_YEAR, self.TEST_DAY)
+        assert not statement_file.is_file()
+        assert not input_file.is_file()
+
+        command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
+        with patch("sys.argv", command.split()):
+            main()
+
+        assert mock_fetch_url.called
+        assert statement_file.is_file()
+        assert input_file.is_file()
+
+    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("sys.stderr", new_callable=io.StringIO)
+    @patch("sys.stdout", new_callable=io.StringIO)
+    def test_start(self, _, _stderr, stdout):  # noqa: PT019
+        command = "esb new"
+        with patch("sys.argv", command.split()):
+            main()
+
+        language_name = "python"
+        command = f"esb start --year {self.TEST_YEAR} --day {self.TEST_DAY} --lang {language_name}"
+        with patch("sys.argv", command.split()):
+            main()
+
+        lmap = LangMap.load_defaults()
+        lang = lmap.get(language_name)
+        for dst in lang.sled.copied_map(self.TEST_YEAR, self.TEST_DAY).values():
+            assert dst.is_file()
+
+    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("sys.stderr", new_callable=io.StringIO)
+    @patch("sys.stdout", new_callable=io.StringIO)
+    def test_show(self, stdout, _stderr, _):  # noqa: PT019
+        command = "esb new"
+        with patch("sys.argv", command.split()):
+            main()
+
+        command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
+        with patch("sys.argv", command.split()):
+            main()
+
+        command = f"esb show --year {self.TEST_YEAR} --day {self.TEST_DAY}"
+        with patch("sys.argv", command.split()):
+            main()
+
+        text = stdout.getvalue()
+        assert "Solution pt1" in text
+
+    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("sys.stderr", new_callable=io.StringIO)
+    @patch("sys.stdout", new_callable=io.StringIO)
+    def test_status(self, stdout, _stderr, _):  # noqa: PT019
+        command = "esb new"
+        with patch("sys.argv", command.split()):
+            main()
+
+        command = "esb status"
+        with patch("sys.argv", command.split()):
+            main()
+
+        command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
+        with patch("sys.argv", command.split()):
+            main()
+
+        text = stdout.getvalue()
+        assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
