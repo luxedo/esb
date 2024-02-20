@@ -12,6 +12,8 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from esb.db import ElvenCrisisArchive
+
 PACKAGE_ROOT = Path(__file__).parent
 BLANK_DIR = "blank"
 SOLUTIONS_DIR = "solutions"
@@ -39,9 +41,20 @@ class YearSled:
     filenames.
     """
 
-    root_dir: Path = field(init=False, default=Path.cwd())
+    root_dir: Path = field(init=False)
     subdirs: SledSubdirs = field(init=False)
     files: SledFiles = field(init=False)
+
+    def __post_init__(self):
+        self.root_dir = self.find_root(Path.cwd())
+
+    def find_root(self, cwd: Path) -> Path:
+        if cwd == Path("/"):
+            message = "Could not find an ESB repo in the current path"
+            raise ValueError(message)
+        if ElvenCrisisArchive.has_db():
+            return cwd
+        return self.find_root(cwd.parent)
 
     @property
     def subdir(self) -> Path:
@@ -77,6 +90,7 @@ class LangSled(YearSled):
     files: SledFiles
 
     def __post_init__(self):
+        super().__post_init__()
         self.subdirs = [SOLUTIONS_DIR, self.name]
 
     @property

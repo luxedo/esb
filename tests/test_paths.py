@@ -9,15 +9,14 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
-import unittest
-
 import pytest
 
 from esb import paths
 from esb.langs import LangMap
+from tests.lib.temporary import TestWithInitializedEsbRepo
 
 
-class TestPaths(unittest.TestCase):
+class TestPaths(TestWithInitializedEsbRepo):
     def test_cachesled_getitem(self):
         cache_sled = paths.CacheSled()
         assert str(cache_sled.path("statement", year=2016, day=24)).endswith(".cache/2016/24/day_24_statement.txt")

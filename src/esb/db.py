@@ -32,7 +32,7 @@ class SqlConnection:
     Initializes once with an optional
     """
 
-    db_path: str
+    db_path: Path
     con: sqlite3.Connection = field(init=False, hash=False, repr=False)
     cur: sqlite3.Cursor = field(init=False, hash=False, repr=False)
 
@@ -265,7 +265,7 @@ class ECALanguage(Table):
 
 
 class ElvenCrisisArchive:
-    db_path = "ElvenCrisisArchive.sqlite"
+    db_path = Path("database/ElvenCrisisArchive.sqlite")
 
     tables: ClassVar[dict[type[Table], str]] = {
         ECABrigadista: """CREATE TABLE {table_name} (
@@ -302,9 +302,12 @@ class ElvenCrisisArchive:
     ECALanguage = ECALanguage
 
     def __repr__(self):
-        return f'{self.__class__.__name__}("{self.db_path}")'  # pragma: no cover
+        return f'{self.__class__.__name__}("{self.db_path}")'
 
-    def __init__(self, db_path: str = db_path):
+    def __init__(self):
+        if not self.db_path.parent.is_dir():
+            self.db_path.parent.mkdir(parents=True, exist_ok=True)
+            self.db_path.touch()
         self.sql = SqlConnection(self.db_path)
         for table in self.tables:
             table.bind_connection(self.sql)

@@ -1,9 +1,9 @@
 """
 ElfScript Brigade
 
+Advent Of Code {year} Day {day}
 Python Solution
 
-Advent Of Code {year}:
 {problem_title}
 
 https://{problem_url}

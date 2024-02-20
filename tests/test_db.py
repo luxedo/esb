@@ -14,7 +14,7 @@ from dataclasses import dataclass, replace
 import pytest
 
 from esb import db
-from tests.lib.temporary import TestWithTemporaryDirectory
+from tests.lib.temporary import TestWithInitializedEsbRepo, TestWithTemporaryDirectory
 
 
 class TestSqlConnection(TestWithTemporaryDirectory):
@@ -192,17 +192,15 @@ class TestTable(TestWithTemporaryDirectory):
             self.SantaTable.find_single({"text": "abc"})
 
 
-class TestElvenCrisisArchive(TestWithTemporaryDirectory):
-    def setUp(self):
-        super().setUp()
-        db.Table.disconnect()
-
-    def test_has_db(self):
-        assert db.ElvenCrisisArchive.has_db() is False
-        db.ElvenCrisisArchive()
-        assert db.ElvenCrisisArchive.has_db() is True
-
+class TestElvenCrisisArchive(TestWithInitializedEsbRepo):
     def test_create_tables(self):
         archive = db.ElvenCrisisArchive()
         archive.create_tables()
         assert len(archive.sql.list_all_tables()) > 0
+
+
+class TestElvenCrisisArchiveHasDb(TestWithTemporaryDirectory):
+    def test_has_db(self):
+        assert db.ElvenCrisisArchive.has_db() is False
+        db.ElvenCrisisArchive()
+        assert db.ElvenCrisisArchive.has_db() is True

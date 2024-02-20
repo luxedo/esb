@@ -16,6 +16,7 @@ from pathlib import Path
 import pytest
 
 from esb.cli import aoc_day, aoc_year, esb_parser
+from tests.lib.temporary import TestWithInitializedEsbRepo
 
 ROOT_DIR = Path(__file__).parent
 
@@ -52,10 +53,7 @@ class TestParserTypes(unittest.TestCase):
         assert aoc_year("all") == range(2015, 2024)
 
 
-class TestEsbParser(unittest.TestCase):
-    def setUp(self):
-        self.parser = esb_parser()
-
+class TestEsbParser(TestWithInitializedEsbRepo):
     def test_working_commands(self):
         commands = [
             "esb new",
@@ -68,6 +66,7 @@ class TestEsbParser(unittest.TestCase):
             "esb run -y 2016 -d 9 -l python -s --part 2",
             "esb dashboard",
         ]
+        self.parser = esb_parser()
         for command in commands:
             [_, *args] = command.split()
             with self.subTest(command=f"Working command: {command}"):
@@ -83,6 +82,7 @@ class TestEsbParser(unittest.TestCase):
             "esb start --year 2016 --day 9",
             "esb run --year 2016 --day 9",
         ]
+        self.parser = esb_parser()
         for command in commands:
             [_, *args] = command.split()
             with self.subTest(command=f"Non working command: {command}"), pytest.raises(SystemExit):
