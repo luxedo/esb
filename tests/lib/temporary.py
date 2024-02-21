@@ -10,17 +10,20 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 """
 
 import os
-import tempfile
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from esb.db import ElvenCrisisArchive
 
 
 class TestWithTemporaryDirectory(unittest.TestCase):
+    current_dir: Path
+    tmp_dir: TemporaryDirectory
+
     def setUp(self):
         self.current_dir = Path.cwd()
-        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.tmp_dir = TemporaryDirectory()
         os.chdir(self.tmp_dir.name)
 
     def tearDown(self):
@@ -29,6 +32,9 @@ class TestWithTemporaryDirectory(unittest.TestCase):
 
 
 class TestWithInitializedEsbRepo(TestWithTemporaryDirectory):
+    repo_root: Path
+
     def setUp(self):
         super().setUp()
-        ElvenCrisisArchive()  # This creates the database file
+        self.repo_root = Path.cwd()
+        ElvenCrisisArchive(self.repo_root)  # This creates the database file

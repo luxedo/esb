@@ -19,20 +19,22 @@ from esb.paths import pad_day
 
 if TYPE_CHECKING:
     from esb.langs import LangSpec
+    from esb.paths import LangSled
 
 
 @dataclass
 class CodeFurnace:
-    spec: LangSpec
+    lang_spec: LangSpec
+    lang_sled: LangSled
 
     def start(self, year: int, day: int, title: str, url: str):
-        src_dir = self.spec.sled.boiler_subdir
-        dst_dir = self.spec.sled.day_dir(year, day)
+        src_dir = self.lang_sled.boiler_subdir
+        dst_dir = self.lang_sled.day_dir(year, day)
         if dst_dir.is_dir():
             shutil.rmtree(dst_dir)
         shutil.copytree(src_dir, dst_dir)
 
-        for src, dst in self.spec.sled.copied_map(year, day).items():
+        for src, dst in self.lang_sled.copied_map(year, day).items():
             shutil.move(src, dst)
             content = dst.read_text().format(
                 year=year,

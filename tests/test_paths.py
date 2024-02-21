@@ -18,22 +18,22 @@ from tests.lib.temporary import TestWithInitializedEsbRepo
 
 class TestPaths(TestWithInitializedEsbRepo):
     def test_cachesled_getitem(self):
-        cache_sled = paths.CacheSled()
+        cache_sled = paths.CacheSled(self.repo_root)
         assert str(cache_sled.path("statement", year=2016, day=24)).endswith(".cache/2016/24/day_24_statement.txt")
 
     def test_cachesled_getitem_missing_key(self):
-        cache_sled = paths.CacheSled()
+        cache_sled = paths.CacheSled(self.repo_root)
         with pytest.raises(KeyError, match="Could not find path for file"):
             cache_sled.path(file="missing key", year=2016, day=24)
 
     def test_langsled_getitem(self):
         p = LangMap.load_defaults().get("python")
-        lang_sled = paths.LangSled(name=p.name, files=p.files)
+        lang_sled = paths.LangSled(repo_root=self.repo_root, name=p.name, files=p.files)
         assert str(lang_sled.path(file="main.py", year=2016, day=24)).endswith("python/2016/24/aoc_2016_24.py")
 
     def test_langsled_boiler_map(self):
         p = LangMap.load_defaults().get("python")
-        lang_sled = paths.LangSled(name=p.name, files=p.files)
+        lang_sled = paths.LangSled(repo_root=self.repo_root, name=p.name, files=p.files)
         for src, dst in lang_sled.boiler_map(year=2016, day=24).items():
             assert src.is_file()
             assert "python/2016/24/" in str(dst)

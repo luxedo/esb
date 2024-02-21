@@ -10,6 +10,7 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 """
 
 from dataclasses import dataclass, replace
+from pathlib import Path
 
 import pytest
 
@@ -18,7 +19,7 @@ from tests.lib.temporary import TestWithInitializedEsbRepo, TestWithTemporaryDir
 
 
 class TestSqlConnection(TestWithTemporaryDirectory):
-    db_path: str = "my_test.sqlite"
+    db_path = Path("my_test.sqlite")
 
     def test_context_manager(self):
         with db.SqlConnection(self.db_path) as sql:
@@ -51,10 +52,10 @@ class TestTable(TestWithTemporaryDirectory):
         value: int
         text: str
 
-    db_path: str = "my_test.sqlite"
-    row0: SantaTable = SantaTable(idx=1, value=123, text="abc")
-    row1: SantaTable = SantaTable(idx=2, value=456, text="def")
-    row2: SantaTable = SantaTable(idx=3, value=789, text="ghi")
+    db_path = Path("my_test.sqlite")
+    row0 = SantaTable(idx=1, value=123, text="abc")
+    row1 = SantaTable(idx=2, value=456, text="def")
+    row2 = SantaTable(idx=3, value=789, text="ghi")
 
     def setUp(self):
         super().setUp()
@@ -194,13 +195,6 @@ class TestTable(TestWithTemporaryDirectory):
 
 class TestElvenCrisisArchive(TestWithInitializedEsbRepo):
     def test_create_tables(self):
-        archive = db.ElvenCrisisArchive()
+        archive = db.ElvenCrisisArchive(self.repo_root)
         archive.create_tables()
         assert len(archive.sql.list_all_tables()) > 0
-
-
-class TestElvenCrisisArchiveHasDb(TestWithTemporaryDirectory):
-    def test_has_db(self):
-        assert db.ElvenCrisisArchive.has_db() is False
-        db.ElvenCrisisArchive()
-        assert db.ElvenCrisisArchive.has_db() is True

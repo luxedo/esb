@@ -13,12 +13,14 @@ from __future__ import annotations
 
 import sqlite3
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import TYPE_CHECKING
+
+from esb.config import ESBConfig
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
+    from pathlib import Path
     from typing import Any, ClassVar, Self
 
     from esb.protocol.fireplacev1_0 import FPPart
@@ -265,7 +267,8 @@ class ECALanguage(Table):
 
 
 class ElvenCrisisArchive:
-    db_path = Path("database/ElvenCrisisArchive.sqlite")
+    repo_root: Path
+    db_path: Path
 
     tables: ClassVar[dict[type[Table], str]] = {
         ECABrigadista: """CREATE TABLE {table_name} (
@@ -301,10 +304,9 @@ class ElvenCrisisArchive:
     ECASolution = ECASolution
     ECALanguage = ECALanguage
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}("{self.db_path}")'
-
-    def __init__(self):
+    def __init__(self, repo_root: Path):
+        self.repo_root = repo_root
+        self.db_path = repo_root / ESBConfig.db_path
         if not self.db_path.parent.is_dir():
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
             self.db_path.touch()
@@ -315,7 +317,3 @@ class ElvenCrisisArchive:
     def create_tables(self):
         for table, create_table_query in self.tables.items():
             self.sql.cur.execute(create_table_query.format(table_name=table.__name__))
-
-    @classmethod
-    def has_db(cls):
-        return Path(cls.db_path).is_file()

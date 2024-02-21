@@ -17,6 +17,7 @@ import shutil
 import sys
 import uuid
 from datetime import datetime
+from functools import wraps
 from itertools import product
 from os import environ
 from pathlib import Path
@@ -28,8 +29,10 @@ from rich.console import Console
 
 from esb import __version__
 from esb.boiler import CodeFurnace
+from esb.config import ESBConfig
 from esb.db import ElvenCrisisArchive
-from esb.paths import BLANK_ROOT, CacheSled, pad_day
+from esb.langs import LangRunner
+from esb.paths import CacheSled, LangSled, find_esb_root, pad_day
 from esb.protocol import fireplacev1_0 as fp1_0
 
 if TYPE_CHECKING:
@@ -52,16 +55,17 @@ AocParts = Literal[1, 2]
 # Decorators
 ###########################################################
 def is_esb_repo(fn):
+    @wraps(fn)
     def wrapper(*args, **kwargs):
-        if not ElvenCrisisArchive.has_db():
+        repo_root = find_esb_root(Path.cwd())
+        if repo_root is None:
             console_err.print(
                 "Fatal: this is not an ElfScript Brigade repo.",
                 style=COLOR_ERROR,
             )
             sys.exit(2)
-        return fn(*args, **kwargs)
+        return fn(repo_root, *args, **kwargs)
 
-    # @TODO
     return wrapper
 
 
@@ -85,7 +89,7 @@ def new():
         console_err.print("Something went wrong! Could not copy", style=COLOR_ERROR)
         sys.exit(1)
 
-    db = ElvenCrisisArchive()
+    db = ElvenCrisisArchive(cwd)
 
     db.create_tables()
 
@@ -98,30 +102,30 @@ def new():
 
 
 @is_esb_repo
-def fetch(years: list[int], days: list[int], *, force: bool = False):
-    db = ElvenCrisisArchive()
+def fetch(repo_root: Path, years: list[int], days: list[int], *, force: bool = False):
+    db = ElvenCrisisArchive(repo_root)
     for year, day in product(years, days):
-        fetch_day(db, year, day, force=force)
+        fetch_day(repo_root, db, year, day, force=force)
 
 
 @is_esb_repo
-def start(lang: LangSpec, years: list[int], days: list[int], *, force: bool = False):
-    db = ElvenCrisisArchive()
+def start(repo_root: Path, lang: LangSpec, years: list[int], days: list[int], *, force: bool = False):
+    db = ElvenCrisisArchive(repo_root)
     for year, day in product(years, days):
-        start_day(db, lang, year, day, force=force)
+        start_day(repo_root, db, lang, year, day, force=force)
 
 
 @is_esb_repo
-def show(years: list[int], days: list[int]):
-    db = ElvenCrisisArchive()
+def show(repo_root: Path, years: list[int], days: list[int]):
+    db = ElvenCrisisArchive(repo_root)
     for year, day in product(years, days):
-        show_day(db, year, day)
+        show_day(repo_root, db, year, day)
 
 
 ###########################################################
 # Commands per Day
 ###########################################################
-def fetch_day(db: ElvenCrisisArchive, year: int, day: int, *, force: bool = False):
+def fetch_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int, *, force: bool = False):
     ds = db.ECASolution.find_single({"year": year, "day": day})
     if not force and ds is not None and ds.pt2_answer is not None:
         console_err.print(
@@ -132,7 +136,7 @@ def fetch_day(db: ElvenCrisisArchive, year: int, day: int, *, force: bool = Fals
 
     host = "adventofcode.com"
     cookie = _load_cookie()
-    cache_sled = CacheSled()
+    cache_sled = CacheSled(repo_root)
 
     st_route = f"/{year}/day/{day}"
     st_html = _fetch_url(host, st_route, cookie)
@@ -162,11 +166,11 @@ def fetch_day(db: ElvenCrisisArchive, year: int, day: int, *, force: bool = Fals
     )
 
 
-def start_day(db: ElvenCrisisArchive, lang: LangSpec, year: int, day: int, *, force: bool):
+def start_day(repo_root: Path, db: ElvenCrisisArchive, lang: LangSpec, year: int, day: int, *, force: bool):
     day_problem = db.ECAProblem.find_single({"year": year, "day": day})
     match (day_problem, force):
         case (_, True) | (None, _):
-            fetch_day(db, year, day, force=force)
+            fetch_day(repo_root, db, year, day, force=force)
             day_problem = db.ECAProblem.find_single({"year": year, "day": day})
 
     day_language = db.ECALanguage.find_single({"year": year, "day": day, "language": lang.name})
@@ -180,7 +184,8 @@ def start_day(db: ElvenCrisisArchive, lang: LangSpec, year: int, day: int, *, fo
             return
         # @TODO: Handle started=False
 
-    cf = CodeFurnace(lang)
+    lang_sled = LangSled.from_spec(repo_root, lang)
+    cf = CodeFurnace(lang, lang_sled)
     cf.start(year, day, day_problem.title, day_problem.url)
 
     db.ECALanguage(
@@ -193,9 +198,9 @@ def start_day(db: ElvenCrisisArchive, lang: LangSpec, year: int, day: int, *, fo
     ).insert()
 
 
-def show_day(db: ElvenCrisisArchive, year: int, day: int):
+def show_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int):
     ds = db.ECASolution.find_single({"year": year, "day": day})
-    cache_sled = CacheSled()
+    cache_sled = CacheSled(repo_root)
     statement_file = cache_sled.path("statement", year, day)
     if ds is None:
         console_err.print(
@@ -230,8 +235,8 @@ def show_day(db: ElvenCrisisArchive, year: int, day: int):
 
 
 @is_esb_repo
-def status():
-    db = ElvenCrisisArchive()
+def status(repo_root: Path):
+    db = ElvenCrisisArchive(repo_root)
     info = db.ECABrigadista.fetch_single()
     console_out.print(
         "ELFSCRIPT BRIGADE STATUS REPORT\n",
@@ -258,6 +263,7 @@ def status():
 
 @is_esb_repo
 def run(
+    repo_root: Path,
     lang: LangSpec,
     part: fp1_0.FPPart,
     years: list[int],
@@ -265,12 +271,13 @@ def run(
     *,
     submit: bool = False,
 ):
-    db = ElvenCrisisArchive()
+    db = ElvenCrisisArchive(repo_root)
     for year, day in product(years, days):
-        run_day(db, lang, part, year, day, submit=submit)
+        run_day(repo_root, db, lang, part, year, day, submit=submit)
 
 
 def run_day(
+    repo_root: Path,
     db: ElvenCrisisArchive,
     lang: LangSpec,
     part: fp1_0.FPPart,
@@ -301,9 +308,11 @@ def run_day(
         )
         return
 
-    cache_sled = CacheSled()
-    command = lang.build_command(year=year, day=day)
-    day_wd = lang.sled.day_dir(year=year, day=day)
+    cache_sled = CacheSled(repo_root)
+    lang_sled = LangSled.from_spec(repo_root, lang)
+    runner = LangRunner(lang, lang_sled)
+    command = runner.build_command(year=year, day=day)
+    day_wd = runner.working_dir(year=year, day=day)
     day_input = cache_sled.path("input", year, day)
     result = fp1_0.exec_protocol(command, part, day_wd, day_input)
     match result.status:
@@ -349,12 +358,14 @@ def run_day(
 ###########################################################
 def _repo_conflicts(cwd):
     return [
-        cwd / item.name for item in BLANK_ROOT.iterdir() if (cwd / item.name).is_dir() or (cwd / item.name).is_file()
+        cwd / item.name
+        for item in ESBConfig.blank_root.iterdir()
+        if (cwd / item.name).is_dir() or (cwd / item.name).is_file()
     ]
 
 
 def _copy_blank_repo(cwd):
-    for item in BLANK_ROOT.iterdir():
+    for item in ESBConfig.blank_root.iterdir():
         if item.is_dir():
             shutil.copytree(item, cwd / item.name)
         else:

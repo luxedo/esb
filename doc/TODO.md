@@ -10,7 +10,7 @@
     1. Fetch from personal times
     1. Store results either in a separate DB or in a file
 ~~1. Show statement command~~
-1. start command - copy boilerplate
+~~1. start command - copy boilerplate~~
 1. status command
 1. Implement Run
 1. Implement  test
@@ -28,9 +28,9 @@
 1. Metrics
 1. Visualization
 ~~1. Feedback when running outside of an ESB repo~~
-1. Run anywhere inside the repo
+~~1. Run anywhere inside the repo~~
 ~~1. Add caching to fetch and --force flag~~
-1. Handle command product exceptions
+~~1. Handle command product exceptions~~
 1. Create GitHub Workflow
 1. Get more badges, coverage, pipeline
 ~~1. Logo~~
@@ -57,3 +57,4 @@
 1. Improve "does not follow FIREPLACE protocol" messages
 1. Move `pad_day` to a better place
 1. Put command instructions for errors
+1. Split commands into separate files

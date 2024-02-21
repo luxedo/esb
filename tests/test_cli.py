@@ -10,6 +10,7 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 """
 
 import io
+import os
 import unittest
 from argparse import ArgumentTypeError, Namespace
 from pathlib import Path
@@ -19,7 +20,7 @@ import pytest
 
 from esb.cli import aoc_day, aoc_year, esb_parser, main
 from esb.langs import LangMap
-from esb.paths import CacheSled
+from esb.paths import CacheSled, LangSled
 from tests.lib.temporary import TestWithInitializedEsbRepo, TestWithTemporaryDirectory
 
 ROOT_DIR = Path(__file__).parent
@@ -130,7 +131,8 @@ class TestCli(TestWithTemporaryDirectory):
         with patch("sys.argv", command.split()):
             main()
 
-        cs = CacheSled()
+        repo_root = Path.cwd()
+        cs = CacheSled(repo_root)
         statement_file = cs.path("statement", self.TEST_YEAR, self.TEST_DAY)
         input_file = cs.path("input", self.TEST_YEAR, self.TEST_DAY)
         assert not statement_file.is_file()
@@ -159,7 +161,8 @@ class TestCli(TestWithTemporaryDirectory):
 
         lmap = LangMap.load_defaults()
         lang = lmap.get(language_name)
-        for dst in lang.sled.copied_map(self.TEST_YEAR, self.TEST_DAY).values():
+        lang_sled = LangSled.from_spec(repo_root=Path.cwd(), spec=lang)
+        for dst in lang_sled.copied_map(self.TEST_YEAR, self.TEST_DAY).values():
             assert dst.is_file()
 
     @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
@@ -194,6 +197,32 @@ class TestCli(TestWithTemporaryDirectory):
             main()
 
         command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
+        with patch("sys.argv", command.split()):
+            main()
+
+        text = stdout.getvalue()
+        assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
+
+    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("sys.stderr", new_callable=io.StringIO)
+    @patch("sys.stdout", new_callable=io.StringIO)
+    def test_status_runs_in_any_esb_repo_subdir(self, stdout, _stderr, _):  # noqa: PT019
+        command = "esb new"
+        with patch("sys.argv", command.split()):
+            main()
+
+        command = "esb status"
+        with patch("sys.argv", command.split()):
+            main()
+
+        text = stdout.getvalue()
+        assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
+
+        dir_name = "solutions"
+        Path(dir_name).mkdir()
+        os.chdir(dir_name)
+
+        command = "esb status"
         with patch("sys.argv", command.split()):
             main()
 

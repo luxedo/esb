@@ -12,13 +12,15 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from esb.paths import BOILER_ROOT, SPEC_FILENAME, LangSled
+from esb.config import ESBConfig
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from esb.paths import LangSled
 
 
 @dataclass
@@ -26,18 +28,38 @@ class LangSpec:
     name: str
     files: dict[str, str]
     command: list[str]
-    sled: LangSled = field(init=False)
 
     @classmethod
     def from_json(cls, file: str | Path):
         with open(file, encoding="utf-8") as fp:
             return cls(**json.load(fp))
 
-    def __post_init__(self):
-        self.sled = LangSled(name=self.name, files=self.files)
+
+@dataclass
+class LangMap:
+    langs: dict[str, LangSpec]
+
+    @classmethod
+    def load_defaults(cls):
+        return cls({
+            lang.name: LangSpec.from_json(lang / ESBConfig.spec_filename) for lang in ESBConfig.boiler_root.iterdir()
+        })
+
+    @property
+    def names(self):
+        return list(self.langs.keys())
+
+    def get(self, key):
+        return self.langs[key]
+
+
+@dataclass
+class LangRunner:
+    spec: LangSpec
+    sled: LangSled
 
     def build_command(self, year: int, day: int) -> list[str]:
-        return [self.replace_files(c, year, day) for c in self.command]
+        return [self.replace_files(c, year, day) for c in self.spec.command]
 
     def replace_files(self, c: str, year: int, day: int) -> str:
         filenames = {k.name: v.name for k, v in self.sled.boiler_map(year, day).items()}
@@ -48,18 +70,5 @@ class LangSpec:
         }
         return c.format_map(replace_mapping)
 
-
-@dataclass
-class LangMap:
-    langs: dict[str, LangSpec]
-
-    @classmethod
-    def load_defaults(cls):
-        return cls({lang.name: LangSpec.from_json(lang / SPEC_FILENAME) for lang in BOILER_ROOT.iterdir()})
-
-    @property
-    def names(self):
-        return list(self.langs.keys())
-
-    def get(self, key):
-        return self.langs[key]
+    def working_dir(self, year: int, day: int) -> Path:
+        return self.sled.day_dir(year, day)

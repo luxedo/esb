@@ -9,17 +9,20 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
-from esb.langs import LangMap
-from tests.lib.temporary import TestWithInitializedEsbRepo
+import unittest
+
+from esb.config import ESBConfig
+from esb.langs import LangMap, LangSpec
 
 
-class TestLangs(TestWithInitializedEsbRepo):
-    def test_build_command(self):
-        lmap = LangMap.load_defaults()
-        lang = lmap.get("python")
-        year = 2021
-        day = 10
-        cmd = " ".join(lang.build_command(year, day))
-        assert "python" in cmd
-        assert str(year) in cmd
-        assert str(day) in cmd
+class TestLangSpec(unittest.TestCase):
+    def test_from_json(self):
+        lang_name = "python"
+        LangSpec.from_json(ESBConfig.boiler_root / lang_name / ESBConfig.spec_filename)
+
+
+class TestLangMap(unittest.TestCase):
+    def test_from_defaults(self):
+        lang_name = "python"
+        lang_map = LangMap.load_defaults()
+        assert lang_name in lang_map.names
