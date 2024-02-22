@@ -24,25 +24,26 @@ from esb.protocol.metric_prefix import MetricPrefix
 if TYPE_CHECKING:
     from pathlib import Path
 
-AocSolutionFn = Callable[[str], Any]
+AocSolutionFn = Callable[[str, list[str] | None], Any]
+FPPart = Literal[1, 2]
 
 
 ###########################################################
 # Python template runner
 ###########################################################
-def _run_solution(part: Literal[1, 2], solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
+def _run_solution(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn, part: FPPart, args: list[str]):
     match part:
         case 1:
-            return solve_pt1(sys.stdin.read())
+            return solve_pt1(sys.stdin.read(), args)
         case 2:
-            return solve_pt2(sys.stdin.read())
+            return solve_pt2(sys.stdin.read(), args)
         case _:
             message = f"Part {part} does not exist"
             raise KeyError(message)
 
 
 def run_solutions(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
-    parser = argparse.ArgumentParser("")
+    parser = argparse.ArgumentParser("Elf Script Brigade python solution runner")
     parser.add_argument(
         "-p",
         "--part",
@@ -59,7 +60,7 @@ def run_solutions(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
     )
     args = parser.parse_args()
     t0 = perf_counter_ns()
-    ans = _run_solution(args.part, solve_pt1, solve_pt2)
+    ans = _run_solution(solve_pt1, solve_pt2, args.part, args.args)
     sys.stdout.write(f"{ans}\n")
     dt = perf_counter_ns() - t0
     sys.stdout.write(f"RT {dt} ns\n")
@@ -82,11 +83,8 @@ class FPResult:
     unit: MetricPrefix | None = None
 
 
-FPPart = Literal[1, 2]
-
-
 # @TODO: type this
-async def _read_output(stream, threshold, print_stream):
+async def _read_output(stream, threshold: int, print_stream):
     ret = ""
     lines = 0
     while line := await stream.readline():

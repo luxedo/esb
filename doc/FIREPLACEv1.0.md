@@ -29,6 +29,7 @@ Any _PROGRAM_ implementing FIREPLACEv1.0 should receive the _PROBLEM DATA_ as in
     1. Example: `RT 123 ns`
 1. The _PROGRAM_ **MUST NOT** print other data besides the _ANSER_ and the _RUNNING TIME_
 1. The _PROGRAM_ **MAY** output data in `stderr`. Any data in this stream will be ignored.
+1. The _PROGRAM_ **MAY** implement an optional flag `--help` or `-h` that shows command usage.
 
 <sup>*</sup> Some Advent of Code problems have different parameters for tests and for the _PROBLEM DATA_. As in [year 2023 day 21](https://adventofcode.com/2023/day/21), If that's the case, positional arguments are passed through the `--arg`.
 
