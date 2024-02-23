@@ -11,6 +11,7 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Self
@@ -38,12 +39,26 @@ def find_esb_root(cwd: Path) -> Path | None:
 
 
 @dataclass
-class YearSled:
-    """
-    Base class for path manipulation. This class allows for the creation of directories and
-    filenames.
-    """
+class BlankSled:
+    repo_root: Path
 
+    def repo_conflicts(self):
+        return [
+            self.repo_root / item.name
+            for item in ESBConfig.blank_root.iterdir()
+            if (self.repo_root / item.name).is_dir() or (self.repo_root / item.name).is_file()
+        ]
+
+    def new_repo(self):
+        for item in ESBConfig.blank_root.iterdir():
+            if item.is_dir():
+                shutil.copytree(item, self.repo_root / item.name)
+            else:
+                shutil.copy(item, self.repo_root)
+
+
+@dataclass
+class YearSled:
     repo_root: Path
     subdirs: SledSubdirs = field(init=False)
     files: SledFiles = field(init=False)

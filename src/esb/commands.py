@@ -11,29 +11,22 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
-import http.client
-import re
-import shutil
 import sys
 import uuid
 from datetime import datetime
 from functools import wraps
 from itertools import product
-from os import environ
 from pathlib import Path
-from textwrap import wrap
 from typing import TYPE_CHECKING, Literal
 
-from bs4 import BeautifulSoup
 from rich.console import Console
 
-from esb import __version__
 from esb.boiler import CodeFurnace
-from esb.config import ESBConfig
 from esb.dash import CliDash
 from esb.db import ElvenCrisisArchive
+from esb.fetch import RudolphFetcher
 from esb.langs import LangMap, LangRunner
-from esb.paths import CacheSled, LangSled, find_esb_root, pad_day
+from esb.paths import BlankSled, CacheSled, LangSled, find_esb_root, pad_day
 from esb.protocol import fireplacev1_0 as fp1_0
 
 if TYPE_CHECKING:
@@ -74,7 +67,9 @@ def new():
     console_err.print("Initializing a new ElfScript Brigade repository", style=COLOR_INFO)
     cwd = Path.cwd()
 
-    if len(_repo_conflicts(cwd)) > 0:
+    bs = BlankSled(Path.cwd())
+
+    if len(bs.repo_conflicts()) > 0:
         console_err.print(
             "Directory not clean! Cannot initialize. Please start the repo in a (somewhat) clean directory.",
             style=COLOR_ERROR,
@@ -82,15 +77,13 @@ def new():
         sys.exit(1)
 
     try:
-        _copy_blank_repo(cwd)
+        bs.new_repo()
     except OSError:
         console_err.print("Something went wrong! Could not copy", style=COLOR_ERROR)
         sys.exit(1)
 
     db = ElvenCrisisArchive(cwd)
-
     db.create_tables()
-
     db.ECABrigadista(brigadista_id=str(uuid.uuid4()), creation_date=datetime.now().astimezone()).insert()
 
     console_err.print(
@@ -167,20 +160,18 @@ def fetch_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int, *, f
         )
         return
 
-    host = "adventofcode.com"
-    cookie = _load_cookie()
-    cache_sled = CacheSled(repo_root)
+    rudolph = RudolphFetcher(repo_root)
 
-    st_route = f"/{year}/day/{day}"
-    st_html = _fetch_url(host, st_route, cookie)
-    statement, pt1_answer, pt2_answer = _parse_body(st_html)
+    url, statement, pt1_answer, pt2_answer = rudolph.fetch_statement(year, day)
+
+    cache_sled = CacheSled(repo_root)
     st_file = cache_sled.path("statement", year, day)
     st_file.parent.mkdir(parents=True, exist_ok=True)
     st_file.write_text(statement)
 
     db.ECASolution(year=year, day=day, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert(replace=True)
     [_, title, *_] = statement.split("---")
-    db.ECAProblem(year=year, day=day, title=title.strip(), url=host + st_route).insert(replace=True)
+    db.ECAProblem(year=year, day=day, title=title.strip(), url=url).insert(replace=True)
 
     input_file = cache_sled.path("input", year, day)
     if not force and input_file.is_file():
@@ -189,8 +180,8 @@ def fetch_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int, *, f
             style=COLOR_INFO,
         )
         return
-    input_route = f"{st_route}/input"
-    puzzle_input = _fetch_url(host, input_route, cookie)
+    puzzle_input = rudolph.fetch_input(year, day)
+
     input_file.parent.mkdir(parents=True, exist_ok=True)
     input_file.write_text(puzzle_input)
     console_err.print(
@@ -229,6 +220,14 @@ def start_day(repo_root: Path, db: ElvenCrisisArchive, lang: LangSpec, year: int
         finished_pt1=False,
         finished_pt2=False,
     ).insert()
+    console_err.print(
+        f"Started code for {lang.name}, year {year} day {pad_day(day)}",
+        style=COLOR_INFO,
+    )
+    console_err.print(
+        f"Open files at {lang_sled.day_dir(year, day)} and happy coding!",
+        style=COLOR_INFO,
+    )
 
 
 def show_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int):
@@ -342,79 +341,3 @@ def run_day(
         ...
     else:
         console_out.print(f"Answer pt{part}: {attempt}", style=COLOR_WARN)
-
-
-###########################################################
-# Helper functions
-###########################################################
-def _repo_conflicts(cwd):
-    return [
-        cwd / item.name
-        for item in ESBConfig.blank_root.iterdir()
-        if (cwd / item.name).is_dir() or (cwd / item.name).is_file()
-    ]
-
-
-def _copy_blank_repo(cwd):
-    for item in ESBConfig.blank_root.iterdir():
-        if item.is_dir():
-            shutil.copytree(item, cwd / item.name)
-        else:
-            shutil.copy(item, cwd)
-
-
-def _load_cookie() -> str:
-    cwd = Path.cwd()
-    sess_env = "AOC_SESSION_COOKIE"
-    dotenv = cwd / ".env"
-    if dotenv.is_file():
-        with dotenv.open() as fp:
-            match [line.split("=")[1] for line in fp.read().split("\n") if line.startswith(sess_env)]:
-                case [dot_cookie]:
-                    return dot_cookie.removeprefix('"').removesuffix('"')
-    env_cookie: str | None = environ.get(sess_env)
-    match env_cookie:
-        case None:
-            message = f"Could not find {sess_env}"
-            raise ValueError(message)
-        case str(_):
-            return env_cookie
-
-
-def _fetch_url(host: str, route: str, cookie: str) -> str:
-    conn = http.client.HTTPSConnection(host)
-    conn.request(
-        "GET",
-        route,
-        headers={
-            "Cookie": f"session={cookie}",
-            "User-Agent": f"ElfScipt Brigade/{__version__}; github.com/luxedo/esb by luizamaral306@gmail.com",
-        },
-    )
-    res = conn.getresponse()
-    http_ok = 200
-    if res.status != http_ok:
-        message = "Could not fetch! Maybe your cookie have expired"
-        raise ValueError(message)
-    return res.read().decode("utf-8")
-
-
-def _parse_body(body: str) -> tuple[str, str | None, str | None]:
-    soup = BeautifulSoup(body, "html.parser")
-    statement = ""
-    for article in soup.find_all("article"):
-        for p in article.find_all(recursive=False):
-            statement += p.get_text() + "\n\n"
-    statement = "\n".join("\n".join(wrap(line, width=100)) for line in statement.strip().split("\n"))
-
-    ans_re = re.compile("Your puzzle answer was")
-    pt1, pt2 = None, None
-    match [ans.next_element.get_text() for ans in soup.find_all(string=ans_re)]:
-        case [spt1, spt2]:
-            pt1, pt2 = spt1, spt2
-        case [spt1]:
-            pt1 = spt1
-        case []:
-            pass
-
-    return statement, pt1, pt2

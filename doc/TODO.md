@@ -59,3 +59,4 @@
 1. Boilerplate Zig ~~@Should I do?~~
 1. Boilerplate Javascript ~~@Should I do?~~
 1. Boilerplate OCaml ~~@Should I do?~~
+1. Get session cookie from root instead of cwd

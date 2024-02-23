@@ -123,7 +123,7 @@ class TestCli(TestWithTemporaryDirectory):
         text = stdout.getvalue()
         assert "Thank you for saving Christmas" in text, text
 
-    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
     @patch("sys.stderr", new_callable=io.StringIO)
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_fetch(self, stdout, _stderr, mock_fetch_url):  # noqa: PT019
@@ -146,7 +146,7 @@ class TestCli(TestWithTemporaryDirectory):
         assert statement_file.is_file()
         assert input_file.is_file()
 
-    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
     @patch("sys.stderr", new_callable=io.StringIO)
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_start(self, _, _stderr, stdout):  # noqa: PT019
@@ -165,7 +165,7 @@ class TestCli(TestWithTemporaryDirectory):
         for dst in lang_sled.copied_map(self.TEST_YEAR, self.TEST_DAY).values():
             assert dst.is_file()
 
-    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
     @patch("sys.stderr", new_callable=io.StringIO)
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_show(self, stdout, _stderr, _):  # noqa: PT019
@@ -184,7 +184,7 @@ class TestCli(TestWithTemporaryDirectory):
         text = stdout.getvalue()
         assert "Solution pt1" in text
 
-    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
     @patch("sys.stderr", new_callable=io.StringIO)
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_status(self, stdout, _stderr, _):  # noqa: PT019
@@ -203,7 +203,7 @@ class TestCli(TestWithTemporaryDirectory):
         text = stdout.getvalue()
         assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
 
-    @patch("esb.commands._fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
+    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
     @patch("sys.stderr", new_callable=io.StringIO)
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_status_runs_in_any_esb_repo_subdir(self, stdout, _stderr, _):  # noqa: PT019
