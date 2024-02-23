@@ -122,7 +122,7 @@ def esb_parser() -> argparse.ArgumentParser:
         required=True,
         dest="command",
     )
-    lmap = LangMap.load_defaults()
+    lmap = LangMap.load()
     parsers = {}
     for cmd in Command:
         parsers[cmd] = subparsers.add_parser(cmd.name, description=cmd_descriptions[cmd])

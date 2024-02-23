@@ -11,7 +11,7 @@
     1. Store results either in a separate DB or in a file
 ~~1. Show statement command~~
 ~~1. start command - copy boilerplate~~
-1. status command
+~~1. status command~~
 1. Implement Run
 1. Implement  test
     1. Where will we store tests?
@@ -19,10 +19,6 @@
 ~~1. Boilerplate Python~~
 1. Boilerplate Rust
 1. Boilerplate Elixir
-1. Boilerplate Lua ~~@Should I do?~~
-1. Boilerplate Zig ~~@Should I do?~~
-1. Boilerplate Javascript ~~@Should I do?~~
-1. Boilerplate OCaml ~~@Should I do?~~
 1. Submit
 1. Compare answers
 1. Metrics
@@ -38,6 +34,7 @@
 ~~1. Check if MyPy is working~~
 1. Handle day 25 star
 1. Test CLI
+1. Create executable
 
 ## Optional features
 
@@ -58,3 +55,7 @@
 1. Move `pad_day` to a better place
 1. Put command instructions for errors
 1. Split commands into separate files
+1. Boilerplate Lua ~~@Should I do?~~
+1. Boilerplate Zig ~~@Should I do?~~
+1. Boilerplate Javascript ~~@Should I do?~~
+1. Boilerplate OCaml ~~@Should I do?~~

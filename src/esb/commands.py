@@ -30,15 +30,13 @@ from rich.console import Console
 from esb import __version__
 from esb.boiler import CodeFurnace
 from esb.config import ESBConfig
+from esb.dash import CliDash
 from esb.db import ElvenCrisisArchive
-from esb.langs import LangRunner
+from esb.langs import LangMap, LangRunner
 from esb.paths import CacheSled, LangSled, find_esb_root, pad_day
 from esb.protocol import fireplacev1_0 as fp1_0
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
-    from typing import Any
-
     from esb.langs import LangSpec
 
 
@@ -120,6 +118,41 @@ def show(repo_root: Path, years: list[int], days: list[int]):
     db = ElvenCrisisArchive(repo_root)
     for year, day in product(years, days):
         show_day(repo_root, db, year, day)
+
+
+@is_esb_repo
+def status(repo_root: Path):
+    db = ElvenCrisisArchive(repo_root)
+    lmap = LangMap.load()
+    cli_dash = CliDash(db, lmap)
+
+    brigadista = cli_dash.brigadista()
+
+    console_out.print("ELFSCRIPT BRIGADE STATUS REPORT\n", style=COLOR_ERROR)
+    console_out.print(brigadista, style=COLOR_INFO)
+    console_out.print("\nSERVICE STARS", style=COLOR_WARN)
+
+    ys = cli_dash.years_summary()
+
+    for year in sorted(ys.keys(), reverse=True):
+        summary = ys[year]
+        console_out.print(f"\n{year}")
+        console_out.print(f"\n{summary}", style=COLOR_WARN)
+
+
+@is_esb_repo
+def run(
+    repo_root: Path,
+    lang: LangSpec,
+    part: fp1_0.FPPart,
+    years: list[int],
+    days: list[int],
+    *,
+    submit: bool = False,
+):
+    db = ElvenCrisisArchive(repo_root)
+    for year, day in product(years, days):
+        run_day(repo_root, db, lang, part, year, day, submit=submit)
 
 
 ###########################################################
@@ -232,48 +265,6 @@ def show_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int):
     for eca_language in dl:
         stars = int(eca_language.finished_pt1) + int(eca_language.finished_pt2)
         console_out.print(f"{eca_language.language}: [yellow]{'*' * stars}[/yellow]", style=COLOR_INFO)
-
-
-@is_esb_repo
-def status(repo_root: Path):
-    db = ElvenCrisisArchive(repo_root)
-    info = db.ECABrigadista.fetch_single()
-    console_out.print(
-        "ELFSCRIPT BRIGADE STATUS REPORT\n",
-        style=COLOR_ERROR,
-    )
-    console_out.print(
-        f"Brigadista ID: {info.brigadista_id}\nIn Duty Since: {info.creation_date}\n",
-        style=COLOR_INFO,
-    )
-    console_out.print(
-        "SERVICE STARS",
-        style=COLOR_WARN,
-    )
-
-    cwd = Path.cwd()
-    ys = _years_summary(db, cwd)
-    for year in sorted(ys.keys(), reverse=True):
-        summary = ys[year]
-        console_out.print(
-            f"\n{summary}\n{year}",
-            style=COLOR_WARN,
-        )
-
-
-@is_esb_repo
-def run(
-    repo_root: Path,
-    lang: LangSpec,
-    part: fp1_0.FPPart,
-    years: list[int],
-    days: list[int],
-    *,
-    submit: bool = False,
-):
-    db = ElvenCrisisArchive(repo_root)
-    for year, day in product(years, days):
-        run_day(repo_root, db, lang, part, year, day, submit=submit)
 
 
 def run_day(
@@ -427,37 +418,3 @@ def _parse_body(body: str) -> tuple[str, str | None, str | None]:
             pass
 
     return statement, pt1, pt2
-
-
-def _groupby(rows: Iterable, key: str) -> dict[Any, Any]:
-    ret: dict[Any, Any] = {}
-    for row in rows:
-        ret.setdefault(getattr(row, key), []).append(row)
-    return ret
-
-
-def _count_stars(rows: Iterable) -> dict[int, dict[int, int]]:
-    return {
-        year: {
-            day: 0 if s.pt1_answer is None else 1 if s.pt2_answer is None else 2
-            for day, [s] in _groupby(rows, "day").items()
-        }
-        for year, rows in _groupby(rows, "year").items()
-    }
-
-
-def _years_summary(db: ElvenCrisisArchive, _cwd: Path) -> dict[int, str]:
-    stats = db.ECASolution.fetch_all()
-    year_stars = _count_stars(stats)
-
-    ret = {}
-    for year, days in year_stars.items():
-        days_str = " ".join([f"{pad_day(day)}" for day in range(1, 26)])
-        stars_str = " ".join([f"{'*' * days.get(day, 0):<2}" for day in range(1, 26)])
-        summary = f"{stars_str}\n{days_str}"
-        ret[year] = summary
-    return ret
-
-
-def _copy_boilerplate(_lang: LangSpec, _year: int, _day: int):
-    pass

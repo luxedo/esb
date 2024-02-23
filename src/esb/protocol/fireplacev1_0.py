@@ -34,9 +34,9 @@ FPPart = Literal[1, 2]
 def _run_solution(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn, part: FPPart, args: list[str]):
     match part:
         case 1:
-            return solve_pt1(sys.stdin.read(), args)
+            return solve_pt1(sys.stdin.read().rstrip(), args)
         case 2:
-            return solve_pt2(sys.stdin.read(), args)
+            return solve_pt2(sys.stdin.read().rstrip(), args)
         case _:
             message = f"Part {part} does not exist"
             raise KeyError(message)

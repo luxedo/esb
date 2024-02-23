@@ -28,6 +28,7 @@ class LangSpec:
     name: str
     files: dict[str, str]
     command: list[str]
+    symbol: str
 
     @classmethod
     def from_json(cls, file: str | Path):
@@ -44,6 +45,10 @@ class LangMap:
         return cls({
             lang.name: LangSpec.from_json(lang / ESBConfig.spec_filename) for lang in ESBConfig.boiler_root.iterdir()
         })
+
+    @classmethod
+    def load(cls):
+        return cls.load_defaults()
 
     @property
     def names(self):
