@@ -12,14 +12,15 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import sqlite3
+import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from esb.config import ESBConfig
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from datetime import datetime
     from pathlib import Path
     from typing import Any, ClassVar, Self
 
@@ -317,3 +318,10 @@ class ElvenCrisisArchive:
     def create_tables(self):
         for table, create_table_query in self.tables.items():
             self.sql.cur.execute(create_table_query.format(table_name=table.__name__))
+
+    def new_brigadista(self):
+        self.ECABrigadista(brigadista_id=str(uuid.uuid4()), creation_date=datetime.now().astimezone()).insert()
+
+    def new_repo(self):
+        self.create_tables()
+        self.new_brigadista()

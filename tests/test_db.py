@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 from esb import db
-from tests.lib.temporary import TestWithInitializedEsbRepo, TestWithTemporaryDirectory
+from tests.lib.temporary import TestWithTemporaryDirectory
 
 
 class TestSqlConnection(TestWithTemporaryDirectory):
@@ -193,8 +193,9 @@ class TestTable(TestWithTemporaryDirectory):
             self.SantaTable.find_single({"text": "abc"})
 
 
-class TestElvenCrisisArchive(TestWithInitializedEsbRepo):
+class TestElvenCrisisArchive(TestWithTemporaryDirectory):
     def test_create_tables(self):
-        archive = db.ElvenCrisisArchive(self.repo_root)
+        repo_root = Path.cwd()
+        archive = db.ElvenCrisisArchive(repo_root)
         archive.create_tables()
         assert len(archive.sql.list_all_tables()) > 0

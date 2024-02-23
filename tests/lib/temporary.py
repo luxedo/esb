@@ -37,4 +37,6 @@ class TestWithInitializedEsbRepo(TestWithTemporaryDirectory):
     def setUp(self):
         super().setUp()
         self.repo_root = Path.cwd()
-        ElvenCrisisArchive(self.repo_root)  # This creates the database file
+        # Creates the db file
+        # This is the condition for a directory to be considered an esb repository
+        ElvenCrisisArchive(self.repo_root).new_repo()

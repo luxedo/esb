@@ -12,12 +12,10 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import sys
-import uuid
-from datetime import datetime
 from functools import wraps
 from itertools import product
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from rich.console import Console
 
@@ -38,8 +36,6 @@ COLOR_ERROR = "bold red"
 COLOR_WARN = "bold yellow"
 console_err = Console(stderr=True)
 console_out = Console()
-
-AocParts = Literal[1, 2]
 
 
 ###########################################################
@@ -82,9 +78,7 @@ def new():
         console_err.print("Something went wrong! Could not copy", style=COLOR_ERROR)
         sys.exit(1)
 
-    db = ElvenCrisisArchive(cwd)
-    db.create_tables()
-    db.ECABrigadista(brigadista_id=str(uuid.uuid4()), creation_date=datetime.now().astimezone()).insert()
+    ElvenCrisisArchive(cwd).new_repo()
 
     console_err.print(
         "ESB repo is ready! Thank you for saving Christmas [italic]Elf[/italic]",
