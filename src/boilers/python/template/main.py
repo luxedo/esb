@@ -9,8 +9,6 @@ Python Solution
 https://{problem_url}
 """
 
-from typing import Any
-
 
 def solve_pt1(input_data: str, args: list[str] | None = None) -> int:
     ...

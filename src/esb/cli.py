@@ -194,7 +194,7 @@ def main():
         case Command.status:
             esb_commands.status()
         case Command.run:
-            esb_commands.run(args.language, args.parts, args.year, args.day)
+            esb_commands.run(args.language, args.parts, args.year, args.day, submit=args.submit)
         case _:
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)

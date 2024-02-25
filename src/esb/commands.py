@@ -22,7 +22,7 @@ from rich.console import Console
 from esb.boiler import CodeFurnace
 from esb.dash import CliDash
 from esb.db import ElvenCrisisArchive
-from esb.fetch import RudolphFetcher
+from esb.fetch import RudolphFetcher, RudolphSubmitStatus
 from esb.langs import LangMap, LangRunner
 from esb.paths import BlankSled, CacheSled, LangSled, find_esb_root, pad_day
 from esb.protocol import fireplacev1_0 as fp1_0
@@ -320,18 +320,36 @@ def run_day(
 
     attempt = result.answer
     answer = ds.get_answer(part)
+
     if answer is not None:
         if attempt == answer:
             console_out.print(f"✔ Answer pt{part}: {attempt}", style=COLOR_INFO)
             dl.set_solved(part)
         else:
-            console_out.print(
-                f"✘ Answer pt{part}: {attempt}. Expected: {answer}",
-                style=COLOR_ERROR,
-            )
+            console_out.print(f"✘ Answer pt{part}: {attempt}. Expected: {answer}", style=COLOR_ERROR)
             dl.set_unsolved(part)
-    elif submit:
-        # @TODO: implement submit
-        ...
+        return
+
+    if attempt is not None and submit:
+        rudolph = RudolphFetcher(repo_root)
+        match rudolph.fetch_submit(year, day, part, attempt):
+            case RudolphSubmitStatus.SUCCESS:
+                console_out.print("Hooray! Found the answer!", style=COLOR_INFO)
+                console_out.print(f"✔ Answer pt{part}: {attempt}", style=COLOR_INFO)
+            case RudolphSubmitStatus.FAIL:
+                console_out.print("That's not the correct answer :'(", style=COLOR_INFO)
+                console_out.print(f"✘ Answer pt{part}: {attempt}", style=COLOR_ERROR)
+            case RudolphSubmitStatus.TIMEOUT:
+                console_out.print("Cannot submit yet. Please wait before trying again", style=COLOR_WARN)
+                console_out.print(f"Answer pt{part}: {attempt}", style=COLOR_WARN)
+            case RudolphSubmitStatus.ALREADY_COMPLETE:
+                console_out.print(
+                    "Puzzle already solved but solution not fetched yet. " "Please fetch again to compare solutions.",
+                    style=COLOR_INFO,
+                )
+                console_out.print(f"Answer pt{part}: {attempt}", style=COLOR_WARN)
+            case RudolphSubmitStatus.ERROR:
+                console_out.print("Unexpected error submitting", style=COLOR_WARN)
+                console_out.print(f"Answer pt{part}: {attempt}", style=COLOR_WARN)
     else:
         console_out.print(f"Answer pt{part}: {attempt}", style=COLOR_WARN)

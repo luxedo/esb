@@ -108,7 +108,7 @@ class TestCli(TestWithTemporaryDirectory):
     dashboard
     """
 
-    TEST_EXAMPLE_STATEMENT = (ROOT_DIR / "mock" / "example.html").read_text()
+    TEST_STATEMENT = (ROOT_DIR / "mock" / "statement.html").read_text()
     TEST_YEAR = 2020
     TEST_DAY = 9
 
@@ -133,8 +133,8 @@ class TestCli(TestWithTemporaryDirectory):
             patch("sys.stderr", new_callable=io.StringIO),
             patch("sys.stdout", new_callable=io.StringIO),
             patch(
-                "esb.fetch.RudolphFetcher.fetch_url",
-                return_value=self.TEST_EXAMPLE_STATEMENT,
+                "esb.fetch.RudolphFetcher.http_get",
+                return_value=self.TEST_STATEMENT,
             ),
         ):
             main()
@@ -177,13 +177,13 @@ class TestCli(TestWithTemporaryDirectory):
             patch("sys.stderr", new_callable=io.StringIO),
             patch("sys.stdout", new_callable=io.StringIO),
             patch(
-                "esb.fetch.RudolphFetcher.fetch_url",
-                return_value=self.TEST_EXAMPLE_STATEMENT,
-            ) as mock_fetch_url,
+                "esb.fetch.RudolphFetcher.http_get",
+                return_value=self.TEST_STATEMENT,
+            ) as mock_http_get,
         ):
             main()
 
-        assert mock_fetch_url.called
+        assert mock_http_get.called
         assert statement_file.is_file()
         assert input_file.is_file()
 
@@ -195,8 +195,8 @@ class TestCli(TestWithTemporaryDirectory):
             patch("sys.stderr", new_callable=io.StringIO),
             patch("sys.stdout", new_callable=io.StringIO),
             patch(
-                "esb.fetch.RudolphFetcher.fetch_url",
-                return_value=self.TEST_EXAMPLE_STATEMENT,
+                "esb.fetch.RudolphFetcher.http_get",
+                return_value=self.TEST_STATEMENT,
             ),
         ):
             main()
@@ -216,8 +216,8 @@ class TestCli(TestWithTemporaryDirectory):
             patch("sys.stderr", new_callable=io.StringIO),
             patch("sys.stdout", new_callable=io.StringIO) as stdout,
             patch(
-                "esb.fetch.RudolphFetcher.fetch_url",
-                return_value=self.TEST_EXAMPLE_STATEMENT,
+                "esb.fetch.RudolphFetcher.http_get",
+                return_value=self.TEST_STATEMENT,
             ),
         ):
             main()

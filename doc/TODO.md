@@ -19,7 +19,7 @@
 ~~1. Boilerplate Python~~
 1. Boilerplate Rust
 1. Boilerplate Elixir
-1. Submit
+~~1. Submit~~
 1. Compare answers
 1. Metrics
 1. Visualization
@@ -60,3 +60,4 @@
 1. Boilerplate Javascript ~~@Should I do?~~
 1. Boilerplate OCaml ~~@Should I do?~~
 1. Get session cookie from root instead of cwd
+1. Improve http_get and http_post status code handling
