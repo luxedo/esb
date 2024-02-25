@@ -1,1 +1,4 @@
 .cache/
+
+# Python ignores
+__pycache__/

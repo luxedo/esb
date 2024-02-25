@@ -16,7 +16,7 @@ from pathlib import Path
 @dataclass
 class ESBConfig:
     # Paths
-    db_path = Path("database/ElvenCrisisArchive.sqlite")
+    db_path = Path(".cache/ElvenCrisisArchive.sqlite")
     package_root = Path(__file__).parent
     blank_dir = "blank"
     solutions_dir = "solutions"

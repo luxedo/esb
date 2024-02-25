@@ -8,7 +8,7 @@
 1. Fetch command
     ~~1. Fix \<code\> blocks in fetch~~
     1. Fetch from personal times
-    1. Store results either in a separate DB or in a file
+    ~~1. Store results either in a separate DB or in a file~~
 ~~1. Show statement command~~
 ~~1. start command - copy boilerplate~~
 ~~1. status command~~

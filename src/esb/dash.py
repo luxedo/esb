@@ -78,6 +78,7 @@ class CliDash:
             ])
             stars_str = self.build_stars_str(days, "*")
             days_str = " ".join([f"{pad_day(day)}" for day in range(1, 26)])
-            summary = f"{langs_str}\n{stars_str}\n{days_str}"
+            sep_str = "=".join(["==" for day in range(1, 26)])
+            summary = f"{langs_str}\n{stars_str}\n{days_str}\n{sep_str}"
             ret[year] = summary
         return ret
