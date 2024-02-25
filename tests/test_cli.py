@@ -112,24 +112,58 @@ class TestCli(TestWithTemporaryDirectory):
     TEST_YEAR = 2020
     TEST_DAY = 9
 
-    @patch("sys.stderr", new_callable=io.StringIO)
-    @patch("sys.stdout", new_callable=io.StringIO)
-    def test_new(self, _stderr, stdout):  # noqa: PT019
-        command = "esb new"
+    cmd_new = "esb new".split()
+    cmd_fetch = f"esb fetch --year {TEST_YEAR} --day {TEST_DAY}".split()
+    language_name = "python"
+    cmd_start = f"esb start --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name}".split()
+    cmd_show = f"esb show --year {TEST_YEAR} --day {TEST_DAY}".split()
+    cmd_status = "esb status".split()
 
-        with patch("sys.argv", command.split()):
+    def esb_new(self):
+        with (
+            patch("sys.argv", self.cmd_new),
+            patch("sys.stderr", new_callable=io.StringIO),
+            patch("sys.stdout", new_callable=io.StringIO),
+        ):
             main()
 
-        text = stdout.getvalue()
-        assert "Thank you for saving Christmas" in text, text
-
-    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-    @patch("sys.stderr", new_callable=io.StringIO)
-    @patch("sys.stdout", new_callable=io.StringIO)
-    def test_fetch(self, stdout, _stderr, mock_fetch_url):  # noqa: PT019
-        command = "esb new"
-        with patch("sys.argv", command.split()):
+    def esb_fetch(self):
+        with (
+            patch("sys.argv", self.cmd_fetch),
+            patch("sys.stderr", new_callable=io.StringIO),
+            patch("sys.stdout", new_callable=io.StringIO),
+            patch(
+                "esb.fetch.RudolphFetcher.fetch_url",
+                return_value=self.TEST_EXAMPLE_STATEMENT,
+            ),
+        ):
             main()
+
+    def test_new(self):
+        with (
+            patch("sys.argv", self.cmd_new),
+            patch("sys.stderr", new_callable=io.StringIO) as stderr,
+            patch("sys.stdout", new_callable=io.StringIO),
+        ):
+            main()
+            text = stderr.getvalue()
+        assert "Thank you for saving Christmas" in text
+
+    def test_new_must_fail_when_runing_in_an_esb_repo(self):
+        self.esb_new()
+
+        with (
+            patch("sys.argv", self.cmd_new),
+            patch("sys.stderr", new_callable=io.StringIO) as stderr,
+            patch("sys.stdout", new_callable=io.StringIO),
+        ):
+            with pytest.raises(SystemExit):
+                main()
+            text = stderr.getvalue()
+        assert "Cannot initialize" in text
+
+    def test_fetch(self):
+        self.esb_new()
 
         repo_root = Path.cwd()
         cs = CacheSled(repo_root)
@@ -138,92 +172,84 @@ class TestCli(TestWithTemporaryDirectory):
         assert not statement_file.is_file()
         assert not input_file.is_file()
 
-        command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-        with patch("sys.argv", command.split()):
+        with (
+            patch("sys.argv", self.cmd_fetch),
+            patch("sys.stderr", new_callable=io.StringIO),
+            patch("sys.stdout", new_callable=io.StringIO),
+            patch(
+                "esb.fetch.RudolphFetcher.fetch_url",
+                return_value=self.TEST_EXAMPLE_STATEMENT,
+            ) as mock_fetch_url,
+        ):
             main()
 
         assert mock_fetch_url.called
         assert statement_file.is_file()
         assert input_file.is_file()
 
-    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-    @patch("sys.stderr", new_callable=io.StringIO)
-    @patch("sys.stdout", new_callable=io.StringIO)
-    def test_start(self, _, _stderr, stdout):  # noqa: PT019
-        command = "esb new"
-        with patch("sys.argv", command.split()):
-            main()
+    def test_start(self):
+        self.esb_new()
 
-        language_name = "python"
-        command = f"esb start --year {self.TEST_YEAR} --day {self.TEST_DAY} --lang {language_name}"
-        with patch("sys.argv", command.split()):
+        with (
+            patch("sys.argv", self.cmd_start),
+            patch("sys.stderr", new_callable=io.StringIO),
+            patch("sys.stdout", new_callable=io.StringIO),
+            patch(
+                "esb.fetch.RudolphFetcher.fetch_url",
+                return_value=self.TEST_EXAMPLE_STATEMENT,
+            ),
+        ):
             main()
 
         lmap = LangMap.load_defaults()
-        lang = lmap.get(language_name)
+        lang = lmap.get(self.language_name)
         lang_sled = LangSled.from_spec(repo_root=Path.cwd(), spec=lang)
         for dst in lang_sled.copied_map(self.TEST_YEAR, self.TEST_DAY).values():
             assert dst.is_file()
 
-    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-    @patch("sys.stderr", new_callable=io.StringIO)
-    @patch("sys.stdout", new_callable=io.StringIO)
-    def test_show(self, stdout, _stderr, _):  # noqa: PT019
-        command = "esb new"
-        with patch("sys.argv", command.split()):
-            main()
+    def test_show(self):
+        self.esb_new()
+        self.esb_fetch()
 
-        command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-        with patch("sys.argv", command.split()):
-            main()
-
-        command = f"esb show --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-        with patch("sys.argv", command.split()):
+        with (
+            patch("sys.argv", self.cmd_show),
+            patch("sys.stderr", new_callable=io.StringIO),
+            patch("sys.stdout", new_callable=io.StringIO) as stdout,
+            patch(
+                "esb.fetch.RudolphFetcher.fetch_url",
+                return_value=self.TEST_EXAMPLE_STATEMENT,
+            ),
+        ):
             main()
 
         text = stdout.getvalue()
         assert "Solution pt1" in text
 
-    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-    @patch("sys.stderr", new_callable=io.StringIO)
-    @patch("sys.stdout", new_callable=io.StringIO)
-    def test_status(self, stdout, _stderr, _):  # noqa: PT019
-        command = "esb new"
-        with patch("sys.argv", command.split()):
-            main()
+    def test_status(self):
+        self.esb_new()
 
-        command = "esb status"
-        with patch("sys.argv", command.split()):
-            main()
-
-        command = f"esb fetch --year {self.TEST_YEAR} --day {self.TEST_DAY}"
-        with patch("sys.argv", command.split()):
+        with (
+            patch("sys.argv", self.cmd_status),
+            patch("sys.stderr", new_callable=io.StringIO),
+            patch("sys.stdout", new_callable=io.StringIO) as stdout,
+        ):
             main()
 
         text = stdout.getvalue()
         assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
 
-    @patch("esb.fetch.RudolphFetcher.fetch_url", return_value=TEST_EXAMPLE_STATEMENT)
-    @patch("sys.stderr", new_callable=io.StringIO)
-    @patch("sys.stdout", new_callable=io.StringIO)
-    def test_status_runs_in_any_esb_repo_subdir(self, stdout, _stderr, _):  # noqa: PT019
-        command = "esb new"
-        with patch("sys.argv", command.split()):
-            main()
+    def test_status_runs_in_any_esb_repo_subdir(self):
+        self.esb_new()
 
-        command = "esb status"
-        with patch("sys.argv", command.split()):
-            main()
-
-        text = stdout.getvalue()
-        assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
-
-        dir_name = "solutions"
+        dir_name = "test_dir"
         Path(dir_name).mkdir()
         os.chdir(dir_name)
 
-        command = "esb status"
-        with patch("sys.argv", command.split()):
+        with (
+            patch("sys.argv", self.cmd_status),
+            patch("sys.stderr", new_callable=io.StringIO),
+            patch("sys.stdout", new_callable=io.StringIO) as stdout,
+        ):
             main()
 
         text = stdout.getvalue()
