@@ -18,6 +18,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from esb.config import ESBConfig
+from esb.protocol.fireplacev1_0 import MetricPrefix
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -75,7 +76,7 @@ class Table:
         self._columns = set(self.__annotations__.keys())
 
     def to_dict(self) -> dict[str, Any]:
-        return {column: getattr(self, column) for column in self._columns}
+        return {column: getattr(self, column, None) for column in self._columns}
 
     @classmethod
     def bind_connection(cls, sql: SqlConnection):
@@ -267,6 +268,24 @@ class ECALanguage(Table):
         self.update({f"finished_pt{part}": False})
 
 
+@dataclass(unsafe_hash=True)
+class ECARun(Table):
+    id: int | None  # noqa: A003
+    datetime: datetime
+    year: int
+    day: int
+    language: str
+    part: FPPart
+    answer: str | None = None
+    time: int | None = None
+    unit: MetricPrefix | None = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        if isinstance(self.unit, int):
+            self.unit = MetricPrefix(self.unit)
+
+
 class ElvenCrisisArchive:
     repo_root: Path
     db_path: Path
@@ -293,19 +312,32 @@ class ElvenCrisisArchive:
         ECALanguage: """CREATE TABLE {table_name} (
                                 year INTEGER NOT NULL,
                                 day INTEGER NOT NULL,
-                                language TEXT,
+                                language TEXT NOT NULL,
                                 started INT,
                                 finished_pt1 INT,
                                 finished_pt2 INT,
                                 PRIMARY KEY (year, day, language)
+                            )""",
+        ECARun: """CREATE TABLE {table_name} (
+                                id INTEGER PRIMARY KEY NOT NULL,
+                                datetime TIMESTAMP NOT NULL,
+                                year INTEGER NOT NULL,
+                                day INTEGER NOT NULL,
+                                language TEXT NOT NULL,
+                                part INTEGER NOT NULL,
+                                answer TEXT,
+                                time INTEGER,
+                                unit INTEGER
                             )""",
     }
     ECABrigadista = ECABrigadista
     ECAProblem = ECAProblem
     ECASolution = ECASolution
     ECALanguage = ECALanguage
+    ECARun = ECARun
 
     def __init__(self, repo_root: Path):
+        sqlite3.register_adapter(MetricPrefix, lambda mp: mp.value)
         self.repo_root = repo_root
         self.db_path = repo_root / ESBConfig.db_path
         if not self.db_path.parent.is_dir():

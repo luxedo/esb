@@ -82,3 +82,10 @@ class MetricPrefix(Enum):
             case unit:
                 mp_map = {member.value: member for member in MetricPrefix}
                 return mp_map[MetricPrefixAbbrev[unit].value]
+
+    def serialize(self):
+        return self.value
+
+    @classmethod
+    def deserialize(cls, value):
+        return cls(value)

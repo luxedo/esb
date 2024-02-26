@@ -12,6 +12,7 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import sys
+from datetime import datetime
 from functools import wraps
 from itertools import product
 from pathlib import Path
@@ -317,9 +318,21 @@ def run_day(
                 style=COLOR_ERROR,
             )
             return
-
     attempt = result.answer
     answer = ds.get_answer(part)
+
+    now = datetime.now().astimezone()
+    db.ECARun(
+        id=None,
+        datetime=now,
+        year=year,
+        day=day,
+        language=lang.name,
+        part=part,
+        answer=attempt,
+        time=result.running_time,
+        unit=result.unit,
+    ).insert()
 
     if answer is not None:
         if attempt == answer:

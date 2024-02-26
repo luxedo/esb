@@ -7,7 +7,6 @@
 ~~1. Argument parser~~
 1. Fetch command
     ~~1. Fix \<code\> blocks in fetch~~
-    1. Fetch from personal times
     ~~1. Store results either in a separate DB or in a file~~
 ~~1. Show statement command~~
 ~~1. start command - copy boilerplate~~
@@ -61,3 +60,5 @@
 1. Boilerplate OCaml ~~@Should I do?~~
 1. Get session cookie from root instead of cwd
 1. Improve http_get and http_post status code handling
+1. Fetch from personal times
+1. Show remaining time for submit
