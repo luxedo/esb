@@ -160,7 +160,7 @@ def esb_parser() -> argparse.ArgumentParser:
             parsers[cmd].add_argument("-y", "--year", nargs="+", type=aoc_year, help="AoC year")
             parsers[cmd].add_argument("-d", "--day", nargs="+", type=aoc_day, help="AoC day")
 
-        if cmd == Command.run:
+        if cmd in {Command.run, Command.test}:
             parsers[cmd].add_argument("-s", "--submit", action="store_true", help="Submits solution")
             parsers[cmd].add_argument(
                 "-p",
@@ -195,6 +195,8 @@ def main():
             esb_commands.status()
         case Command.run:
             esb_commands.run(args.language, args.parts, args.year, args.day, submit=args.submit)
+        case Command.test:
+            esb_commands.test(args.language, args.parts, args.year, args.day)
         case _:
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)

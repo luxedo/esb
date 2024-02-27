@@ -221,9 +221,11 @@ class ECABrigadista(Table):
 
 
 @dataclass(unsafe_hash=True)
-class ECASolution(Table):
+class ECAPuzzle(Table):
     year: int
     day: int
+    title: str
+    url: str
     pt1_answer: str | None
     pt2_answer: str | None
 
@@ -238,12 +240,6 @@ class ECASolution(Table):
                 raise KeyError(message)
 
 
-@dataclass(unsafe_hash=True)
-class ECAProblem(Table):
-    year: int
-    day: int
-    title: str
-    url: str
 
 
 @dataclass(unsafe_hash=True)
@@ -295,16 +291,11 @@ class ElvenCrisisArchive:
                                 brigadista_id CHARACTER(36),
                                 creation_date TIMESTAMP NOT NULL
                             )""",
-        ECAProblem: """CREATE TABLE {table_name} (
+        ECAPuzzle: """CREATE TABLE {table_name} (
                                 year INTEGER NOT NULL,
                                 day INTEGER NOT NULL,
                                 title TEXT,
                                 url TEXT,
-                                PRIMARY KEY (year, day)
-                            )""",
-        ECASolution: """CREATE TABLE {table_name} (
-                                year INTEGER NOT NULL,
-                                day INTEGER NOT NULL,
                                 pt1_answer TEXT,
                                 pt2_answer TEXT,
                                 PRIMARY KEY (year, day)
@@ -331,8 +322,7 @@ class ElvenCrisisArchive:
                             )""",
     }
     ECABrigadista = ECABrigadista
-    ECAProblem = ECAProblem
-    ECASolution = ECASolution
+    ECAPuzzle = ECAPuzzle
     ECALanguage = ECALanguage
     ECARun = ECARun
 

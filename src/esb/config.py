@@ -22,6 +22,7 @@ class ESBConfig:
     solutions_dir = "solutions"
     boiler_dir = "boilers"
     cache_dir = ".cache"
+    tests_dir = "tests"
     boiler_template = "template"
     blank_root = package_root.parent / blank_dir
     solutions_root = package_root.parent / solutions_dir

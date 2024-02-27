@@ -43,7 +43,7 @@ class CliDash:
         }
 
     def fetch_year_stars(self) -> dict[int, dict[int, int]]:
-        stats = self.db.ECASolution.fetch_all()
+        stats = self.db.ECAPuzzle.fetch_all()
 
         def cmp_year(s):
             return 0 if s.pt1_answer is None else 1 if s.pt2_answer is None else 2

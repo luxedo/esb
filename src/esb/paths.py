@@ -121,3 +121,7 @@ class LangSled(YearSled):
 
     def copied_map(self, year: int, day: int) -> dict[Path, Path]:
         return {self.copied_source(year, day, file): self.path(file=file, year=year, day=day) for file in self.files}
+
+@dataclass
+class TestSled(YearSled):
+    subdirs: SledSubdirs = field(default_factory=lambda: [ESBConfig.tests_dir])

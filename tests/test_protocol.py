@@ -24,7 +24,7 @@ from esb.protocol.fireplacev1_0 import (
     FPStatus,
     MetricPrefix,
     _parse_running_time,
-    exec_protocol,
+    exec_protocol_from_file,
     run_solutions,
 )
 
@@ -94,30 +94,30 @@ class TestExecProtocol(unittest.TestCase):
     command = ("python", "tests/mock/solution.py")
 
     @staticmethod
-    def exec_protocol_context(command: tuple[str, ...], part: FPPart, cwd: Path, input_data: str):
+    def exec_protocol_from_file_context(command: tuple[str, ...], part: FPPart, cwd: Path, input_data: str):
         with NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as fp:
             fp.write(input_data)
             fp.seek(0)
-            result = exec_protocol(list(command), part=part, cwd=cwd, day_input=Path(fp.name))
+            result = exec_protocol_from_file(list(command), part=part, cwd=cwd, day_input=Path(fp.name))
             fp.close()
         return result
 
-    def test_exec_protocol_runs_successfully_part_1(self):
-        result = self.exec_protocol_context(self.command, part=1, cwd=Path.cwd(), input_data=TEST_INPUT)
+    def test_exec_protocol_from_file_runs_successfully_part_1(self):
+        result = self.exec_protocol_from_file_context(self.command, part=1, cwd=Path.cwd(), input_data=TEST_INPUT)
         assert result.status == FPStatus.Ok
         assert result.answer == TEST_INPUT
         assert isinstance(result.running_time, int)
         assert isinstance(result.unit, MetricPrefix)
 
-    def test_exec_protocol_runs_successfully_part_2(self):
-        result = self.exec_protocol_context(self.command, part=2, cwd=Path.cwd(), input_data=TEST_INPUT)
+    def test_exec_protocol_from_file_runs_successfully_part_2(self):
+        result = self.exec_protocol_from_file_context(self.command, part=2, cwd=Path.cwd(), input_data=TEST_INPUT)
         assert result.status == FPStatus.Ok
         assert result.answer == str(PT2_SOLUTION)
         assert isinstance(result.running_time, int)
         assert isinstance(result.unit, MetricPrefix)
 
-    def test_exec_protocol_fails_when_no_input_is_found(self):
-        result = exec_protocol(
+    def test_exec_protocol_from_file_fails_when_no_input_is_found(self):
+        result = exec_protocol_from_file(
             list(self.command),
             part=1,
             cwd=Path.cwd(),

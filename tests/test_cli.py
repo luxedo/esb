@@ -64,7 +64,7 @@ class TestEsbParser(TestWithInitializedEsbRepo):
             "esb new",
             "esb fetch --year 2016 --day 9",
             "esb start --lang python --year 2016 --day 9",
-            "esb test --year 2016 --day 9 --lang python",
+            "esb test --year 2016 --day 9 --lang python -p 1",
             "esb run --year 2016 --day 9 --lang python --part 1",
             "esb run --year 2016 --day 9 --lang python -p 2",
             "esb run --year 2016 --day 9 --lang python -p 1 --submit",

@@ -1,4 +1,6 @@
+# ESB
 .cache/
+tests/
 
-# Python ignores
+# Python
 __pycache__/
