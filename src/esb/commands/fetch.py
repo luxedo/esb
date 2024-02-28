@@ -46,13 +46,9 @@ def fetch_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int, *, f
     st_file.write_text(statement)
 
     [_, title, *_] = statement.split("---")
-    db.ECAPuzzle(
-            year=year,
-            day=day,
-            title=title.strip(),
-            url=url,
-            pt1_answer=pt1_answer,
-            pt2_answer=pt2_answer).insert(replace=True)
+    db.ECAPuzzle(year=year, day=day, title=title.strip(), url=url, pt1_answer=pt1_answer, pt2_answer=pt2_answer).insert(
+        replace=True
+    )
 
     input_file = cache_sled.path("input", year, day)
     if not force and input_file.is_file():

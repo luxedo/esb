@@ -1,4 +1,3 @@
-# noqa: INP001
 """
 ElfScript Brigade
 

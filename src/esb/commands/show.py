@@ -22,8 +22,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-
-
 @is_esb_repo
 def show(repo_root: Path, years: list[int], days: list[int]):
     db = ElvenCrisisArchive(repo_root)
@@ -36,9 +34,7 @@ def show_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int):
     cache_sled = CacheSled(repo_root)
     statement_file = cache_sled.path("statement", year, day)
     if dp is None:
-        eprint_error(
-            f"Solution for year {year} day {pad_day(day)} not cached. Please fetch first"
-        )
+        eprint_error(f"Solution for year {year} day {pad_day(day)} not cached. Please fetch first")
         return
 
     if not statement_file.is_file():

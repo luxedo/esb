@@ -254,3 +254,15 @@ class TestCli(TestWithTemporaryDirectory):
 
         text = stdout.getvalue()
         assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
+
+    def test_status_should_fail_when_running_not_in_an_esb_repo(self):
+        with (
+            patch("sys.argv", self.cmd_status),
+            patch("sys.stderr", new_callable=io.StringIO) as stderr,
+            patch("sys.stdout", new_callable=io.StringIO),
+            pytest.raises(SystemExit),
+        ):
+            main()
+
+        text = stderr.getvalue()
+        assert "Fatal: this is not an ElfScript Brigade repo" in text

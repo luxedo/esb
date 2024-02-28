@@ -7,8 +7,8 @@ name = "esb"
 dynamic = ["version"]
 description = 'Script your way to rescue Christmas as part of the ElfScript Brigade team.'
 readme = "README.md"
-requires-python = ">=3.9"
-license = {file = "LICENSE.md"}
+requires-python = ">=3.11"
+license = { file = "LICENSE.md" }
 scripts = { esb = "esb.cli:main" }
 keywords = ["Advent of Code", "CLI", "AoC", "Elf", "Elves", "ElfScript Brigade"]
 authors = [
@@ -20,8 +20,6 @@ maintainers = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
@@ -41,6 +39,11 @@ Source = "https://github.com/luxedo/esb"
 
 [tool.hatch.version]
 path = "src/esb/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src/",
+]
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -62,6 +65,9 @@ cov = [
 ]
 check = "mypy --install-types --non-interactive {args:src/esb tests}"
 
+[tool.mypy]
+exclude = ["esb/boilers"]
+
 [[tool.hatch.envs.all.matrix]]
 python = ["3.11", "3.12"]
 
@@ -69,7 +75,10 @@ python = ["3.11", "3.12"]
 source_pkgs = ["esb", "tests"]
 branch = true
 parallel = true
-omit = []
+omit = [
+  "esb/boilers",
+  "tests/mock/*"
+]
 
 [tool.coverage.paths]
 esb = ["src/esb", "*/esb/src/esb"]
@@ -86,7 +95,7 @@ exclude_lines = [
 line-length = 120
 ignore = ["TRY", "ARG002"]
 include = ["pyproject.toml", "src/esb/*.py", "tests/**/*.py"]
-
+exclude = ["src/esb/boilers"]
 
 [tool.ruff.format]
 preview = true

@@ -22,8 +22,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-
-
 @is_esb_repo
 def status(repo_root: Path):
     db = ElvenCrisisArchive(repo_root)

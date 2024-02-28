@@ -91,7 +91,7 @@ class Table:
 
     @classmethod
     def build_class(cls, row: tuple) -> Self:
-        return cls(**dict(zip(cls.__annotations__.keys(), row)))
+        return cls(**dict(zip(cls.__annotations__.keys(), row, strict=True)))
 
     @staticmethod
     def check_connection(fn):
@@ -238,8 +238,6 @@ class ECAPuzzle(Table):
             case _:
                 message = f"Part {part} does not exist"
                 raise KeyError(message)
-
-
 
 
 @dataclass(unsafe_hash=True)

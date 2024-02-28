@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-
 @is_esb_repo
 def run(
     repo_root: Path,
@@ -69,8 +68,9 @@ def run_day(
         case fp1_0.FPStatus.Ok:
             pass
         case fp1_0.FPStatus.InputDoesNotExists:
-            eprint_error(f"\nCould not find input for year {year} day {pad_day(day)}. "
-                         "Data seems corrupted. Please fetch again with --force"
+            eprint_error(
+                f"\nCould not find input for year {year} day {pad_day(day)}. "
+                "Data seems corrupted. Please fetch again with --force"
             )
             return
         case fp1_0.FPStatus.ProtocolError:

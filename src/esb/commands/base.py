@@ -12,11 +12,11 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import sys
+import tomllib
 from functools import wraps
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import tomllib
 from rich.console import Console
 
 from esb.paths import TestSled, find_esb_root, pad_day
@@ -37,7 +37,6 @@ eprint_error = Console(stderr=True, style=COLOR_ERROR).print
 oprint_error = Console(style=COLOR_ERROR).print
 
 
-
 def is_esb_repo(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -48,6 +47,7 @@ def is_esb_repo(fn):
         return fn(repo_root, *args, **kwargs)
 
     return wrapper
+
 
 def find_solution(db: ElvenCrisisArchive, year: int, day: int, lang: LangSpec) -> ECALanguage | None:
     dl = db.ECALanguage.find_single({"year": year, "day": day, "language": lang.name})
@@ -64,16 +64,17 @@ def find_puzzle(db: ElvenCrisisArchive, year: int, day: int) -> ECAPuzzle | None
     if dp is not None:
         return dp
     eprint_error(f"Could not find input for year {year} day {pad_day(day)}. Please fetch first.")
-    eprint_info(f"esb fetch --year {year} --day {day}",)
+    eprint_info(
+        f"esb fetch --year {year} --day {day}",
+    )
     return None
 
 
 def find_tests(repo_root: Path, year: int, day: int, part: fp1_0.FPPart) -> list[tuple[str, dict]]:
     ts = TestSled(repo_root)
     day_dir = ts.day_dir(year, day)
-    if not day_dir.is_dir():
-        day_dir.mkdir(parents=True, exist_ok=True)
-    test_files = [file for file in day_dir.iterdir() if file.suffix == ".toml"]
+
+    test_files = [file for file in day_dir.iterdir() if file.suffix == ".toml"] if day_dir.is_dir() else []
 
     tests = [test for test_file in test_files for test in load_tests(test_file, part)]
 
@@ -82,19 +83,20 @@ def find_tests(repo_root: Path, year: int, day: int, part: fp1_0.FPPart) -> list
         eprint_error(f"Create tests at: {day_dir!s}")
     return tests
 
+
 def load_tests(filename: Path, part: fp1_0.FPPart) -> list[tuple[str, dict]]:
     cases_str = filename.read_text()
     try:
         cases = tomllib.loads(cases_str).get("test", {})
-    except:
-        eprint_error(f"Test file {filename.stem} is malformed")
+    except tomllib.TOMLDecodeError:
+        eprint_error(f"Test file {filename.name} is malformed")
         return []
 
     tests = []
     for name, c in cases.items():
         test_name = f"{filename.stem}.{name}"
         if not all(key in c for key in ["input", "answer", "part"]):
-            eprint_error(f"Test {test_name} is missing one of the following keys: \"input\", \"answer\" or \"part\"")
+            eprint_error(f'Test {test_name} is missing one of the following keys: "input", "answer" or "part"')
             continue
         if c["part"] == part:
             tests.append((test_name, c))

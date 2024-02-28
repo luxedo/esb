@@ -1,0 +1,34 @@
+[test.test_01_pt1]
+part = 1
+input = "12"
+answer = "2"
+
+[test.test_02_pt1]
+part = 1
+input = "14"
+answer = "2"
+
+[test.test_03_pt1]
+part = 1
+input = "1969"
+answer = "654"
+
+[test.test_04_pt1]
+part = 1
+input = "100756"
+answer = "33583"
+
+[test.test_01_pt2]
+part = 2
+input = "14"
+answer = "2"
+
+[test.test_02_pt2]
+part = 2
+input = "1969"
+answer = "966"
+
+[test.test_03_pt2]
+part = 2
+input = "100756"
+answer = "33583"

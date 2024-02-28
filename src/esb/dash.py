@@ -12,12 +12,12 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from esb.paths import pad_day
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
     from typing import Any
 
     from esb.db import ElvenCrisisArchive, Table

@@ -14,10 +14,11 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum, auto
 from time import perf_counter_ns
-from typing import TYPE_CHECKING, Any, Callable, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from esb.protocol.metric_prefix import MetricPrefix
 

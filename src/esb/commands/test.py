@@ -30,8 +30,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-
-
 @is_esb_repo
 def test(
     repo_root: Path,
@@ -70,8 +68,6 @@ def test_day(
             case (fp1_0.FPStatus.Ok, True):
                 eprint_info(f"✔ Answer {name} pt{part}: {result.answer}")
             case (fp1_0.FPStatus.Ok, False):
-                eprint_error(
-                    f"✘ Answer {name} pt{part}: {result.answer}. Expected: {test['answer']}"
-                )
+                eprint_error(f"✘ Answer {name} pt{part}: {result.answer}. Expected: {test['answer']}")
             case _:
                 eprint_error(f"✘ Could not run {name}")

@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     from esb.langs import LangSpec
 
 
-
 @is_esb_repo
 def start(repo_root: Path, lang: LangSpec, years: list[int], days: list[int], *, force: bool = False):
     db = ElvenCrisisArchive(repo_root)
@@ -63,9 +62,5 @@ def start_day(repo_root: Path, db: ElvenCrisisArchive, lang: LangSpec, year: int
         finished_pt1=False,
         finished_pt2=False,
     ).insert()
-    eprint_info(
-        f"Started code for {lang.name}, year {year} day {pad_day(day)}"
-    )
-    eprint_info(
-        f"Open files at {lang_sled.day_dir(year, day)} and happy coding!"
-    )
+    eprint_info(f"Started code for {lang.name}, year {year} day {pad_day(day)}")
+    eprint_info(f"Open files at {lang_sled.day_dir(year, day)} and happy coding!")
