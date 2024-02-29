@@ -27,3 +27,6 @@ class ESBConfig:
     blank_root = package_root / blank_dir
     boiler_root = package_root / boiler_dir
     spec_filename = "spec.json"
+    first_year = 2015
+    first_day = 1
+    last_day = 25

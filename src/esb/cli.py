@@ -17,6 +17,7 @@ from zoneinfo import ZoneInfo
 
 from esb import __version__
 from esb import commands as esb_commands
+from esb.config import ESBConfig
 from esb.langs import LangMap
 from esb.protocol.fireplacev1_0 import FPPart
 
@@ -25,17 +26,14 @@ from esb.protocol.fireplacev1_0 import FPPart
 # Parser Types
 ###########################################################
 def aoc_year(value: str):
-    # @TODO: Implement logic to get up to the current day
-    aoc_first_year = 2015
-
     now = datetime.now(tz=ZoneInfo("EST"))
 
     if value == "all":
-        return range(aoc_first_year, now.year)
+        return range(ESBConfig.first_year, now.year)
 
     try:
         ivalue = int(value)
-        if ivalue < aoc_first_year:
+        if ivalue < ESBConfig.first_year:
             message = f"{value} is not a valid AoC year. Please try from 2015 onwards."
             raise argparse.ArgumentTypeError(message)
 
@@ -50,18 +48,16 @@ def aoc_year(value: str):
 
 
 def aoc_day(value: str):
-    day_01 = 1
-    day_25 = 25
     if value == "all":
-        return range(day_01, day_25 + 1)
+        return range(ESBConfig.first_day, ESBConfig.last_day + 1)
 
     try:
         ivalue = int(value)
-        if ivalue < day_01:
+        if ivalue < ESBConfig.first_day:
             message = f"{value} is not a valid AoC day. Please try from 1 onwards."
             raise argparse.ArgumentTypeError(message)
 
-        if ivalue > day_25:
+        if ivalue > ESBConfig.last_day:
             message = f"{value} is not a valid AoC day. Please try from 1 up to 25."
             raise argparse.ArgumentTypeError(message)
 

@@ -14,7 +14,8 @@ from __future__ import annotations
 from itertools import product
 from typing import TYPE_CHECKING
 
-from esb.commands.base import eprint_error, is_esb_repo, oprint_error, oprint_info
+from esb.commands.base import eprint_error, is_esb_repo, oprint_error, oprint_info, oprint_none
+from esb.config import ESBConfig
 from esb.db import ElvenCrisisArchive
 from esb.paths import CacheSled, pad_day
 
@@ -40,7 +41,7 @@ def show_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int):
     if not statement_file.is_file():
         eprint_error("Problem not fetched yet!")
     else:
-        oprint_info(statement_file.read_text())
+        oprint_none(statement_file.read_text())
 
     not_solved = "<'Not solved yet'>"
     oprint_info()
@@ -48,10 +49,12 @@ def show_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int):
         oprint_info(f"Solution pt1: {dp.pt1_answer}")
     else:
         oprint_error(f"Solution pt1: {not_solved}")
-    if dp.pt2_answer is not None:
-        oprint_info(f"Solution pt2: {dp.pt2_answer}")
-    else:
-        oprint_error(f"Solution pt2: {not_solved}")
+
+    if day != ESBConfig.last_day:
+        if dp.pt2_answer is not None:
+            oprint_info(f"Solution pt2: {dp.pt2_answer}")
+        else:
+            oprint_error(f"Solution pt2: {not_solved}")
 
     dl = db.ECALanguage.find({"year": year, "day": day})
     if dl is not None:

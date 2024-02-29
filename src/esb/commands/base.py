@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from rich.console import Console
+from rich.theme import Theme
 
 from esb.paths import TestSled, find_esb_root, pad_day
 
@@ -30,11 +31,13 @@ COLOR_INFO = "bold green"
 COLOR_ERROR = "bold red"
 COLOR_WARN = "bold yellow"
 eprint_info = Console(stderr=True, style=COLOR_INFO).print
-oprint_info = Console(style=COLOR_INFO).print
-eprint_warn = Console(stderr=True, style=COLOR_WARN).print
-oprint_warn = Console(style=COLOR_WARN).print
 eprint_error = Console(stderr=True, style=COLOR_ERROR).print
+eprint_none = Console(stderr=True, theme=Theme(inherit=False)).print
+eprint_warn = Console(stderr=True, style=COLOR_WARN).print
+oprint_info = Console(style=COLOR_INFO).print
 oprint_error = Console(style=COLOR_ERROR).print
+oprint_none = Console(theme=Theme(inherit=False)).print
+oprint_warn = Console(style=COLOR_WARN).print
 
 
 def is_esb_repo(fn):

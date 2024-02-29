@@ -14,6 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from esb.config import ESBConfig
 from esb.paths import pad_day
 
 if TYPE_CHECKING:
@@ -46,6 +47,8 @@ class CliDash:
         stats = self.db.ECAPuzzle.fetch_all()
 
         def cmp_year(s):
+            if s.day == ESBConfig.last_day and s.pt1_answer is not None:  # Day 25 has only one star
+                return 2
             return 0 if s.pt1_answer is None else 1 if s.pt2_answer is None else 2
 
         return self.count_stars(stats, cmp_year)
