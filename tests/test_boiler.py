@@ -14,7 +14,7 @@ from pathlib import Path
 from esb.boiler import CodeFurnace
 from esb.langs import LangMap
 from esb.paths import LangSled
-from tests.lib.temporary import TestWithInitializedEsbRepo
+from tests.lib import TestWithInitializedEsbRepo
 
 
 class TestBoiler(TestWithInitializedEsbRepo):

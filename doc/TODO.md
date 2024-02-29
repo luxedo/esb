@@ -32,7 +32,7 @@
 ~~1. Test #Currently supported languages hyperlinkn in README~~
 ~~1. Check if MyPy is working~~
 1. Handle day 25 star
-1. Mock AOC_SESSION_COOKIE in tests
+~~1. Mock AOC_SESSION_COOKIE in tests~~
 1. Test CLI
 ~~1. Create executable~~
 

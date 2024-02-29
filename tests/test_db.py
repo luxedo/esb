@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 from esb import db
-from tests.lib.temporary import TestWithTemporaryDirectory
+from tests.lib import TestWithTemporaryDirectory
 
 
 class TestSqlConnection(TestWithTemporaryDirectory):

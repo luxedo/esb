@@ -9,19 +9,17 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
-import io
 import os
 import unittest
 from argparse import ArgumentTypeError, Namespace
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
 from esb.cli import aoc_day, aoc_year, esb_parser, main
 from esb.langs import LangMap
 from esb.paths import CacheSled, LangSled
-from tests.lib.temporary import TestWithInitializedEsbRepo, TestWithTemporaryDirectory
+from tests.lib import CliMock, TestWithInitializedEsbRepo, TestWithTemporaryDirectory
 from tests.mock import STATEMENT_HTML
 
 
@@ -91,37 +89,6 @@ class TestEsbParser(TestWithInitializedEsbRepo):
             [_, *args] = command.split()
             with self.subTest(command=f"Non working command: {command}"), pytest.raises(SystemExit, match="2"):
                 self.parser.parse_args(args)
-
-
-class CliMock:
-    command: list[str]
-    http_response: str
-    stderr: io.StringIO
-    stdout: io.StringIO
-
-    def __init__(self, command: list[str], http_response: str = ""):
-        self.command = command
-        self.http_response = http_response
-
-    def __enter__(self):
-        self.stderr = io.StringIO()
-        self.stdout = io.StringIO()
-
-        self.patchers = [
-            patch("sys.argv", self.command),
-            patch("sys.stderr", new_callable=lambda: self.stderr),
-            patch("sys.stdout", new_callable=lambda: self.stdout),
-            patch("esb.fetch.RudolphFetcher.http_get", return_value=self.http_response),
-        ]
-
-        for patcher in self.patchers:
-            patcher.start()
-
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        for patcher in reversed(self.patchers):
-            patcher.stop()
 
 
 class TestCli(TestWithTemporaryDirectory):

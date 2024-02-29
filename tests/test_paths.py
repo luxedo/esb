@@ -13,7 +13,7 @@ import pytest
 
 from esb import paths
 from esb.langs import LangMap
-from tests.lib.temporary import TestWithInitializedEsbRepo
+from tests.lib import TestWithInitializedEsbRepo
 
 
 class TestPaths(TestWithInitializedEsbRepo):
