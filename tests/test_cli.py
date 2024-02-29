@@ -22,8 +22,7 @@ from esb.cli import aoc_day, aoc_year, esb_parser, main
 from esb.langs import LangMap
 from esb.paths import CacheSled, LangSled
 from tests.lib.temporary import TestWithInitializedEsbRepo, TestWithTemporaryDirectory
-
-ROOT_DIR = Path(__file__).parent
+from tests.mock import STATEMENT_HTML
 
 
 class TestParserTypes(unittest.TestCase):
@@ -90,8 +89,39 @@ class TestEsbParser(TestWithInitializedEsbRepo):
         self.parser = esb_parser()
         for command in commands:
             [_, *args] = command.split()
-            with self.subTest(command=f"Non working command: {command}"), pytest.raises(SystemExit):
+            with self.subTest(command=f"Non working command: {command}"), pytest.raises(SystemExit, match="2"):
                 self.parser.parse_args(args)
+
+
+class CliMock:
+    command: list[str]
+    http_response: str
+    stderr: io.StringIO
+    stdout: io.StringIO
+
+    def __init__(self, command: list[str], http_response: str = ""):
+        self.command = command
+        self.http_response = http_response
+
+    def __enter__(self):
+        self.stderr = io.StringIO()
+        self.stdout = io.StringIO()
+
+        self.patchers = [
+            patch("sys.argv", self.command),
+            patch("sys.stderr", new_callable=lambda: self.stderr),
+            patch("sys.stdout", new_callable=lambda: self.stdout),
+            patch("esb.fetch.RudolphFetcher.http_get", return_value=self.http_response),
+        ]
+
+        for patcher in self.patchers:
+            patcher.start()
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        for patcher in reversed(self.patchers):
+            patcher.stop()
 
 
 class TestCli(TestWithTemporaryDirectory):
@@ -108,7 +138,6 @@ class TestCli(TestWithTemporaryDirectory):
     dashboard
     """
 
-    TEST_STATEMENT = (ROOT_DIR / "mock" / "statement.html").read_text()
     TEST_YEAR = 2020
     TEST_DAY = 9
 
@@ -120,46 +149,26 @@ class TestCli(TestWithTemporaryDirectory):
     cmd_status = "esb status".split()
 
     def esb_new(self):
-        with (
-            patch("sys.argv", self.cmd_new),
-            patch("sys.stderr", new_callable=io.StringIO),
-            patch("sys.stdout", new_callable=io.StringIO),
-        ):
+        with CliMock(self.cmd_new, ""):
             main()
 
     def esb_fetch(self):
-        with (
-            patch("sys.argv", self.cmd_fetch),
-            patch("sys.stderr", new_callable=io.StringIO),
-            patch("sys.stdout", new_callable=io.StringIO),
-            patch(
-                "esb.fetch.RudolphFetcher.http_get",
-                return_value=self.TEST_STATEMENT,
-            ),
-        ):
+        with CliMock(self.cmd_fetch, STATEMENT_HTML.read_text()):
             main()
 
     def test_new(self):
-        with (
-            patch("sys.argv", self.cmd_new),
-            patch("sys.stderr", new_callable=io.StringIO) as stderr,
-            patch("sys.stdout", new_callable=io.StringIO),
-        ):
+        command = self.cmd_new
+        with CliMock(command) as clim:
             main()
-            text = stderr.getvalue()
+        text = clim.stderr.getvalue()
         assert "Thank you for saving Christmas" in text
 
     def test_new_must_fail_when_runing_in_an_esb_repo(self):
         self.esb_new()
-
-        with (
-            patch("sys.argv", self.cmd_new),
-            patch("sys.stderr", new_callable=io.StringIO) as stderr,
-            patch("sys.stdout", new_callable=io.StringIO),
-        ):
-            with pytest.raises(SystemExit):
-                main()
-            text = stderr.getvalue()
+        command = self.cmd_new
+        with CliMock(command) as clim, pytest.raises(SystemExit, match="1"):
+            main()
+        text = clim.stderr.getvalue()
         assert "Cannot initialize" in text
 
     def test_fetch(self):
@@ -172,34 +181,23 @@ class TestCli(TestWithTemporaryDirectory):
         assert not statement_file.is_file()
         assert not input_file.is_file()
 
-        with (
-            patch("sys.argv", self.cmd_fetch),
-            patch("sys.stderr", new_callable=io.StringIO),
-            patch("sys.stdout", new_callable=io.StringIO),
-            patch(
-                "esb.fetch.RudolphFetcher.http_get",
-                return_value=self.TEST_STATEMENT,
-            ) as mock_http_get,
-        ):
+        command = self.cmd_fetch
+        http_response = STATEMENT_HTML.read_text()
+        with CliMock(command, http_response) as clim:
             main()
-
-        assert mock_http_get.called
+        text = clim.stderr.getvalue()
+        assert "Fetched year" in text
         assert statement_file.is_file()
         assert input_file.is_file()
 
     def test_start(self):
         self.esb_new()
-
-        with (
-            patch("sys.argv", self.cmd_start),
-            patch("sys.stderr", new_callable=io.StringIO),
-            patch("sys.stdout", new_callable=io.StringIO),
-            patch(
-                "esb.fetch.RudolphFetcher.http_get",
-                return_value=self.TEST_STATEMENT,
-            ),
-        ):
+        command = self.cmd_start
+        http_response = STATEMENT_HTML.read_text()
+        with CliMock(command, http_response) as clim:
             main()
+        text = clim.stderr.getvalue()
+        assert "Started code for" in text, text
 
         lmap = LangMap.load_defaults()
         lang = lmap.get(self.language_name)
@@ -210,32 +208,20 @@ class TestCli(TestWithTemporaryDirectory):
     def test_show(self):
         self.esb_new()
         self.esb_fetch()
-
-        with (
-            patch("sys.argv", self.cmd_show),
-            patch("sys.stderr", new_callable=io.StringIO),
-            patch("sys.stdout", new_callable=io.StringIO) as stdout,
-            patch(
-                "esb.fetch.RudolphFetcher.http_get",
-                return_value=self.TEST_STATEMENT,
-            ),
-        ):
+        command = self.cmd_show
+        http_response = STATEMENT_HTML.read_text()
+        with CliMock(command, http_response) as clim:
             main()
-
-        text = stdout.getvalue()
-        assert "Solution pt1" in text
+        text = clim.stdout.getvalue()
+        assert "Solution pt1" in text, text
 
     def test_status(self):
         self.esb_new()
 
-        with (
-            patch("sys.argv", self.cmd_status),
-            patch("sys.stderr", new_callable=io.StringIO),
-            patch("sys.stdout", new_callable=io.StringIO) as stdout,
-        ):
+        command = self.cmd_status
+        with CliMock(command) as clim:
             main()
-
-        text = stdout.getvalue()
+        text = clim.stdout.getvalue()
         assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
 
     def test_status_runs_in_any_esb_repo_subdir(self):
@@ -245,24 +231,15 @@ class TestCli(TestWithTemporaryDirectory):
         Path(dir_name).mkdir()
         os.chdir(dir_name)
 
-        with (
-            patch("sys.argv", self.cmd_status),
-            patch("sys.stderr", new_callable=io.StringIO),
-            patch("sys.stdout", new_callable=io.StringIO) as stdout,
-        ):
+        command = self.cmd_status
+        with CliMock(command) as clim:
             main()
-
-        text = stdout.getvalue()
+        text = clim.stdout.getvalue()
         assert "ELFSCRIPT BRIGADE STATUS REPORT" in text
 
     def test_status_should_fail_when_running_not_in_an_esb_repo(self):
-        with (
-            patch("sys.argv", self.cmd_status),
-            patch("sys.stderr", new_callable=io.StringIO) as stderr,
-            patch("sys.stdout", new_callable=io.StringIO),
-            pytest.raises(SystemExit),
-        ):
+        command = self.cmd_status
+        with CliMock(command) as clim, pytest.raises(SystemExit, match="2"):
             main()
-
-        text = stderr.getvalue()
+        text = clim.stderr.getvalue()
         assert "Fatal: this is not an ElfScript Brigade repo" in text
