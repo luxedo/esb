@@ -10,11 +10,6 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/esb.svg)](https://pypi.org/project/esb) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/esb.svg)](https://pypi.org/project/esb) [![License: GPL v3](https://img.shields.io/badge/License-GPL_v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/luxedo/esb/publish.yml) ![Codecov](https://img.shields.io/codecov/c/github/luxedo/esb) ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/luxedo/esb)
 
-
-
-
-
-
 ---
 
 In the bureaucratic workshop of Santa's IT department, where the spirit of Christmas and the magic of coding converge, a special group of coding elves emerged known as the **ElfScript Brigade**. These skilled and whimsical elves were bestowed with the mission of safeguarding the joyous essence of Christmas through the power of scripting and coding.
@@ -178,8 +173,6 @@ Any program that supports the [FIREPLACEv1](doc/FIREPLACEv1.0.md) prococol can u
 - **But, why python 3.11? What about my Debian friends?**
 
   > Because the developer wanted to some of the newest features
-
-
 
 ## Rules of Automation
 
