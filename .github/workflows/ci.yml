@@ -1,19 +1,12 @@
-name: Publish to PyPI
+name: Python CI
 
 on:
-  release:
-    types: [published]
-
-permissions:
-  contents: read
+  push:
+    branches: [main]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
-    environment: release
-    permissions:
-      id-token: write
 
     steps:
       - uses: actions/checkout@v3
@@ -29,11 +22,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install hatch
 
+      - name: Lint/Format
+        run: hatch fmt
+
+      - name: Mypy
+        run: hatch run check
+
       - name: Build package
         run: hatch build
 
       - name: Test package
-        run: hatch run test
+        run: hatch run cov
 
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: luxedo/esb
