@@ -63,6 +63,10 @@ cov = [
   "test-cov",
   "cov-report",
 ]
+cov-xml = [
+  "cov",
+  "coverage xml",
+]
 check = "mypy --install-types --non-interactive {args:src/esb tests}"
 
 [tool.mypy]

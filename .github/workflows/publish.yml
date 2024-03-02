@@ -29,6 +29,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install hatch
 
+      - name: Lint/Format
+        run: hatch fmt
+
+      - name: Mypy
+        run: hatch run check
+
       - name: Build package
         run: hatch build
 
