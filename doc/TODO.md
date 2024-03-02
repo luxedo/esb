@@ -49,7 +49,7 @@
    ~~1. aoc_parser types: Check day correctly~~
 1. Mock fetch properly
 1. Standardize exit codes
-1. Redo parser
+   ~~1. Redo parser ~~
 1. Write PT-Br documentation
 1. Document development guidelines
 1. Get tests from HTML

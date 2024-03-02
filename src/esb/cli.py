@@ -90,18 +90,11 @@ class Command(Enum):
     dashboard = auto()
 
 
-def esb_parser() -> argparse.ArgumentParser:
-    cmd_descriptions = {
-        Command.new: "Initializes the ESB repo tool",
-        Command.fetch: "Fetches problem statement and data",
-        Command.start: "Prepares boilerplate code for the given language and day",
-        Command.show: "Show problem statement and answers",
-        Command.status: "Checks progress",
-        Command.test: "Runs test cases",
-        Command.run: "Runs with real input",
-        Command.dashboard: "Rebuilds the dashboard",
-    }
+def set_arguments(parser, args, kwargs):
+    parser.add_argument(*args, **kwargs)
 
+
+def esb_parser() -> argparse.ArgumentParser:
     description = (
         "Script your way to rescue Christmas as part of the ElfScript Brigade team.\n\n"
         "`esb` is a CLI tool to help us _elves_ to save Christmas for the [Advent Of Code](https://adventofcode.com/)"
@@ -119,53 +112,87 @@ def esb_parser() -> argparse.ArgumentParser:
         dest="command",
     )
     lmap = LangMap.load()
-    parsers = {}
-    for cmd in Command:
-        parsers[cmd] = subparsers.add_parser(cmd.name, description=cmd_descriptions[cmd])
-        if cmd in {Command.fetch, Command.start}:
-            parsers[cmd].add_argument(
-                "-f",
-                "--force",
-                action="store_true",
-                help="Ignore cache and fetch again",
-            )
 
-        if cmd in {Command.fetch, Command.start, Command.show}:
-            parsers[cmd].add_argument("-y", "--year", required=True, nargs="+", type=aoc_year, help="AoC year")
-            parsers[cmd].add_argument("-d", "--day", required=True, nargs="+", type=aoc_day, help="AoC day")
+    cmd_descriptions = {
+        Command.new: "Initializes the ESB repo tool",
+        Command.fetch: "Fetches problem statement and data",
+        Command.start: "Prepares boilerplate code for the given language and day",
+        Command.show: "Show problem statement and answers",
+        Command.status: "Checks progress",
+        Command.test: "Runs test cases",
+        Command.run: "Runs with real input",
+        Command.dashboard: "Rebuilds the dashboard",
+    }
 
-        if cmd == Command.start:
-            parsers[cmd].add_argument(
-                "-l",
-                "--language",
-                required=True,
-                action=AocLangAction,
-                lmap=lmap,
-                choices=lmap.names,
-            )
+    parsers = {cmd: subparsers.add_parser(cmd.name, description=cmd_descriptions[cmd]) for cmd in Command}
 
-        if cmd in {Command.test, Command.run}:
-            parsers[cmd].add_argument(
-                "-l",
-                "--language",
-                required=True,
-                action=AocLangAction,
-                lmap=lmap,
-                choices=lmap.names,
-            )
-            parsers[cmd].add_argument("-y", "--year", nargs="+", type=aoc_year, help="AoC year")
-            parsers[cmd].add_argument("-d", "--day", nargs="+", type=aoc_day, help="AoC day")
+    # Arguments
+    force_arg = (
+        ["-f", "--force"],
+        {"action": "store_true", "help": "Ignore cache and fetch again"},
+    )
+    year_arg = (
+        ["-y", "--year"],
+        {"required": True, "nargs": "+", "type": aoc_year, "help": "AoC year"},
+    )
+    day_arg = (
+        ["-d", "--day"],
+        {"required": True, "nargs": "+", "type": aoc_day, "help": "AoC day"},
+    )
+    lang_arg = (
+        ["-l", "--language"],
+        {
+            "required": True,
+            "action": AocLangAction,
+            "lmap": lmap,
+            "choices": lmap.names,
+        },
+    )
+    submit_arg = (
+        ["-s", "--submit"],
+        {"action": "store_true", "help": "Submits solution"},
+    )
+    part_arg = (
+        ["-p", "--parts"],
+        {
+            "required": True,
+            "choices": get_args(FPPart),
+            "type": int,
+            "help": "Run for part 1 or part 2",
+        },
+    )
 
-        if cmd in {Command.run, Command.test}:
-            parsers[cmd].add_argument("-s", "--submit", action="store_true", help="Submits solution")
-            parsers[cmd].add_argument(
-                "-p",
-                "--parts",
-                required=True,
-                choices=get_args(FPPart),
-                type=int,
-                help="Run for part 1 or part 2",
-            )
+    # New
+    # Fetch
+    set_arguments(parsers[Command.fetch], *year_arg)
+    set_arguments(parsers[Command.fetch], *day_arg)
+    set_arguments(parsers[Command.fetch], *force_arg)
+
+    # Start
+    set_arguments(parsers[Command.start], *year_arg)
+    set_arguments(parsers[Command.start], *day_arg)
+    set_arguments(parsers[Command.start], *lang_arg)
+    set_arguments(parsers[Command.start], *force_arg)
+
+    # Show
+    set_arguments(parsers[Command.show], *year_arg)
+    set_arguments(parsers[Command.show], *day_arg)
+
+    # Status
+    # Test
+    set_arguments(parsers[Command.test], *year_arg)
+    set_arguments(parsers[Command.test], *day_arg)
+    set_arguments(parsers[Command.test], *lang_arg)
+    set_arguments(parsers[Command.test], *part_arg)
+
+    # Run
+    set_arguments(parsers[Command.run], *year_arg)
+    set_arguments(parsers[Command.run], *day_arg)
+    set_arguments(parsers[Command.run], *lang_arg)
+    set_arguments(parsers[Command.run], *part_arg)
+    set_arguments(parsers[Command.run], *submit_arg)
+
+    # Dashboard
 
     return parser
 
@@ -196,11 +223,3 @@ def main():
         case _:
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)
-    #     case Command.run | Command.test:
-    #         aoc_main(spec, RunMode[args.command], args.year, args.day)
-    #     case Command.fetch:
-    #         prepare_template(spec, args.year, args.day, cookie)
-    #     case Command.fetch2:
-    #         update_main_template(spec, args.year, args.day, cookie)
-    #     case _:
-    #         raise ValueError(f"Command '{args.command}' not found.")
