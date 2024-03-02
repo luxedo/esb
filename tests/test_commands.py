@@ -16,7 +16,7 @@ from unittest.mock import patch
 
 from esb.commands.base import find_tests
 from esb.commands.base import load_tests as esb_load_tests
-from esb.paths import TestSled
+from esb.paths import CacheTestSled
 from esb.protocol.fireplacev1_0 import FPPart
 from tests.lib import TestWithInitializedEsbRepo
 from tests.mock import TESTS_ERROR_TOML, TESTS_MISSING_TOML, TESTS_SUCCESS_TOML
@@ -57,7 +57,7 @@ class TestCommandsBaseFindTests(TestWithInitializedEsbRepo):
     part: FPPart = 1
 
     def test_find_tests(self):
-        ts = TestSled(self.repo_root)
+        ts = CacheTestSled(self.repo_root)
         day_dir = ts.day_dir(self.year, self.day)
         day_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy(TESTS_SUCCESS_TOML, day_dir)

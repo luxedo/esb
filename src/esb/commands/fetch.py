@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from esb.commands.base import eprint_error, eprint_info, is_esb_repo
 from esb.db import ElvenCrisisArchive
 from esb.fetch import RudolphFetcher
-from esb.paths import CacheSled, pad_day
+from esb.paths import CacheInputSled, pad_day
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -40,7 +40,7 @@ def fetch_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int, *, f
 
     url, statement, pt1_answer, pt2_answer = rudolph.fetch_statement(year, day)
 
-    cache_sled = CacheSled(repo_root)
+    cache_sled = CacheInputSled(repo_root)
     st_file = cache_sled.path("statement", year, day)
     st_file.parent.mkdir(parents=True, exist_ok=True)
     st_file.write_text(statement)

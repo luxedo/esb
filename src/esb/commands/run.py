@@ -19,7 +19,7 @@ from esb.commands.base import eprint_error, eprint_info, eprint_warn, find_puzzl
 from esb.db import ElvenCrisisArchive
 from esb.fetch import RudolphFetcher, RudolphSubmitStatus
 from esb.langs import LangRunner, LangSpec
-from esb.paths import CacheSled, LangSled, pad_day
+from esb.paths import CacheInputSled, LangSled, pad_day
 from esb.protocol import fireplacev1_0 as fp1_0
 
 if TYPE_CHECKING:
@@ -57,7 +57,7 @@ def run_day(
     if (dp := find_puzzle(db, year, day)) is None:
         return
 
-    cache_sled = CacheSled(repo_root)
+    cache_sled = CacheInputSled(repo_root)
     lang_sled = LangSled.from_spec(repo_root, lang)
     runner = LangRunner(lang, lang_sled)
     command = runner.build_command(year=year, day=day)

@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from rich.console import Console
 from rich.theme import Theme
 
-from esb.paths import TestSled, find_esb_root, pad_day
+from esb.paths import CacheTestSled, find_esb_root, pad_day
 
 if TYPE_CHECKING:
     from esb.db import ECALanguage, ECAPuzzle, ElvenCrisisArchive
@@ -74,7 +74,7 @@ def find_puzzle(db: ElvenCrisisArchive, year: int, day: int) -> ECAPuzzle | None
 
 
 def find_tests(repo_root: Path, year: int, day: int, part: fp1_0.FPPart) -> list[tuple[str, dict]]:
-    ts = TestSled(repo_root)
+    ts = CacheTestSled(repo_root)
     day_dir = ts.day_dir(year, day)
 
     test_files = [file for file in day_dir.iterdir() if file.suffix == ".toml"] if day_dir.is_dir() else []

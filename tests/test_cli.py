@@ -18,7 +18,7 @@ import pytest
 
 from esb.cli import aoc_day, aoc_year, esb_parser, main
 from esb.langs import LangMap
-from esb.paths import CacheSled, LangSled
+from esb.paths import CacheInputSled, LangSled
 from tests.lib import CliMock, TestWithInitializedEsbRepo, TestWithTemporaryDirectory
 from tests.mock import STATEMENT_HTML
 
@@ -142,7 +142,7 @@ class TestCli(TestWithTemporaryDirectory):
         self.esb_new()
 
         repo_root = Path.cwd()
-        cs = CacheSled(repo_root)
+        cs = CacheInputSled(repo_root)
         statement_file = cs.path("statement", self.TEST_YEAR, self.TEST_DAY)
         input_file = cs.path("input", self.TEST_YEAR, self.TEST_DAY)
         assert not statement_file.is_file()

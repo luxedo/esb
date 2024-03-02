@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from esb.commands.base import eprint_error, is_esb_repo, oprint_error, oprint_info, oprint_none
 from esb.config import ESBConfig
 from esb.db import ElvenCrisisArchive
-from esb.paths import CacheSled, pad_day
+from esb.paths import CacheInputSled, pad_day
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -32,7 +32,7 @@ def show(repo_root: Path, years: list[int], days: list[int]):
 
 def show_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int):
     dp = db.ECAPuzzle.find_single({"year": year, "day": day})
-    cache_sled = CacheSled(repo_root)
+    cache_sled = CacheInputSled(repo_root)
     statement_file = cache_sled.path("statement", year, day)
     if dp is None:
         eprint_error(f"Solution for year {year} day {pad_day(day)} not cached. Please fetch first")

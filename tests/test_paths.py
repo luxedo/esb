@@ -18,11 +18,11 @@ from tests.lib import TestWithInitializedEsbRepo
 
 class TestPaths(TestWithInitializedEsbRepo):
     def test_cachesled_getitem(self):
-        cache_sled = paths.CacheSled(self.repo_root)
+        cache_sled = paths.CacheInputSled(self.repo_root)
         assert str(cache_sled.path("statement", year=2016, day=24)).endswith(".cache/2016/24/day_24_statement.txt")
 
     def test_cachesled_getitem_missing_key(self):
-        cache_sled = paths.CacheSled(self.repo_root)
+        cache_sled = paths.CacheInputSled(self.repo_root)
         with pytest.raises(KeyError, match="Could not find path for file"):
             cache_sled.path(file="missing key", year=2016, day=24)
 
