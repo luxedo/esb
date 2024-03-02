@@ -1,6 +1,6 @@
 # ESB - ElfScript Brigade
 
-> ⚠️ This project is under development! It hasn't been released yet
+> ⚠️ This project is under development!
 
 > Script your way to rescue Christmas as part of the ElfScript Brigade team.
 >
