@@ -37,6 +37,4 @@ def status(repo_root: Path):
     ys = cli_dash.years_summary()
 
     for year in sorted(ys.keys(), reverse=True):
-        summary = ys[year]
-        oprint_info(f"\n{year}")
-        oprint_warn(f"\n{summary}")
+        oprint_warn(f"\n{ys[year]}")

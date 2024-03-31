@@ -31,3 +31,4 @@ class ESBConfig:
     first_year = 2015
     first_day = 1
     last_day = 25
+    max_parts = 2

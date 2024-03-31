@@ -67,7 +67,10 @@ def test_day(
     run_command = runner.prepare_run_command(year=year, day=day)
     for name, test in tests:
         day_input_text = test["input"]
-        result = fp1_0.exec_protocol(run_command, part, day_wd, day_input_text)
+        if "args" in test:
+            test["args"] = [str(arg) for arg in test["args"]]
+        args = test.get("args")
+        result = fp1_0.exec_protocol(run_command, part, args, day_wd, day_input_text)
         match (result.status, result.answer == str(test["answer"])):
             case (fp1_0.FPStatus.Ok, True):
                 eprint_info(f"✔ Answer {name} pt{part}: {result.answer}")

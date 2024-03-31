@@ -62,6 +62,13 @@ class CliDash:
         return {lang: self.count_stars(rows, cmp_lang) for lang, rows in self.groupby(langs, "language").items()}
 
     @staticmethod
+    def build_year_str(year: int, days: dict[int, int]) -> str:
+        solved_all = (
+            all(v == ESBConfig.max_parts for v in days.values()) and len(set(days.keys())) == ESBConfig.last_day
+        )
+        return f"* {year}" if solved_all else f"  {year}"
+
+    @staticmethod
     def build_stars_str(days: dict[int, int], symbol: str) -> str:
         return " ".join([f"{symbol * days.get(day, 0):<2}" for day in range(1, 26)])
 
@@ -76,12 +83,13 @@ class CliDash:
 
         ret = {}
         for year, days in year_stars.items():
+            year_title = self.build_year_str(year, days)
             langs_str = "\n".join([
                 self.build_stars_str(lang_stars[lang].get(year, {}), self.lmap.get(lang).symbol) for lang in langs
             ]).rstrip()
             stars_str = self.build_stars_str(days, "*")
             days_str = " ".join([f"{pad_day(day)}" for day in range(1, 26)])
             sep_str = "=".join(["==" for day in range(1, 26)])
-            summary = f"{langs_str}\n{stars_str}\n{days_str}\n{sep_str}"
+            summary = f"{year_title}\n\n{langs_str}\n{stars_str}\n{days_str}\n{sep_str}"
             ret[year] = summary
         return ret

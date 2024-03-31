@@ -73,7 +73,8 @@ def run_day(
 
     run_command = runner.prepare_run_command(year=year, day=day)
     day_input = cache_sled.path("input", year, day)
-    result = fp1_0.exec_protocol_from_file(run_command, part, day_wd, day_input)
+    args = None
+    result = fp1_0.exec_protocol_from_file(run_command, part, args, day_wd, day_input)
     match result.status:
         case fp1_0.FPStatus.Ok:
             pass

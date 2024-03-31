@@ -131,15 +131,25 @@ def _parse_running_time(running_time_line: str) -> tuple[int, MetricPrefix]:
     raise ValueError(message)
 
 
-def exec_protocol_from_file(command: list[str], part: FPPart, cwd: Path, day_input: Path) -> FPResult:
+def exec_protocol_from_file(
+    command: list[str], part: FPPart, args: list[str] | None, cwd: Path, day_input: Path
+) -> FPResult:
     if not day_input.is_file():
         return FPResult(status=FPStatus.InputDoesNotExists)
     day_input_text = day_input.read_text()
-    return exec_protocol(command, part, cwd, day_input_text)
+    return exec_protocol(command, part, args, cwd, day_input_text)
 
 
-def exec_protocol(command: list[str], part: FPPart, cwd: Path, day_input_text: str) -> FPResult:
+def exec_protocol(
+    command: list[str],
+    part: FPPart,
+    args: list[str] | None,
+    cwd: Path,
+    day_input_text: str,
+) -> FPResult:
     cmd = [*command, "--part", f"{part}"]
+    if args is not None:
+        cmd.extend(["--args", *args])
     exitcode, (stdout, out_lines) = asyncio.run(_exec_protocol_command(cmd, cwd, day_input_text))
 
     success_exit = 0

@@ -97,7 +97,7 @@ class TestExecProtocol(unittest.TestCase):
         with NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as fp:
             fp.write(input_data)
             fp.seek(0)
-            result = exec_protocol_from_file(list(command), part=part, cwd=cwd, day_input=Path(fp.name))
+            result = exec_protocol_from_file(list(command), part=part, args=None, cwd=cwd, day_input=Path(fp.name))
             fp.close()
         return result
 
@@ -119,6 +119,7 @@ class TestExecProtocol(unittest.TestCase):
         result = exec_protocol_from_file(
             list(self.command),
             part=1,
+            args=None,
             cwd=Path.cwd(),
             day_input=Path("This input does not exists"),
         )

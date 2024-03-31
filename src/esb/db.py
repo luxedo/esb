@@ -266,7 +266,7 @@ class ECALanguage(Table):
     def set_solved(self, part: FPPart):
         self.update({f"finished_pt{part}": True})
         if self.day == ESBConfig.last_day:  # Day 25 has only one star
-            self.update({f"finished_pt{(part + 1) % 2}": True})
+            self.update({"finished_pt2": True})
 
     def set_unsolved(self, part: FPPart):
         self.update({f"finished_pt{part}": False})
