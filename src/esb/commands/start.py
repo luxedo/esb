@@ -11,13 +11,15 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
+import sys
 from itertools import product
 from typing import TYPE_CHECKING
 
 from esb.boiler import CodeFurnace
-from esb.commands.base import eprint_error, eprint_info, is_esb_repo
+from esb.commands.base import eprint_error, eprint_info, eprint_warn, is_esb_repo
 from esb.commands.fetch import fetch_day
 from esb.db import ElvenCrisisArchive
+from esb.langs import LangRunner
 from esb.paths import LangSled, pad_day
 
 if TYPE_CHECKING:
@@ -41,8 +43,15 @@ def start_day(repo_root: Path, db: ElvenCrisisArchive, lang: LangSpec, year: int
             day_problem = db.ECAPuzzle.find_single({"year": year, "day": day})
 
     day_language = db.ECALanguage.find_single({"year": year, "day": day, "language": lang.name})
-    match day_language:
-        case db.ECALanguage(started=True):
+    match (day_language, force):
+        case (None, _):
+            pass
+        case (db.ECALanguage(), True):
+            eprint_warn(
+                f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. ' "Overwritting...",
+            )
+            day_language.delete()
+        case (db.ECALanguage(started=True), _):
             eprint_error(
                 f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. '
                 "If you wish to overwrite run the command with --force flag.",
@@ -53,6 +62,13 @@ def start_day(repo_root: Path, db: ElvenCrisisArchive, lang: LangSpec, year: int
     lang_sled = LangSled.from_spec(repo_root, lang)
     cf = CodeFurnace(lang, lang_sled)
     cf.start(year, day, day_problem.title, day_problem.url)
+
+    if lang.install is not None:
+        runner = LangRunner(lang, lang_sled)
+        p = runner.exec_command(lang.install, year, day)
+        if p.returncode != 0:
+            eprint_error(f"Could not install program for: {lang.name}, year {year} day {pad_day(day)}")
+            sys.exit(2)
 
     db.ECALanguage(
         year=year,

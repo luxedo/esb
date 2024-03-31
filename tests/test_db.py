@@ -192,6 +192,20 @@ class TestTable(TestWithTemporaryDirectory):
         with pytest.raises(RuntimeError, match="should have found one or zero rows"):
             self.SantaTable.find_single({"text": "abc"})
 
+    def test_delete(self):
+        self.row0.insert()
+        self.row1.insert()
+        rows = list(self.SantaTable.fetch_all())
+        assert len(rows) == 2
+        self.row1.delete()
+        rows = list(self.SantaTable.fetch_all())
+        assert len(rows) == 1
+        [row0] = rows
+        assert self.row0 == row0
+        self.row0.delete()
+        rows = list(self.SantaTable.fetch_all())
+        assert len(rows) == 0
+
 
 class TestElvenCrisisArchive(TestWithTemporaryDirectory):
     def test_create_tables(self):

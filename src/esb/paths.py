@@ -115,6 +115,10 @@ class LangSled(YearSled):
     def boiler_subdir(self) -> Path:
         return ESBConfig.boiler_root / self.name / ESBConfig.boiler_template
 
+    @property
+    def boiler_base_subdir(self) -> Path:
+        return self.boiler_subdir.parent / ESBConfig.boiler_template_base
+
     def boiler_source(self, filename: str) -> Path:
         return self.boiler_subdir / filename
 
@@ -126,3 +130,6 @@ class LangSled(YearSled):
 
     def copied_map(self, year: int, day: int) -> dict[Path, Path]:
         return {self.copied_source(year, day, file): self.path(file=file, year=year, day=day) for file in self.files}
+
+    def working_dir(self, year: int, day: int) -> Path:
+        return self.day_dir(year, day)

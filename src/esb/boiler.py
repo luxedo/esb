@@ -15,9 +15,11 @@ import shutil
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from esb.paths import pad_day
+from esb.paths import CacheTestSled, pad_day
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from esb.langs import LangSpec
     from esb.paths import LangSled
 
@@ -28,11 +30,25 @@ class CodeFurnace:
     lang_sled: LangSled
 
     def start(self, year: int, day: int, title: str, url: str):
-        src_dir = self.lang_sled.boiler_subdir
         dst_dir = self.lang_sled.day_dir(year, day)
         if dst_dir.is_dir():
             shutil.rmtree(dst_dir)
-        shutil.copytree(src_dir, dst_dir)
+
+        if self.lang_spec.base:
+            self.copy_base(dst_dir)
+
+        self.copy_template(year, day, title, url)
+
+        self.make_test_dir(year, day)
+
+    def copy_base(self, dst_dir: Path):
+        base_dir = self.lang_sled.boiler_base_subdir
+        shutil.copytree(base_dir, dst_dir)
+
+    def copy_template(self, year: int, day: int, title: str, url: str):
+        src_dir = self.lang_sled.boiler_subdir
+        dst_dir = self.lang_sled.day_dir(year, day)
+        shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
 
         for src, dst in self.lang_sled.copied_map(year, day).items():
             shutil.move(src, dst)
@@ -43,3 +59,10 @@ class CodeFurnace:
                 problem_url=url,
             )
             dst.write_text(content)
+
+    def make_test_dir(self, year: int, day: int):
+        ts = CacheTestSled(self.lang_sled.repo_root)
+        day_dir = ts.day_dir(year, day)
+        # print(list(day_dir.iterdir()))
+        if not day_dir.is_dir():
+            day_dir.mkdir(parents=True, exist_ok=True)

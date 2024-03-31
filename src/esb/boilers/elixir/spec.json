@@ -1,0 +1,10 @@
+{
+  "name": "elixir",
+  "files": {
+    "lib/main.ex": "lib/aoc_{year}_{day}.ex"
+  },
+  "run_command": ["mix", "run", "-e", "Year{year}Day{day}.start", "--"],
+  "symbol": "[purple]e[/purple]",
+  "base": true,
+  "install": ["mix", "deps.get"]
+}

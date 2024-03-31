@@ -43,49 +43,48 @@ def solve_pt2(_input_data: str, _args: list[str] | None = None) -> int:
 
 
 class TestRunSolutions(unittest.TestCase):
-    command_pt1 = ("run_solutions", "--part", "1")
-    command_pt2 = ("run_solutions", "--part", "2")
+    command_args_pt1 = ("--part", "1")
+    command_args_pt2 = ("--part", "2")
 
     @staticmethod
-    def run_solutions_context(input_data: str, command: tuple[str, ...]):
+    def run_solutions_context(input_data: str, command_args: tuple[str, ...]):
         input_io = io.StringIO(input_data)
-        with patch("sys.argv", list(command)), patch("sys.stdin", input_io), patch(
+        with patch("sys.argv", ["command_name", *command_args]), patch("sys.stdin", input_io), patch(
             "sys.stderr", new_callable=io.StringIO
         ), patch("sys.stdout", new_callable=io.StringIO) as stdout:
             run_solutions(solve_pt1, solve_pt2)
             return stdout.getvalue()
 
     def test_run_solutions_should_fail_when_not_passing_correct_arguments(self):
-        command = ("run_solutions",)
         with pytest.raises(SystemExit, match="2"):
-            self.run_solutions_context(TEST_INPUT, command)
+            self.run_solutions_context(TEST_INPUT, ())
 
     def test_run_solutions_should_print_the_solution_value_in_the_first_line(self):
-        output = self.run_solutions_context(TEST_INPUT, self.command_pt1)
+        output = self.run_solutions_context(TEST_INPUT, self.command_args_pt1)
         assert output.startswith(f"{TEST_INPUT}\n")
 
     def test_run_solutions_should_print_the_running_time_in_the_second_line(self):
-        output = self.run_solutions_context(TEST_INPUT, self.command_pt1)
+        output = self.run_solutions_context(TEST_INPUT, self.command_args_pt1)
         time, unit = _parse_running_time(output.removeprefix(f"{TEST_INPUT}\n"))
         assert isinstance(time, int)
         assert isinstance(unit, MetricPrefix)
 
     def test_run_solutions_should_have_only_two_lines(self):
-        output = self.run_solutions_context(TEST_INPUT, self.command_pt1)
+        output = self.run_solutions_context(TEST_INPUT, self.command_args_pt1)
         assert len(output.removesuffix("\n").split("\n")) == 2
 
     def test_run_solutions_must_run_the_solution_pt2(self):
-        output = self.run_solutions_context(TEST_INPUT, self.command_pt2)
+        output = self.run_solutions_context(TEST_INPUT, self.command_args_pt2)
         assert output.startswith(f"{PT2_SOLUTION}\n")
 
     def test_run_solutions_must_accept_shorthand_part_argument(self):
-        command = ("run_solutions", "-p", "2")
+        command = ("-p", "2")
         output = self.run_solutions_context(TEST_INPUT, command)
         assert output.startswith(f"{PT2_SOLUTION}\n")
 
     def test_run_solutions_must_accept_optional_positional_arguments(self):
         args = ("a", "b", "c")
-        command = ("run_solutions", "-p", "1", "--args", *args)
+        command = ("-p", "1", "--args", *args)
         output = self.run_solutions_context(TEST_INPUT, command)
         assert output.startswith(f"{' '.join(args)}\n")
 

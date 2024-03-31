@@ -3,6 +3,6 @@
   "files": {
     "main.py": "aoc_{year}_{day}.py"
   },
-  "command": ["python", "{filenames[main.py]}"],
+  "run_command": ["python", "{filenames[main.py]}"],
   "symbol": "[blue]p[/blue]"
 }

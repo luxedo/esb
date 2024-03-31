@@ -11,6 +11,7 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
+import sys
 from itertools import product
 from typing import TYPE_CHECKING
 
@@ -35,6 +36,12 @@ def fetch_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int, *, f
     if not force and dp is not None and dp.pt2_answer is not None:
         eprint_error(f"Fetch for year {year} day {pad_day(day)} is already complete!")
         return
+
+    try:
+        RudolphFetcher.load_cookie(repo_root)
+    except ValueError:
+        eprint_error(f"Could not load {RudolphFetcher.sess_env} environment variable.")
+        sys.exit(2)
 
     rudolph = RudolphFetcher(repo_root)
 

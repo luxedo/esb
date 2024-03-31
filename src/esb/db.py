@@ -210,6 +210,14 @@ class Table:
         self._sql.cur.execute(query, d)
         self._sql.con.commit()
 
+    @check_connection
+    def delete(self):
+        d = self.to_dict()
+        where_params = self.query_named_placeholders(d, sep=" AND ")
+        query = f"DELETE FROM {self.__class__.__name__} WHERE {where_params}"  # noqa: S608
+        self._sql.cur.execute(query, d)
+        self._sql.con.commit()
+
 
 ###########################################################
 # Main DB Interface
@@ -262,6 +270,13 @@ class ECALanguage(Table):
 
     def set_unsolved(self, part: FPPart):
         self.update({f"finished_pt{part}": False})
+
+
+@dataclass(unsafe_hash=True)
+class ECAArgCache(Table):
+    year: int
+    day: int
+    language: str
 
 
 @dataclass(unsafe_hash=True)
@@ -320,11 +335,18 @@ class ElvenCrisisArchive:
                                 time INTEGER,
                                 unit INTEGER
                             )""",
+        ECAArgCache: """CREATE TABLE {table_name} (
+                                year INTEGER NOT NULL,
+                                day INTEGER NOT NULL,
+                                language TEXT NOT NULL,
+                                PRIMARY KEY (year, day, language)
+                            )""",
     }
     ECABrigadista = ECABrigadista
     ECAPuzzle = ECAPuzzle
     ECALanguage = ECALanguage
     ECARun = ECARun
+    ECAArgCache = ECAArgCache
 
     def __init__(self, repo_root: Path):
         sqlite3.register_adapter(MetricPrefix, lambda mp: mp.value)

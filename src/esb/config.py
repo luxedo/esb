@@ -24,6 +24,7 @@ class ESBConfig:
     cache_dir = ".cache"
     tests_dir = "tests"
     boiler_template = "template"
+    boiler_template_base = "base"
     blank_root = package_root / blank_dir
     boiler_root = package_root / boiler_dir
     spec_filename = "spec.json"

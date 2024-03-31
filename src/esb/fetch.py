@@ -48,18 +48,19 @@ class RudolphFetcher:
 
     def __init__(self, repo_root: Path):
         self.repo_root = repo_root
-        self.cookie = self.load_cookie()
+        self.cookie = self.load_cookie(repo_root)
 
-    def load_cookie(self) -> str:
-        dotenv = self.repo_root / ".env"
+    @classmethod
+    def load_cookie(cls, repo_root) -> str:
+        dotenv = repo_root / ".env"
         if dotenv.is_file():
             with dotenv.open() as fp:
-                [dot_cookie] = [line.split("=")[1] for line in fp.read().split("\n") if line.startswith(self.sess_env)]
+                [dot_cookie] = [line.split("=")[1] for line in fp.read().split("\n") if line.startswith(cls.sess_env)]
                 return dot_cookie.removeprefix('"').removesuffix('"')
-        env_cookie: str | None = environ.get(self.sess_env)
+        env_cookie: str | None = environ.get(cls.sess_env)
         match env_cookie:
             case None:
-                message = f"Could not find {self.sess_env}"
+                message = f"Could not find {cls.sess_env}"
                 raise ValueError(message)
             case str(_):
                 return env_cookie

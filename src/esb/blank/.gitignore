@@ -1,6 +1,5 @@
 # ESB
 .cache/
-tests/
 
 # Python
 __pycache__/

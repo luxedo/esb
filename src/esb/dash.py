@@ -78,7 +78,7 @@ class CliDash:
         for year, days in year_stars.items():
             langs_str = "\n".join([
                 self.build_stars_str(lang_stars[lang].get(year, {}), self.lmap.get(lang).symbol) for lang in langs
-            ])
+            ]).rstrip()
             stars_str = self.build_stars_str(days, "*")
             days_str = " ".join([f"{pad_day(day)}" for day in range(1, 26)])
             sep_str = "=".join(["==" for day in range(1, 26)])

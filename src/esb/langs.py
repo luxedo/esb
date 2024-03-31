@@ -12,10 +12,12 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import json
+import subprocess
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from esb.config import ESBConfig
+from esb.paths import pad_day
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -27,8 +29,11 @@ if TYPE_CHECKING:
 class LangSpec:
     name: str
     files: dict[str, str]
-    command: list[str]
+    run_command: list[str]
     symbol: str
+    base: bool = False
+    build_command: list[str] | None = None
+    install: list[str] | None = None
 
     @classmethod
     def from_json(cls, file: str | Path):
@@ -63,17 +68,34 @@ class LangRunner:
     spec: LangSpec
     sled: LangSled
 
-    def build_command(self, year: int, day: int) -> list[str]:
-        return [self.replace_files(c, year, day) for c in self.spec.command]
+    def prepare_install_command(self, year: int, day: int) -> list[str]:
+        if self.spec.install is None:
+            message = f"Cannot prepare install command because it does not exists for language {self.spec.name}"
+            raise TypeError(message)
+        return self.prepare_command(self.spec.install, year, day)
+
+    def prepare_build_command(self, year: int, day: int) -> list[str]:
+        if self.spec.build_command is None:
+            message = f"Cannot prepare build command because it does not exists for language {self.spec.name}"
+            raise TypeError(message)
+        return self.prepare_command(self.spec.build_command, year, day)
+
+    def prepare_run_command(self, year: int, day: int) -> list[str]:
+        return self.prepare_command(self.spec.run_command, year, day)
+
+    def prepare_command(self, command: list[str], year: int, day: int) -> list[str]:
+        return [self.replace_files(c, year, day) for c in command]
 
     def replace_files(self, c: str, year: int, day: int) -> str:
         filenames = {k.name: v.name for k, v in self.sled.boiler_map(year, day).items()}
         replace_mapping = {
             "year": year,
-            "day": day,
+            "day": pad_day(day),
             "filenames": filenames,
         }
         return c.format_map(replace_mapping)
 
-    def working_dir(self, year: int, day: int) -> Path:
-        return self.sled.day_dir(year, day)
+    def exec_command(self, command: list[str], year: int, day: int) -> subprocess.CompletedProcess:
+        day_wd = self.sled.working_dir(year=year, day=day)
+        command = self.prepare_command(command, year=year, day=day)
+        return subprocess.run(command, cwd=day_wd, check=False)

@@ -57,7 +57,7 @@ def run_solutions(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
         "-a",
         "--args",
         nargs="*",
-        help="Run solution part 1 or part 2",
+        help="Additional arguments for running the solutions",
     )
     args = parser.parse_args()
     t0 = perf_counter_ns()

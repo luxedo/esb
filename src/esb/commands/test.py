@@ -59,12 +59,16 @@ def test_day(
 
     lang_sled = LangSled.from_spec(repo_root, lang)
     runner = LangRunner(lang, lang_sled)
-    command = runner.build_command(year=year, day=day)
-    day_wd = runner.working_dir(year=year, day=day)
+
+    day_wd = lang_sled.working_dir(year=year, day=day)
+    if lang.build_command is not None:
+        runner.exec_command(lang.build_command, year, day)
+
+    run_command = runner.prepare_run_command(year=year, day=day)
     for name, test in tests:
         day_input_text = test["input"]
-        result = fp1_0.exec_protocol(command, part, day_wd, day_input_text)
-        match (result.status, result.answer == test["answer"]):
+        result = fp1_0.exec_protocol(run_command, part, day_wd, day_input_text)
+        match (result.status, result.answer == str(test["answer"])):
             case (fp1_0.FPStatus.Ok, True):
                 eprint_info(f"✔ Answer {name} pt{part}: {result.answer}")
             case (fp1_0.FPStatus.Ok, False):

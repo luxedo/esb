@@ -11,6 +11,7 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
+import sys
 from datetime import datetime
 from itertools import product
 from typing import TYPE_CHECKING
@@ -60,10 +61,19 @@ def run_day(
     cache_sled = CacheInputSled(repo_root)
     lang_sled = LangSled.from_spec(repo_root, lang)
     runner = LangRunner(lang, lang_sled)
-    command = runner.build_command(year=year, day=day)
-    day_wd = runner.working_dir(year=year, day=day)
+
+    day_wd = lang_sled.working_dir(year=year, day=day)
+
+    if lang.build_command is not None:
+        runner = LangRunner(lang, lang_sled)
+        p = runner.exec_command(lang.build_command, year, day)
+        if p.returncode != 0:
+            eprint_error(f"Could not build program for: {lang.name}, year {year} day {pad_day(day)}")
+            sys.exit(2)
+
+    run_command = runner.prepare_run_command(year=year, day=day)
     day_input = cache_sled.path("input", year, day)
-    result = fp1_0.exec_protocol_from_file(command, part, day_wd, day_input)
+    result = fp1_0.exec_protocol_from_file(run_command, part, day_wd, day_input)
     match result.status:
         case fp1_0.FPStatus.Ok:
             pass

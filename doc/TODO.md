@@ -19,7 +19,7 @@
 1. Document boilerplate creation
    ~~1. Boilerplate Python~~
 1. Boilerplate Rust
-1. Boilerplate Elixir
+   ~~1. Boilerplate Elixir~~
    ~~1. Submit~~
    ~~1. Compare answers~~
 1. Metrics
@@ -38,6 +38,7 @@
 1. Test CLI
    ~~1. Create executable~~
    ~~1. PUBLISH!~~
+1. Fetch Tests
 
 ## Optional features
 
@@ -67,3 +68,8 @@
 1. Fetch from personal times
 1. Show remaining time for submit
    ~~1. Add prettier to pre-commit~~
+1. Add current working day
+1. Add connect/login
+1. Add set day
+   ~~1. Improve `Could not find AOC_SESSION_COOKIE` error~~
+1. Improve `cookie have expired` error
