@@ -31,6 +31,7 @@ class LangSpec:
     files: dict[str, str]
     run_command: list[str]
     symbol: str
+    emoji: str
     base: bool = False
     build_command: list[str] | None = None
     install: list[str] | None = None

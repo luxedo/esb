@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from esb.commands.base import is_esb_repo, oprint_info
-from esb.dash import CliDash
+from esb.commands.base import is_esb_repo, oprint_error, oprint_info
+from esb.dash import MdDash
 from esb.db import ElvenCrisisArchive
 from esb.langs import LangMap
 
@@ -23,9 +23,12 @@ if TYPE_CHECKING:
 
 
 @is_esb_repo
-def status(repo_root: Path):
+def dashboard(repo_root: Path, *, reset: bool = False):
     db = ElvenCrisisArchive(repo_root)
     lmap = LangMap.load()
-    cli_dash = CliDash(db, lmap)
-
-    oprint_info(cli_dash.build_dash())
+    md_dash = MdDash(db, lmap, repo_root)
+    try:
+        md_dash.build_dash(reset=reset)
+        oprint_info("Dashboard rebuilt successfully!")
+    except ValueError:
+        oprint_error("Error building dashboard. Check if you have all the needed tags in the template")

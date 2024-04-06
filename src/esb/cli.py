@@ -220,6 +220,8 @@ def main():
             esb_commands.run(args.language, args.parts, args.year, args.day, submit=args.submit)
         case Command.test:
             esb_commands.test(args.language, args.parts, args.year, args.day)
+        case Command.dashboard:
+            esb_commands.dashboard()
         case _:
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)

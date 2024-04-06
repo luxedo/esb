@@ -114,6 +114,7 @@ class TestCli(TestWithTemporaryDirectory):
     cmd_start = f"esb start --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name}".split()
     cmd_show = f"esb show --year {TEST_YEAR} --day {TEST_DAY}".split()
     cmd_status = "esb status".split()
+    cmd_dashboard = "esb dashboard".split()
 
     def esb_new(self):
         with CliMock(self.cmd_new, ""):
@@ -210,3 +211,12 @@ class TestCli(TestWithTemporaryDirectory):
             main()
         text = clim.stderr.getvalue()
         assert "Fatal: this is not an ElfScript Brigade repo" in text
+
+    def test_dashboard(self):
+        self.esb_new()
+
+        command = self.cmd_dashboard
+        with CliMock(command) as clim:
+            main()
+        text = clim.stdout.getvalue()
+        assert "Dashboard rebuilt successfully!" in text

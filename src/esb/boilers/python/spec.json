@@ -4,5 +4,6 @@
     "main.py": "aoc_{year}_{day}.py"
   },
   "run_command": ["python", "{filenames[main.py]}"],
-  "symbol": "[blue]p[/blue]"
+  "symbol": "[blue]p[/blue]",
+  "emoji": "🐍"
 }

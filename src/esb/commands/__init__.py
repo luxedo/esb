@@ -9,6 +9,7 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
+from esb.commands.dashboard import dashboard
 from esb.commands.fetch import fetch
 from esb.commands.new import new
 from esb.commands.run import run
@@ -17,4 +18,4 @@ from esb.commands.start import start
 from esb.commands.status import status
 from esb.commands.test import test
 
-__all__ = ["fetch", "new", "run", "show", "start", "status", "test"]
+__all__ = ["dashboard", "fetch", "new", "run", "show", "start", "status", "test"]
