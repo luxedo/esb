@@ -85,7 +85,7 @@ class FPResult:
 
 
 # @TODO: type this
-async def _read_output(stream, threshold: int, print_stream):
+async def _read_output(stream, threshold: int, print_stream) -> str:
     ret = ""
     lines = 0
     while line := await stream.readline():
@@ -96,10 +96,10 @@ async def _read_output(stream, threshold: int, print_stream):
         elif lines > threshold:
             print_stream.write(line)
         lines += 1
-    return ret, lines
+    return ret
 
 
-async def _exec_protocol_command(cmd: list[str], cwd: Path, day_input_text: str) -> tuple[int, tuple[str, int]]:
+async def _exec_protocol_command(cmd: list[str], cwd: Path, day_input_text: str) -> tuple[int, str]:
     proc = await asyncio.create_subprocess_exec(
         *cmd,
         cwd=cwd,
@@ -150,26 +150,21 @@ def exec_protocol(
     cmd = [*command, "--part", f"{part}"]
     if args is not None:
         cmd.extend(["--args", *args])
-    exitcode, (stdout, out_lines) = asyncio.run(_exec_protocol_command(cmd, cwd, day_input_text))
+    exitcode, stdout = asyncio.run(_exec_protocol_command(cmd, cwd, day_input_text))
 
     success_exit = 0
-    stdout_lines = [1, 2]
-    if exitcode != success_exit or out_lines not in stdout_lines:
+    if exitcode != success_exit or not stdout.endswith("\n"):
         return FPResult(status=FPStatus.ProtocolError)
 
-    answer = None
     running_time = None
     unit = None
-    match stdout.strip().split("\n"):
-        case [ans, running_time_line]:
-            answer = ans
-            try:
-                running_time, unit = _parse_running_time(running_time_line)
-            except ValueError:
-                return FPResult(status=FPStatus.ProtocolError)
-        case [ans]:
-            answer = ans
-        case _:
+    answer = stdout[:-1]
+    lines = answer.split("\n")
+    if lines[-1].startswith("RT "):
+        answer = "\n".join(lines[:-1])
+        try:
+            running_time, unit = _parse_running_time(lines[-1])
+        except ValueError:
             return FPResult(status=FPStatus.ProtocolError)
 
     return FPResult(status=FPStatus.Ok, answer=answer, running_time=running_time, unit=unit)

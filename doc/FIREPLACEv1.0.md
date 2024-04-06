@@ -8,6 +8,14 @@ At the heart of the ElfScript Brigade's operational endeavors resides the _Firep
 
 The FIREPLACEv1.0 allows the use of the `esb` tooling for solving Advent of Code problems.
 
+> ### tl;dr:
+>
+> - Problem input comes from `stdin`;
+> - Problem answer goes to `stdout`;
+> - `--part`, `--args` goes in the arguments;
+> - May output the running time of the program in `stdou`;
+> - `stderr` is ignored;
+
 ## Protocol Definition
 
 ### Premises
@@ -25,6 +33,7 @@ Any _PROGRAM_ implementing FIREPLACEv1.0 should receive the _PROBLEM DATA_ as in
    1. `--part` or `-p`, a required argument with values of either `1` or `2`.
    1. `--args` or `-a`, optional positional arguments<sup>\*</sup>.
 1. The _PROGRAM_ **MUST** return the _ANSWER_ followed by a line break via `stdout`.
+1. The _ANSWER_ **MAY** have more than one line.
 1. The _PROGRAM_ **MUST** return an exit code of `0` on successful execution. Any other code is considered an error.
 1. The _PROGRAM_ **MAY** log a _RUNNING TIME_ followed by a line break via `stdout` after the _ANSWER_.
 1. The _RUNNING TIME_ **MUST** be represented the following three elements sepearated by an spaces and ending with a line break:
@@ -56,14 +65,21 @@ Running programs with running time
 
 ```shell
 ./my_program --part 1 --args a b c < problem_data.txt
-SRTM 12 ms
 1234
-ERTM 7632 milliseconds
+RT 7632 milliseconds
 ```
 
 ```shell
 cat problem_data.txt | ./my_program --part 2
-SRTM 24 ms
 1234
-ERTM 6833 milliseconds
+RT 6833 milliseconds
+```
+
+Problem with three lines answer
+
+```shell
+./my_program --part 1 --args a b c < problem_data.txt
+three
+lines
+answer
 ```

@@ -38,7 +38,8 @@
 1. Test CLI
    ~~1. Create executable~~
    ~~1. PUBLISH!~~
-1. Fetch Tests
+1. Fetch Test
+1. Fix 2016 day 08
 
 ## Optional features
 

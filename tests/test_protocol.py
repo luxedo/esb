@@ -30,6 +30,8 @@ from esb.protocol.fireplacev1_0 import (
 
 PT2_SOLUTION = 2
 TEST_INPUT = "Any input"
+TWO_LINES_INPUT = """Two lines
+input"""
 
 
 def solve_pt1(input_data: str, args: list[str] | None = None) -> str:
@@ -69,9 +71,15 @@ class TestRunSolutions(unittest.TestCase):
         assert isinstance(time, int)
         assert isinstance(unit, MetricPrefix)
 
-    def test_run_solutions_should_have_only_two_lines(self):
+    def test_run_solutions_should_have_two_lines(self):
         output = self.run_solutions_context(TEST_INPUT, self.command_args_pt1)
         assert len(output.removesuffix("\n").split("\n")) == 2
+
+    def test_run_solutions_should_may_have_more_than_two_lines(self):
+        output = self.run_solutions_context(TWO_LINES_INPUT, self.command_args_pt1)
+        assert (
+            len(output.removesuffix("\n").split("\n")) == 3  # Two from input + 1 from RT
+        )
 
     def test_run_solutions_must_run_the_solution_pt2(self):
         output = self.run_solutions_context(TEST_INPUT, self.command_args_pt2)
@@ -124,3 +132,10 @@ class TestExecProtocol(unittest.TestCase):
             day_input=Path("This input does not exists"),
         )
         assert result.status == FPStatus.InputDoesNotExists
+
+    def test_exec_protocol_can_output_more_than_one_line(self):
+        result = self.exec_protocol_from_file_context(self.command, part=1, cwd=Path.cwd(), input_data=TWO_LINES_INPUT)
+        assert result.status == FPStatus.Ok
+        assert result.answer == TWO_LINES_INPUT
+        assert isinstance(result.running_time, int)
+        assert isinstance(result.unit, MetricPrefix)
