@@ -1,0 +1,10 @@
+{
+  "name": "rust",
+  "files": {
+    "src/main.rs": "src/main.rs"
+  },
+  "run_command": ["cargo", "run", "--"],
+  "symbol": "[orange]r[/orange]",
+  "emoji": "🦀",
+  "base": true
+}

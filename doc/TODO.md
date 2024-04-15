@@ -18,7 +18,7 @@
    ~~1. Where will we store tests?~~
 1. Document boilerplate creation
    ~~1. Boilerplate Python~~
-1. Boilerplate Rust
+   ~~1. Boilerplate Rust~~
    ~~1. Boilerplate Elixir~~
    ~~1. Submit~~
    ~~1. Compare answers~~
@@ -74,3 +74,4 @@
 1. Add set day
    ~~1. Improve `Could not find AOC_SESSION_COOKIE` error~~
 1. Improve `cookie have expired` error
+1. Language stars not aligned

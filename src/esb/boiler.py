@@ -52,7 +52,8 @@ class CodeFurnace:
 
         for src, dst in self.lang_sled.copied_map(year, day).items():
             shutil.move(src, dst)
-            content = dst.read_text().format(
+            content = self.safe_format(
+                dst.read_text(),
                 year=year,
                 day=pad_day(day),
                 problem_title=title,
@@ -63,6 +64,13 @@ class CodeFurnace:
     def make_test_dir(self, year: int, day: int):
         ts = CacheTestSled(self.lang_sled.repo_root)
         day_dir = ts.day_dir(year, day)
-        # print(list(day_dir.iterdir()))
         if not day_dir.is_dir():
             day_dir.mkdir(parents=True, exist_ok=True)
+
+    @staticmethod
+    def safe_format(template: str, **patterns) -> str:
+        result = template
+        for key, val in patterns.items():
+            m = f"{{{key}}}"
+            result = result.replace(m, str(val))
+        return result
