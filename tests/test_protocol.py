@@ -23,8 +23,8 @@ from esb.protocol.fireplacev1_0 import (
     FPPart,
     FPStatus,
     MetricPrefix,
-    _parse_running_time,
     exec_protocol_from_file,
+    parse_running_time,
     run_solutions,
 )
 
@@ -51,9 +51,12 @@ class TestRunSolutions(unittest.TestCase):
     @staticmethod
     def run_solutions_context(input_data: str, command_args: tuple[str, ...]):
         input_io = io.StringIO(input_data)
-        with patch("sys.argv", ["command_name", *command_args]), patch("sys.stdin", input_io), patch(
-            "sys.stderr", new_callable=io.StringIO
-        ), patch("sys.stdout", new_callable=io.StringIO) as stdout:
+        with (
+            patch("sys.argv", ["command_name", *command_args]),
+            patch("sys.stdin", input_io),
+            patch("sys.stderr", new_callable=io.StringIO),
+            patch("sys.stdout", new_callable=io.StringIO) as stdout,
+        ):
             run_solutions(solve_pt1, solve_pt2)
             return stdout.getvalue()
 
@@ -67,7 +70,7 @@ class TestRunSolutions(unittest.TestCase):
 
     def test_run_solutions_should_print_the_running_time_in_the_second_line(self):
         output = self.run_solutions_context(TEST_INPUT, self.command_args_pt1)
-        time, unit = _parse_running_time(output.removeprefix(f"{TEST_INPUT}\n"))
+        time, unit = parse_running_time(output.removeprefix(f"{TEST_INPUT}\n"))
         assert isinstance(time, int)
         assert isinstance(unit, MetricPrefix)
 

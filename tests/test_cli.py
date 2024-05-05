@@ -31,8 +31,9 @@ class TestParserTypes(unittest.TestCase):
 
     def test_aoc_day_error(self):
         for day in [0, 26, "twenty-seven"]:
-            with self.subTest(aoc_day=day, error=True), pytest.raises(
-                ArgumentTypeError, match="is not a valid AoC day"
+            with (
+                self.subTest(aoc_day=day, error=True),
+                pytest.raises(ArgumentTypeError, match="is not a valid AoC day"),
             ):
                 aoc_day(str(day))
 
@@ -46,8 +47,9 @@ class TestParserTypes(unittest.TestCase):
 
     def test_aoc_year_error(self):
         for year in [2014, 2031, "twenty-seven"]:
-            with self.subTest(aoc_year=year, error=True), pytest.raises(
-                ArgumentTypeError, match="is not a valid AoC year"
+            with (
+                self.subTest(aoc_year=year, error=True),
+                pytest.raises(ArgumentTypeError, match="is not a valid AoC year"),
             ):
                 aoc_year(str(year))
 

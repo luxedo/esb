@@ -281,7 +281,7 @@ class ECAArgCache(Table):
 
 @dataclass(unsafe_hash=True)
 class ECARun(Table):
-    id: int | None  # noqa: A003
+    id: int | None
     datetime: datetime
     year: int
     day: int

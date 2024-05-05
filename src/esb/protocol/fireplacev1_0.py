@@ -117,14 +117,14 @@ async def _exec_protocol_command(cmd: list[str], cwd: Path, day_input_text: str)
     return await asyncio.gather(proc.wait(), _read_output(proc.stdout, threshold=2, print_stream=sys.stdout))
 
 
-def _parse_running_time(running_time_line: str) -> tuple[int, MetricPrefix]:
+def parse_running_time(running_time_line: str) -> tuple[int, MetricPrefix]:
     try:
         match running_time_line.split():
             case ["RT", running_time_str, unit_str]:
                 running_time = int(running_time_str)
                 unit = MetricPrefix.parse(unit_str, "second", "s")
                 return running_time, unit
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         message = f"Could not parse running time for '{running_time_line}'"
         raise ValueError(message) from exc
     message = f"Could not parse running time for '{running_time_line}'"
@@ -163,7 +163,7 @@ def exec_protocol(
     if lines[-1].startswith("RT "):
         answer = "\n".join(lines[:-1])
         try:
-            running_time, unit = _parse_running_time(lines[-1])
+            running_time, unit = parse_running_time(lines[-1])
         except ValueError:
             return FPResult(status=FPStatus.ProtocolError)
 

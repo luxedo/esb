@@ -43,8 +43,8 @@ class RudolphFetcher:
     sess_env = "AOC_SESSION_COOKIE"
     host = "adventofcode.com"
     st_route = "/{year}/day/{day}"
-    in_route = "{st_route}/input"
-    ans_route = "{st_route}/answer"
+    in_route = "{st_route}/input"  # noqa: RUF027
+    ans_route = "{st_route}/answer"  # noqa: RUF027
 
     def __init__(self, repo_root: Path):
         self.repo_root = repo_root
