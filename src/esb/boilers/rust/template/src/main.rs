@@ -14,11 +14,11 @@ use esb_fireplace::{FireplaceError, FireplaceResult};
 
 use std::fmt::Display;
 
-fn solve_pt1(input_data: &str, _args: Vec<&str>) -> FireplaceResult<impl Display> {
+fn solve_pt1(input_data: &str, _args: Vec<String>) -> FireplaceResult<impl Display> {
     Ok(25)
 }
 
-fn solve_pt2(input_data: &str, _args: Vec<&str>) -> FireplaceResult<impl Display> {
+fn solve_pt2(input_data: &str, _args: Vec<String>) -> FireplaceResult<impl Display> {
     Ok("December")
 }
 

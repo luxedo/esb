@@ -40,6 +40,7 @@
    ~~1. PUBLISH!~~
 1. Fetch Test
 1. Fix 2016 day 08
+1. Fix 2022 day 10
 
 ## Optional features
 
@@ -75,3 +76,4 @@
    ~~1. Improve `Could not find AOC_SESSION_COOKIE` error~~
 1. Improve `cookie have expired` error
 1. Language stars not aligned
+1. Document extra args
