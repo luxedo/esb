@@ -9,4 +9,4 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
-__version__ = "0.2.0"
+__version__ = "0.1.2"
