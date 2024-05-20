@@ -12,6 +12,8 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 import io
 import os
 import unittest
+from collections.abc import Iterable
+from itertools import cycle
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -46,18 +48,19 @@ class TestWithInitializedEsbRepo(TestWithTemporaryDirectory):
 
 
 class HttpMock:
-    http_response: str
+    http_response: list[str]
+    responses: Iterable[str]
 
-    def __init__(self, http_response: str):
+    def __init__(self, http_response: list[str]):
         self.http_response = http_response
+        self.next_response = cycle(self.http_response)
 
     def __enter__(self):
         self.stderr = io.StringIO()
         self.stdout = io.StringIO()
-
         self.patchers = [
-            patch("esb.fetch.RudolphFetcher.http_get", return_value=self.http_response),
-            patch("esb.fetch.RudolphFetcher.http_post", return_value=self.http_response),
+            patch("esb.fetch.RudolphFetcher.http_get", side_effect=self.next_response),
+            patch("esb.fetch.RudolphFetcher.http_post", side_effect=self.next_response),
             patch.dict(os.environ, {RudolphFetcher.sess_env: "mocka moccha"}),
         ]
 
@@ -73,11 +76,13 @@ class HttpMock:
 
 class CliMock(HttpMock):
     command: list[str]
-    http_response: str
+    http_response: list[str]
     stderr: io.StringIO
     stdout: io.StringIO
 
-    def __init__(self, command: list[str], http_response: str = ""):
+    def __init__(self, command: list[str], http_response: list[str] | None = None):
+        if http_response is None:
+            http_response = [""]
         super().__init__(http_response)
         self.command = command
 

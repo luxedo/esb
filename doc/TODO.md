@@ -35,11 +35,13 @@
    ~~1. Check if MyPy is working~~
    ~~1. Handle day 25 star~~
    ~~1. Mock AOC_SESSION_COOKIE in tests~~
-1. Test CLI
+   ~~1. Test CLI~~
    ~~1. Create executable~~
    ~~1. PUBLISH!~~
-1. Fetch Test
-1. add FIREPLACE link to elixir and rust implementations
+   ~~1. Test Fetch~~
+   ~~1. add FIREPLACE link to elixir and rust implementations~~
+   1. Test Test
+   1. Test Run
 
 ## Optional features
 

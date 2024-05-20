@@ -15,7 +15,10 @@ MOCK_ROOT = Path(__file__).parent
 
 SOLUTION_PYTHON = MOCK_ROOT / "solution.py"
 
-STATEMENT_HTML = MOCK_ROOT / "statement.html"
+SOLUTION_2016_01_PYTHON = MOCK_ROOT / "test_day" / "aoc_2016_01.py"
+STATEMENT_2016_01 = MOCK_ROOT / "test_day" / "statement.html"
+INPUT_2016_01 = MOCK_ROOT / "test_day" / "input.txt"
+
 SUBMIT_ALREADY_COMPLETE = MOCK_ROOT / "submit_already_complete.html"
 SUBMIT_FAIL = MOCK_ROOT / "submit_fail.html"
 SUBMIT_SUCCESS = MOCK_ROOT / "submit_success.html"

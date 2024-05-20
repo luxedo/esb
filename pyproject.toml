@@ -81,7 +81,7 @@ branch = true
 parallel = true
 omit = [
   "esb/boilers",
-  "tests/mock/*"
+  "tests/**/*"
 ]
 
 [tool.coverage.paths]

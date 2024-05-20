@@ -10,6 +10,7 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 """
 
 import os
+import shutil
 import unittest
 from argparse import ArgumentTypeError, Namespace
 from pathlib import Path
@@ -20,7 +21,7 @@ from esb.cli import aoc_day, aoc_year, esb_parser, main
 from esb.langs import LangMap
 from esb.paths import CacheInputSled, LangSled
 from tests.lib import CliMock, TestWithInitializedEsbRepo, TestWithTemporaryDirectory
-from tests.mock import STATEMENT_HTML
+from tests.mock import INPUT_2016_01, SOLUTION_2016_01_PYTHON, STATEMENT_2016_01
 
 
 class TestParserTypes(unittest.TestCase):
@@ -107,8 +108,9 @@ class TestCli(TestWithTemporaryDirectory):
     dashboard
     """
 
-    TEST_YEAR = 2020
-    TEST_DAY = 9
+    TEST_YEAR = 2016
+    TEST_DAY = 1
+    TEST_PART = 1
 
     cmd_new = "esb new".split()
     cmd_fetch = f"esb fetch --year {TEST_YEAR} --day {TEST_DAY}".split()
@@ -117,13 +119,15 @@ class TestCli(TestWithTemporaryDirectory):
     cmd_show = f"esb show --year {TEST_YEAR} --day {TEST_DAY}".split()
     cmd_status = "esb status".split()
     cmd_dashboard = "esb dashboard".split()
+    cmd_run = f"esb run --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name} --part {TEST_PART}".split()
 
     def esb_new(self):
-        with CliMock(self.cmd_new, ""):
+        with CliMock(self.cmd_new, [""]):
             main()
 
     def esb_fetch(self):
-        with CliMock(self.cmd_fetch, STATEMENT_HTML.read_text()):
+        http_response = [STATEMENT_2016_01.read_text(), INPUT_2016_01.read_text()]
+        with CliMock(self.cmd_fetch, http_response):
             main()
 
     def test_new(self):
@@ -152,7 +156,7 @@ class TestCli(TestWithTemporaryDirectory):
         assert not input_file.is_file()
 
         command = self.cmd_fetch
-        http_response = STATEMENT_HTML.read_text()
+        http_response = [STATEMENT_2016_01.read_text()]
         with CliMock(command, http_response) as clim:
             main()
         text = clim.stderr.getvalue()
@@ -163,7 +167,7 @@ class TestCli(TestWithTemporaryDirectory):
     def test_start(self):
         self.esb_new()
         command = self.cmd_start
-        http_response = STATEMENT_HTML.read_text()
+        http_response = [STATEMENT_2016_01.read_text()]
         with CliMock(command, http_response) as clim:
             main()
         text = clim.stderr.getvalue()
@@ -179,7 +183,7 @@ class TestCli(TestWithTemporaryDirectory):
         self.esb_new()
         self.esb_fetch()
         command = self.cmd_show
-        http_response = STATEMENT_HTML.read_text()
+        http_response = [STATEMENT_2016_01.read_text()]
         with CliMock(command, http_response) as clim:
             main()
         text = clim.stdout.getvalue()
@@ -222,3 +226,24 @@ class TestCli(TestWithTemporaryDirectory):
             main()
         text = clim.stdout.getvalue()
         assert "Dashboard rebuilt successfully!" in text
+
+    def test_run(self):
+        self.esb_new()
+
+        command = self.cmd_start
+        http_response = [STATEMENT_2016_01.read_text(), INPUT_2016_01.read_text()]
+        with CliMock(command, http_response) as clim:
+            main()
+
+        lmap = LangMap.load_defaults()
+        lang = lmap.get(self.language_name)
+        lang_sled = LangSled.from_spec(repo_root=Path.cwd(), spec=lang)
+        day_dir = lang_sled.day_dir(self.TEST_YEAR, self.TEST_DAY)
+
+        shutil.copy(SOLUTION_2016_01_PYTHON, day_dir)
+
+        command = self.cmd_run
+        with CliMock(command) as clim:
+            main()
+        text = clim.stderr.getvalue()
+        assert "✔ Answer pt1:" in text

@@ -19,25 +19,25 @@ class TestRudolphFetcher(TestWithInitializedEsbRepo):
     TEST_DAY = 1
 
     def test_fetch_submit_success(self):
-        with HttpMock(SUBMIT_SUCCESS.read_text()):
+        with HttpMock([SUBMIT_SUCCESS.read_text()]):
             rf = RudolphFetcher(self.repo_root)
             submit_status = rf.fetch_submit(self.TEST_YEAR, self.TEST_DAY, 1, "Any")
         assert submit_status == RudolphSubmitStatus.SUCCESS
 
     def test_fetch_submit_fail(self):
-        with HttpMock(SUBMIT_FAIL.read_text()):
+        with HttpMock([SUBMIT_FAIL.read_text()]):
             rf = RudolphFetcher(self.repo_root)
             submit_status = rf.fetch_submit(self.TEST_YEAR, self.TEST_DAY, 1, "Any")
         assert submit_status == RudolphSubmitStatus.FAIL
 
     def test_fetch_submit_timeout(self):
-        with HttpMock(SUBMIT_TIMEOUT.read_text()):
+        with HttpMock([SUBMIT_TIMEOUT.read_text()]):
             rf = RudolphFetcher(self.repo_root)
             submit_status = rf.fetch_submit(self.TEST_YEAR, self.TEST_DAY, 1, "Any")
         assert submit_status == RudolphSubmitStatus.TIMEOUT
 
     def test_fetch_submit_already_complete(self):
-        with HttpMock(SUBMIT_ALREADY_COMPLETE.read_text()):
+        with HttpMock([SUBMIT_ALREADY_COMPLETE.read_text()]):
             rf = RudolphFetcher(self.repo_root)
             submit_status = rf.fetch_submit(self.TEST_YEAR, self.TEST_DAY, 1, "Any")
         assert submit_status == RudolphSubmitStatus.ALREADY_COMPLETE
