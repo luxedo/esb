@@ -19,9 +19,9 @@ import pytest
 
 from esb.cli import aoc_day, aoc_year, esb_parser, main
 from esb.langs import LangMap
-from esb.paths import CacheInputSled, LangSled
+from esb.paths import CacheInputSled, CacheTestSled, LangSled
 from tests.lib import CliMock, TestWithInitializedEsbRepo, TestWithTemporaryDirectory
-from tests.mock import INPUT_2016_01, SOLUTION_2016_01_PYTHON, STATEMENT_2016_01
+from tests.mock import INPUT_2016_01, SOLUTION_2016_01_PYTHON, STATEMENT_2016_01, TEST_2016_01
 
 
 class TestParserTypes(unittest.TestCase):
@@ -120,6 +120,7 @@ class TestCli(TestWithTemporaryDirectory):
     cmd_status = "esb status".split()
     cmd_dashboard = "esb dashboard".split()
     cmd_run = f"esb run --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name} --part {TEST_PART}".split()
+    cmd_test = f"esb test --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name} --part {TEST_PART}".split()
 
     def esb_new(self):
         with CliMock(self.cmd_new, [""]):
@@ -247,3 +248,29 @@ class TestCli(TestWithTemporaryDirectory):
             main()
         text = clim.stderr.getvalue()
         assert "✔ Answer pt1:" in text
+
+    def test_test(self):
+        self.esb_new()
+
+        command = self.cmd_start
+        http_response = [STATEMENT_2016_01.read_text(), INPUT_2016_01.read_text()]
+        with CliMock(command, http_response) as clim:
+            main()
+
+        lmap = LangMap.load_defaults()
+        lang = lmap.get(self.language_name)
+        lang_sled = LangSled.from_spec(repo_root=Path.cwd(), spec=lang)
+        test_sled = CacheTestSled(repo_root=Path.cwd())
+
+        day_dir = lang_sled.day_dir(self.TEST_YEAR, self.TEST_DAY)
+        test_day_dir = test_sled.day_dir(self.TEST_YEAR, self.TEST_DAY)
+
+        shutil.copy(SOLUTION_2016_01_PYTHON, day_dir)
+        shutil.copy(TEST_2016_01, test_day_dir)
+
+        command = self.cmd_test
+        with CliMock(command) as clim:
+            main()
+        text = clim.stderr.getvalue()
+        assert "✔ Answer test" in text
+        assert "✘" not in text

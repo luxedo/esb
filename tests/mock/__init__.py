@@ -18,6 +18,7 @@ SOLUTION_PYTHON = MOCK_ROOT / "solution.py"
 SOLUTION_2016_01_PYTHON = MOCK_ROOT / "test_day" / "aoc_2016_01.py"
 STATEMENT_2016_01 = MOCK_ROOT / "test_day" / "statement.html"
 INPUT_2016_01 = MOCK_ROOT / "test_day" / "input.txt"
+TEST_2016_01 = MOCK_ROOT / "test_day" / "test.toml"
 
 SUBMIT_ALREADY_COMPLETE = MOCK_ROOT / "submit_already_complete.html"
 SUBMIT_FAIL = MOCK_ROOT / "submit_fail.html"
