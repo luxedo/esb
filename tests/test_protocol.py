@@ -19,13 +19,13 @@ from unittest.mock import patch
 
 import pytest
 
-from esb.protocol.fireplacev1_0 import (
+from esb.protocol.fireplace import (
     FPPart,
     FPStatus,
     MetricPrefix,
     exec_protocol_from_file,
     parse_running_time,
-    run_solutions,
+    v1_run,
 )
 
 PT2_SOLUTION = 2
@@ -49,7 +49,7 @@ class TestRunSolutions(unittest.TestCase):
     command_args_pt2 = ("--part", "2")
 
     @staticmethod
-    def run_solutions_context(input_data: str, command_args: tuple[str, ...]):
+    def v1_run_context(input_data: str, command_args: tuple[str, ...]):
         input_io = io.StringIO(input_data)
         with (
             patch("sys.argv", ["command_name", *command_args]),
@@ -57,46 +57,46 @@ class TestRunSolutions(unittest.TestCase):
             patch("sys.stderr", new_callable=io.StringIO),
             patch("sys.stdout", new_callable=io.StringIO) as stdout,
         ):
-            run_solutions(solve_pt1, solve_pt2)
+            v1_run(solve_pt1, solve_pt2)
             return stdout.getvalue()
 
-    def test_run_solutions_should_fail_when_not_passing_correct_arguments(self):
+    def test_v1_run_should_fail_when_not_passing_correct_arguments(self):
         with pytest.raises(SystemExit, match="2"):
-            self.run_solutions_context(TEST_INPUT, ())
+            self.v1_run_context(TEST_INPUT, ())
 
-    def test_run_solutions_should_print_the_solution_value_in_the_first_line(self):
-        output = self.run_solutions_context(TEST_INPUT, self.command_args_pt1)
+    def test_v1_run_should_print_the_solution_value_in_the_first_line(self):
+        output = self.v1_run_context(TEST_INPUT, self.command_args_pt1)
         assert output.startswith(f"{TEST_INPUT}\n")
 
-    def test_run_solutions_should_print_the_running_time_in_the_second_line(self):
-        output = self.run_solutions_context(TEST_INPUT, self.command_args_pt1)
+    def test_v1_run_should_print_the_running_time_in_the_second_line(self):
+        output = self.v1_run_context(TEST_INPUT, self.command_args_pt1)
         time, unit = parse_running_time(output.removeprefix(f"{TEST_INPUT}\n"))
         assert isinstance(time, int)
         assert isinstance(unit, MetricPrefix)
 
-    def test_run_solutions_should_have_two_lines(self):
-        output = self.run_solutions_context(TEST_INPUT, self.command_args_pt1)
+    def test_v1_run_should_have_two_lines(self):
+        output = self.v1_run_context(TEST_INPUT, self.command_args_pt1)
         assert len(output.removesuffix("\n").split("\n")) == 2
 
-    def test_run_solutions_should_may_have_more_than_two_lines(self):
-        output = self.run_solutions_context(TWO_LINES_INPUT, self.command_args_pt1)
+    def test_v1_run_should_may_have_more_than_two_lines(self):
+        output = self.v1_run_context(TWO_LINES_INPUT, self.command_args_pt1)
         assert (
             len(output.removesuffix("\n").split("\n")) == 3  # Two from input + 1 from RT
         )
 
-    def test_run_solutions_must_run_the_solution_pt2(self):
-        output = self.run_solutions_context(TEST_INPUT, self.command_args_pt2)
+    def test_v1_run_must_run_the_solution_pt2(self):
+        output = self.v1_run_context(TEST_INPUT, self.command_args_pt2)
         assert output.startswith(f"{PT2_SOLUTION}\n")
 
-    def test_run_solutions_must_accept_shorthand_part_argument(self):
+    def test_v1_run_must_accept_shorthand_part_argument(self):
         command = ("-p", "2")
-        output = self.run_solutions_context(TEST_INPUT, command)
+        output = self.v1_run_context(TEST_INPUT, command)
         assert output.startswith(f"{PT2_SOLUTION}\n")
 
-    def test_run_solutions_must_accept_optional_positional_arguments(self):
+    def test_v1_run_must_accept_optional_positional_arguments(self):
         args = ("a", "b", "c")
         command = ("-p", "1", "--args", *args)
-        output = self.run_solutions_context(TEST_INPUT, command)
+        output = self.v1_run_context(TEST_INPUT, command)
         assert output.startswith(f"{' '.join(args)}\n")
 
 

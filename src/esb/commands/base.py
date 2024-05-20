@@ -25,7 +25,7 @@ from esb.paths import CacheTestSled, find_esb_root, pad_day
 if TYPE_CHECKING:
     from esb.db import ECALanguage, ECAPuzzle, ElvenCrisisArchive
     from esb.langs import LangSpec
-    from esb.protocol import fireplacev1_0 as fp1_0
+    from esb.protocol.fireplace import FPPart
 
 COLOR_INFO = "bold green"
 COLOR_ERROR = "bold red"
@@ -73,7 +73,7 @@ def find_puzzle(db: ElvenCrisisArchive, year: int, day: int) -> ECAPuzzle | None
     return None
 
 
-def find_tests(repo_root: Path, year: int, day: int, part: fp1_0.FPPart) -> list[tuple[str, dict]]:
+def find_tests(repo_root: Path, year: int, day: int, part: FPPart) -> list[tuple[str, dict]]:
     ts = CacheTestSled(repo_root)
     day_dir = ts.day_dir(year, day)
 
@@ -87,7 +87,7 @@ def find_tests(repo_root: Path, year: int, day: int, part: fp1_0.FPPart) -> list
     return tests
 
 
-def load_tests(filename: Path, part: fp1_0.FPPart) -> list[tuple[str, dict]]:
+def load_tests(filename: Path, part: FPPart) -> list[tuple[str, dict]]:
     cases_str = filename.read_text()
     try:
         cases = tomllib.loads(cases_str).get("test", {})

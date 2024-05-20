@@ -18,14 +18,14 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from esb.config import ESBConfig
-from esb.protocol.fireplacev1_0 import MetricPrefix
+from esb.protocol.metric_prefix import MetricPrefix
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
     from typing import Any, ClassVar, Self
 
-    from esb.protocol.fireplacev1_0 import FPPart
+    from esb.protocol.fireplace import FPPart
 
 
 @dataclass

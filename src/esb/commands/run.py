@@ -21,7 +21,7 @@ from esb.db import ElvenCrisisArchive
 from esb.fetch import RudolphFetcher, RudolphSubmitStatus
 from esb.langs import LangRunner, LangSpec
 from esb.paths import CacheInputSled, LangSled, pad_day
-from esb.protocol import fireplacev1_0 as fp1_0
+from esb.protocol import fireplace
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 def run(
     repo_root: Path,
     lang: LangSpec,
-    part: fp1_0.FPPart,
+    part: fireplace.FPPart,
     years: list[int],
     days: list[int],
     *,
@@ -46,7 +46,7 @@ def run_day(
     repo_root: Path,
     db: ElvenCrisisArchive,
     lang: LangSpec,
-    part: fp1_0.FPPart,
+    part: fireplace.FPPart,
     year: int,
     day: int,
     *,
@@ -74,17 +74,17 @@ def run_day(
     run_command = runner.prepare_run_command(year=year, day=day)
     day_input = cache_sled.path("input", year, day)
     args = None
-    result = fp1_0.exec_protocol_from_file(run_command, part, args, day_wd, day_input)
+    result = fireplace.exec_protocol_from_file(run_command, part, args, day_wd, day_input)
     match result.status:
-        case fp1_0.FPStatus.Ok:
+        case fireplace.FPStatus.Ok:
             pass
-        case fp1_0.FPStatus.InputDoesNotExists:
+        case fireplace.FPStatus.InputDoesNotExists:
             eprint_error(
                 f"\nCould not find input for year {year} day {pad_day(day)}. "
                 "Data seems corrupted. Please fetch again with --force"
             )
             return
-        case fp1_0.FPStatus.ProtocolError:
+        case fireplace.FPStatus.ProtocolError:
             eprint_error()
             eprint_error(f"Solution for year {year} day {pad_day(day)} does not follow FIREPLACE protocol.")
             return

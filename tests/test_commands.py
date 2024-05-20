@@ -17,7 +17,7 @@ from unittest.mock import patch
 from esb.commands.base import find_tests
 from esb.commands.base import load_tests as esb_load_tests
 from esb.paths import CacheTestSled
-from esb.protocol.fireplacev1_0 import FPPart
+from esb.protocol.fireplace import FPPart
 from tests.lib import TestWithInitializedEsbRepo
 from tests.mock import TESTS_ERROR_TOML, TESTS_MISSING_TOML, TESTS_SUCCESS_TOML
 

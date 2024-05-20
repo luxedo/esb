@@ -19,7 +19,7 @@ from esb import __version__
 from esb import commands as esb_commands
 from esb.config import ESBConfig
 from esb.langs import LangMap
-from esb.protocol.fireplacev1_0 import FPPart
+from esb.protocol.fireplace import FPPart
 
 
 ###########################################################

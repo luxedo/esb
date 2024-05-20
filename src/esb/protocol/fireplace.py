@@ -32,7 +32,7 @@ FPPart = Literal[1, 2]
 ###########################################################
 # Python template runner
 ###########################################################
-def _run_solution(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn, part: FPPart, args: list[str]):
+def _v1_run(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn, part: FPPart, args: list[str]):
     match part:
         case 1:
             return solve_pt1(sys.stdin.read().rstrip(), args)
@@ -43,7 +43,7 @@ def _run_solution(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn, part: FPPa
             raise KeyError(message)
 
 
-def run_solutions(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
+def v1_run(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
     parser = argparse.ArgumentParser("Elf Script Brigade python solution runner")
     parser.add_argument(
         "-p",
@@ -61,7 +61,7 @@ def run_solutions(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
     )
     args = parser.parse_args()
     t0 = perf_counter_ns()
-    ans = _run_solution(solve_pt1, solve_pt2, args.part, args.args)
+    ans = _v1_run(solve_pt1, solve_pt2, args.part, args.args)
     sys.stdout.write(f"{ans}\n")
     dt = perf_counter_ns() - t0
     sys.stdout.write(f"RT {dt} ns\n")

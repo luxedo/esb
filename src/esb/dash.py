@@ -84,7 +84,12 @@ class BaseDash:
 
     @staticmethod
     def build_stars_str(days: DayStars, symbol: str) -> str:
-        return " ".join([f"{symbol * days.get(day, 0):<2}" for day in range(1, 26)])
+        ret = []
+        for day in range(1, 26):
+            solved = days.get(day, 0)
+            unsolved = ESBConfig.max_parts - solved
+            ret.append("".join([symbol] * solved + [" "] * unsolved))
+        return " ".join(ret)
 
     def brigadista(self) -> str:
         b = self.db.ECABrigadista.fetch_single()

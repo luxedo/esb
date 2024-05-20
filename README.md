@@ -174,6 +174,9 @@ Any program that supports the [FIREPLACEv1](doc/FIREPLACEv1.0.md) prococol can u
 
   > Because the developer wanted to some of the newest features
 
+- **You could steal my session cookies right?**
+  > Yes, but I won't. Remember to read this code. Also, watch out for malicious dependencies.
+
 ## Rules of Automation
 
 ElfScript Brigade does follow the [automation guidelines](https://www.reddit.com/r/adventofcode/wiki/faqs/automation) on the [/r/adventofcode](https://www.reddit.com/r/adventofcode) community wiki

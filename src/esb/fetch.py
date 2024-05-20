@@ -26,7 +26,7 @@ from esb import __version__
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from esb.protocol.fireplacev1_0 import FPPart
+    from esb.protocol.fireplace import FPPart
 
 
 class RudolphSubmitStatus(Enum):

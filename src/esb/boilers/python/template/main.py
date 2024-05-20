@@ -19,7 +19,7 @@ def solve_pt2(input_data: str, args: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    from esb.protocol import fireplacev1_0 as fp1_0
+    from esb.protocol import fireplace
     # 🎅🎄❄️☃️🎁🦌
     # Bright christmas lights HERE
-    fp1_0.run_solutions(solve_pt1, solve_pt2)
+    fireplace.v1_run(solve_pt1, solve_pt2)
