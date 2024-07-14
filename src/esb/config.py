@@ -32,4 +32,5 @@ class ESBConfig:
     first_day = 1
     last_day = 25
     max_parts = 2
+    parts = (1, 2)
     blank_dash = package_root / blank_dir / "README.md"

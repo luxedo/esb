@@ -34,12 +34,12 @@ if TYPE_CHECKING:
 def test(
     repo_root: Path,
     lang: LangSpec,
-    part: fireplace.FPPart,
+    parts: list[fireplace.FPPart],
     years: list[int],
     days: list[int],
 ):
     db = ElvenCrisisArchive(repo_root)
-    for year, day in product(years, days):
+    for year, day, part in product(years, days, parts):
         test_day(repo_root, db, lang, part, year, day)
 
 

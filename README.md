@@ -51,10 +51,10 @@ pip install esb
 > esb new
 >
 > # Create boilerplate code and fetches input data
-> esb start --lang rust --year 2023 --day 13
+> esb start --lang rust --year 2023 --day 13 -- part 1
 >
 > # Run code and submit answer
-> esb run --lang rust --year 2023 --day 13 --submit
+> esb run --lang rust --year 2023 --day 13 --part 1 --submit
 >
 > # Collect stars!
 > ```
@@ -111,10 +111,10 @@ Runs tests or selected tests
 esb test --all
 
 # Run all from specific language
-esb test --year 2016 --day 9 --lang rust --all
+esb test --year 2016 --day 9 --part 1 --lang rust
 
 # Run single test
-esb test --year 2016 --day 9 --lang rust --all
+esb test --year 2016 --day 9 --part 1 --lang rust
 ```
 
 ### Running for real
@@ -122,9 +122,9 @@ esb test --year 2016 --day 9 --lang rust --all
 Runs the code for the given input. Also can submit solutions.
 
 ```shell
-esb run --year 2016 --day 9 --lang rust
+esb run --year 2016 --day 9 --part 1 --lang rust
 
-esb run --year 2016 --day 9 --lang rust --submit
+esb run --year 2016 --day 9 --part 1 --lang rust --submit
 ```
 
 ### Check your progress in the command line

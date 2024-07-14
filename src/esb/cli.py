@@ -12,14 +12,12 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 import argparse
 from datetime import datetime
 from enum import Enum, auto
-from typing import get_args
 from zoneinfo import ZoneInfo
 
 from esb import __version__
 from esb import commands as esb_commands
 from esb.config import ESBConfig
 from esb.langs import LangMap
-from esb.protocol.fireplace import FPPart
 
 
 ###########################################################
@@ -29,7 +27,7 @@ def aoc_year(value: str):
     now = datetime.now(tz=ZoneInfo("EST"))
 
     if value == "all":
-        return range(ESBConfig.first_year, now.year)
+        return list(range(ESBConfig.first_year, now.year + 1))
 
     try:
         ivalue = int(value)
@@ -49,7 +47,7 @@ def aoc_year(value: str):
 
 def aoc_day(value: str):
     if value == "all":
-        return range(ESBConfig.first_day, ESBConfig.last_day + 1)
+        return list(range(ESBConfig.first_day, ESBConfig.last_day + 1))
 
     try:
         ivalue = int(value)
@@ -64,6 +62,22 @@ def aoc_day(value: str):
         return ivalue
     except ValueError as exc:
         message = f"{value} is not a valid AoC day"
+        raise argparse.ArgumentTypeError(message) from exc
+
+
+def aoc_part(value: str):
+    if value == "all":
+        return ESBConfig.parts
+
+    try:
+        ivalue = int(value)
+        if ivalue not in ESBConfig.parts:
+            message = f"{value} is not a valid AoC part. Please chose 1 or/and 2."
+            raise argparse.ArgumentTypeError(message)
+
+        return ivalue
+    except ValueError as exc:
+        message = f"{value} is not a valid AoC part"
         raise argparse.ArgumentTypeError(message) from exc
 
 
@@ -153,12 +167,12 @@ def esb_parser() -> argparse.ArgumentParser:
         {"action": "store_true", "help": "Submits solution"},
     )
     part_arg = (
-        ["-p", "--parts"],
+        ["-p", "--part"],
         {
             "required": True,
-            "choices": get_args(FPPart),
-            "type": int,
-            "help": "Run for part 1 or part 2",
+            "nargs": "+",
+            "type": aoc_part,
+            "help": "Runs part 1, part 2 or both parts",
         },
     )
 
@@ -197,6 +211,16 @@ def esb_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def normalize_arg(args, name):
+    if not hasattr(args, name):
+        return args
+    arg = getattr(args, name)
+    if len(arg) == 1 and isinstance(arg[0], list | tuple):
+        arg = arg[0]
+    setattr(args, name, list(set(arg)))
+    return args
+
+
 ###########################################################
 # CLI main
 ###########################################################
@@ -204,6 +228,10 @@ def main():
     parser = esb_parser()
     args = parser.parse_args()
     command = Command[args.command]
+
+    args = normalize_arg(args, "year")
+    args = normalize_arg(args, "day")
+    args = normalize_arg(args, "part")
 
     match command:
         case Command.new:
@@ -217,9 +245,9 @@ def main():
         case Command.status:
             esb_commands.status()
         case Command.run:
-            esb_commands.run(args.language, args.parts, args.year, args.day, submit=args.submit)
+            esb_commands.run(args.language, args.part, args.year, args.day, submit=args.submit)
         case Command.test:
-            esb_commands.test(args.language, args.parts, args.year, args.day)
+            esb_commands.test(args.language, args.part, args.year, args.day)
         case Command.dashboard:
             esb_commands.dashboard()
         case _:

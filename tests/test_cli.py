@@ -13,11 +13,13 @@ import os
 import shutil
 import unittest
 from argparse import ArgumentTypeError, Namespace
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pytest
 
-from esb.cli import aoc_day, aoc_year, esb_parser, main
+from esb.cli import aoc_day, aoc_part, aoc_year, esb_parser, main
 from esb.langs import LangMap
 from esb.paths import CacheInputSled, CacheTestSled, LangSled
 from tests.lib import CliMock, TestWithInitializedEsbRepo, TestWithTemporaryDirectory
@@ -39,7 +41,7 @@ class TestParserTypes(unittest.TestCase):
                 aoc_day(str(day))
 
     def test_aoc_day_all(self):
-        assert aoc_day("all") == range(1, 26)
+        assert aoc_day("all") == list(range(1, 26))
 
     def test_aoc_year_single(self):
         for year in range(2015, 2024):
@@ -55,7 +57,24 @@ class TestParserTypes(unittest.TestCase):
                 aoc_year(str(year))
 
     def test_aoc_year_all(self):
-        assert aoc_year("all") == range(2015, 2024)
+        now = datetime.now(tz=ZoneInfo("EST"))
+        assert aoc_year("all") == list(range(2015, now.year + 1))
+
+    def test_aoc_part_single(self):
+        for part in range(1, 3):
+            with self.subTest(aoc_part=part):
+                assert aoc_part(str(part)) == part
+
+    def test_aoc_part_error(self):
+        for part in [0, 26, "twenty-seven"]:
+            with (
+                self.subTest(aoc_part=part, error=True),
+                pytest.raises(ArgumentTypeError, match="is not a valid AoC part"),
+            ):
+                aoc_part(str(part))
+
+    def test_aoc_part_all(self):
+        assert aoc_part("all") == (1, 2)
 
 
 class TestEsbParser(TestWithInitializedEsbRepo):
