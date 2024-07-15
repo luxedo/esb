@@ -6,7 +6,7 @@
 >
 > This tool transforms Advent of Code into a CLI adventure
 
-<img src="doc/logo/png/logo-color-small.png" alt="ElfScript Brigade Logo"/>
+<img src="doc/assets/logo/png/logo-color-small.png" alt="ElfScript Brigade Logo"/>
 
 [![PyPI - Version](https://img.shields.io/pypi/v/esb.svg)](https://pypi.org/project/esb) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/esb.svg)](https://pypi.org/project/esb) [![License: GPL v3](https://img.shields.io/badge/License-GPL_v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/luxedo/esb/publish.yml) ![Codecov](https://img.shields.io/codecov/c/github/luxedo/esb) ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/luxedo/esb)
 
@@ -22,7 +22,7 @@ This tool allows us _elves_ to:
 2. Create language agnostic boilerplate code<sup>\*[Check supported languages](#currently-supported-languages)</sup>
 3. Test run and submit solutions
 4. Shiny dashboards
-5. [Follows the rules of automation](#rules-of-automation)
+5. [Follow the rules of automation](#rules-of-automation)
 
 ## Table of Contents
 
@@ -51,7 +51,7 @@ pip install esb
 > esb new
 >
 > # Create boilerplate code and fetches input data
-> esb start --lang rust --year 2023 --day 13 -- part 1
+> esb start --lang rust --year 2023 --day 13
 >
 > # Run code and submit answer
 > esb run --lang rust --year 2023 --day 13 --part 1 --submit
@@ -74,8 +74,6 @@ git commit -m  "I now pledge to help, and I will forever help, saving christmas.
 ### Add your credentials
 
 Set your credentials by locating your session cookie or save it in a `.env` file. If the cookie expires, you'll have to redo this step for fetching and submitting data.
-
-@TODO: Show how to get the cookie
 
 ```shell
 export AOC_SESSION_COOKIE="<my_current_cookie>"
@@ -107,14 +105,7 @@ esb start --lang rust --year 2023 --day 13
 Runs tests or selected tests
 
 ```shell
-# Run all
-esb test --all
-
-# Run all from specific language
-esb test --year 2016 --day 9 --part 1 --lang rust
-
-# Run single test
-esb test --year 2016 --day 9 --part 1 --lang rust
+esb test --lang rust --year 2016 --day 9 --part 1
 ```
 
 ### Running for real
@@ -122,9 +113,10 @@ esb test --year 2016 --day 9 --part 1 --lang rust
 Runs the code for the given input. Also can submit solutions.
 
 ```shell
-esb run --year 2016 --day 9 --part 1 --lang rust
+esb run --lang rust --year 2016 --day 9 --part 1
 
-esb run --year 2016 --day 9 --part 1 --lang rust --submit
+# Run solution and then submit
+esb run --lang rust --year 2016 --day 9 --part 1 --submit
 ```
 
 ### Check your progress in the command line
@@ -172,19 +164,26 @@ Any program that supports the [FIREPLACEv1](doc/FIREPLACEv1.0.md) prococol can u
 
 - **But, why python 3.11? What about my Debian friends?**
 
-  > Because the developer wanted to some of the newest features
+  > Because the developer wanted to some of the newest features.
 
 - **You could steal my session cookies right?**
+
   > Yes, but I won't. Remember to read this code. Also, watch out for malicious dependencies.
+
+- **I'd like to store the datababse and cache data**
+
+  > Please don't store it publicly because it goes against [AoC's Code of Conduct](https://adventofcode.com/2023/about).
+  > If you want to do it in private repos, just remove the `.cache` dir from `.gitignore`.
 
 ## Rules of Automation
 
 ElfScript Brigade does follow the [automation guidelines](https://www.reddit.com/r/adventofcode/wiki/faqs/automation) on the [/r/adventofcode](https://www.reddit.com/r/adventofcode) community wiki
 Specifically:
 
-Once inputs are downloaded, they are cached locally in the `data` directory.
+Once inputs are downloaded, they are cached locally in the `.cache` directory.
 If you suspect your input is corrupted, you can manually request a fresh copy using `esb fetch ... --force`
-The User-Agent header for the HTTP requests is set to me since I maintain this tool :)
+The User-Agent header for the HTTP requests is set to me [@luxedo](https://github.com/luxedo)
+since I maintain this tool :)
 
 ## License
 
