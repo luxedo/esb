@@ -81,6 +81,8 @@ export AOC_SESSION_COOKIE="<my_current_cookie>"
 echo "<my_current_cookie>" > .env
 ```
 
+How to find your Session Cookie? Check [SESSION_COOKIE.md](doc/SESSION_COOKIE.md).
+
 ### Fetching problems
 
 Downloads puzzle statement, data and correct answers (when applicable).
