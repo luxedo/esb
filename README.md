@@ -24,6 +24,8 @@ This tool allows us _elves_ to:
 4. Shiny dashboards
 5. [Follow the rules of automation](#rules-of-automation)
 
+> Check out an [example repo](https://github.com/luxedo/advent-of-code) created using `esb`!
+
 ## Table of Contents
 
 - [Installation](##installation)
