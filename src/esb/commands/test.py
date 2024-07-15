@@ -23,7 +23,7 @@ from esb.commands.base import (
 )
 from esb.db import ElvenCrisisArchive
 from esb.langs import LangRunner, LangSpec
-from esb.paths import LangSled
+from esb.paths import LangSled, pad_day
 from esb.protocol import fireplace
 
 if TYPE_CHECKING:
@@ -70,6 +70,7 @@ def test_day(
         if "args" in test:
             test["args"] = [str(arg) for arg in test["args"]]
         args = test.get("args")
+        eprint_info(f"Testing solution for: {lang.name}, year {year} day {pad_day(day)} part {part}")
         result = fireplace.exec_protocol(run_command, part, args, day_wd, day_input_text)
         match (result.status, result.answer == str(test["answer"])):
             case (fireplace.FPStatus.Ok, True):

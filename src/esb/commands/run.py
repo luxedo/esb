@@ -74,6 +74,8 @@ def run_day(
     run_command = runner.prepare_run_command(year=year, day=day)
     day_input = cache_sled.path("input", year, day)
     args = None
+
+    eprint_info(f"Running solution for: {lang.name}, year {year} day {pad_day(day)} part {part}")
     result = fireplace.exec_protocol_from_file(run_command, part, args, day_wd, day_input)
     match result.status:
         case fireplace.FPStatus.Ok:
