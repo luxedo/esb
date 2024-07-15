@@ -89,7 +89,8 @@ class TestTable(TestWithTemporaryDirectory):
         update_value = 321
         self.row0.update(key={"value": update_value})
         frow0 = self.SantaTable.fetch_single()
-        assert self.row0 != frow0
+        assert frow0.value == update_value
+        assert self.row0.value == update_value
 
     def test_fetch_all(self):
         self.row0.insert()

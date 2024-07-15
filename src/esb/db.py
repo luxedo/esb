@@ -200,6 +200,9 @@ class Table:
 
     @check_connection
     def update(self, key: dict):
+        for k, v in key.items():
+            setattr(self, k, v)
+
         d = self.to_dict() | key
         where_values = {k: v for k, v in d.items() if k not in key}
 
