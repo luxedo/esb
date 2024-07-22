@@ -94,7 +94,7 @@ class AocLangAction(argparse.Action):
 # Parser
 ###########################################################
 class Command(Enum):
-    new = auto()
+    init = auto()
     fetch = auto()
     start = auto()
     show = auto()
@@ -112,7 +112,7 @@ def esb_parser() -> argparse.ArgumentParser:
     description = (
         "Script your way to rescue Christmas as part of the ElfScript Brigade team.\n\n"
         "`esb` is a CLI tool to help us _elves_ to save Christmas for the [Advent Of Code](https://adventofcode.com/)"
-        "yearly events (Thank you [Eric 😉!](https://twitter.com/ericwastl)).\n"
+        " yearly events (Thank you [Eric 😉!](https://twitter.com/ericwastl)).\n"
         "For more information visit https://github.com/luxedo/esb"
     )
     parser = argparse.ArgumentParser(description=description)
@@ -128,7 +128,7 @@ def esb_parser() -> argparse.ArgumentParser:
     lmap = LangMap.load()
 
     cmd_descriptions = {
-        Command.new: "Initializes the ESB repo tool",
+        Command.init: "Initializes the ESB repo tool",
         Command.fetch: "Fetches problem statement and data",
         Command.start: "Prepares boilerplate code for the given language and day",
         Command.show: "Show problem statement and answers",
@@ -175,6 +175,14 @@ def esb_parser() -> argparse.ArgumentParser:
             "help": "Runs part 1, part 2 or both parts",
         },
     )
+    show_input_arg = (
+        ["--show-input"],
+        {"action": "store_true", "help": "Shows puzzle input"},
+    )
+    show_test_arg = (
+        ["--show-test"],
+        {"action": "store_true", "help": "Shows puzzle tests"},
+    )
 
     # New
     # Fetch
@@ -191,6 +199,8 @@ def esb_parser() -> argparse.ArgumentParser:
     # Show
     set_arguments(parsers[Command.show], *year_arg)
     set_arguments(parsers[Command.show], *day_arg)
+    set_arguments(parsers[Command.show], *show_input_arg)
+    set_arguments(parsers[Command.show], *show_test_arg)
 
     # Status
     # Test
@@ -234,22 +244,23 @@ def main():
     args = normalize_arg(args, "part")
 
     match command:
-        case Command.new:
-            esb_commands.new()
+        case Command.init:
+            cmd = esb_commands.Init()
         case Command.fetch:
-            esb_commands.fetch(args.year, args.day, force=args.force)
+            cmd = esb_commands.Fetch(args.year, args.day, force=args.force)
         case Command.start:
-            esb_commands.start(args.language, args.year, args.day, force=args.force)
+            cmd = esb_commands.Start(args.language, args.year, args.day, force=args.force)
         case Command.show:
-            esb_commands.show(args.year, args.day)
+            cmd = esb_commands.Show(args.year, args.day, show_input=args.show_input, show_test=args.show_test)
         case Command.status:
-            esb_commands.status()
+            cmd = esb_commands.Status()
         case Command.run:
-            esb_commands.run(args.language, args.part, args.year, args.day, submit=args.submit)
+            cmd = esb_commands.Run(args.language, args.year, args.day, args.part, submit=args.submit)
         case Command.test:
-            esb_commands.test(args.language, args.part, args.year, args.day)
+            cmd = esb_commands.Test(args.language, args.year, args.day, args.part)
         case Command.dashboard:
-            esb_commands.dashboard()
+            cmd = esb_commands.Dashboard()
         case _:
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)
+    cmd.execute()

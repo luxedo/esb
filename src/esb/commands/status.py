@@ -11,21 +11,13 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from esb.commands.base import is_esb_repo, oprint_info
+from esb.commands.base import Command, oprint_info
 from esb.dash import CliDash
-from esb.db import ElvenCrisisArchive
-from esb.langs import LangMap
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
-@is_esb_repo
-def status(repo_root: Path):
-    db = ElvenCrisisArchive(repo_root)
-    lmap = LangMap.load()
-    cli_dash = CliDash(db, lmap)
+class Status(Command):
+    esb_repo: bool = True
 
-    oprint_info(cli_dash.build_dash())
+    def execute(self):
+        cli_dash = CliDash(self.db, self.lang_map)
+        oprint_info(cli_dash.build_dash())

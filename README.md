@@ -50,7 +50,7 @@ pip install esb
 > mkdir my_aoc_repo && cd my_aoc_repo
 >
 > # Initializes ESB repo
-> esb new
+> esb init
 >
 > # Create boilerplate code and fetches input data
 > esb start --lang rust --year 2023 --day 13
@@ -69,7 +69,7 @@ Create a `git` repository and initialize an `esb` repository too.
 mkdir my_aoc_repo
 cd my_aoc_repo
 git init
-esb new
+esb init
 git commit -m  "I now pledge to help, and I will forever help, saving christmas."
 ```
 

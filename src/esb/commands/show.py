@@ -12,54 +12,74 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 from itertools import product
-from typing import TYPE_CHECKING
 
-from esb.commands.base import eprint_error, is_esb_repo, oprint_error, oprint_info, oprint_none
+from rich.syntax import Syntax
+
+from esb.commands.base import Command, eprint_error, oprint_error, oprint_info, oprint_none
 from esb.config import ESBConfig
-from esb.db import ElvenCrisisArchive
 from esb.paths import CacheInputSled, pad_day
 
-if TYPE_CHECKING:
-    from pathlib import Path
 
+class Show(Command):
+    esb_repo: bool = True
 
-@is_esb_repo
-def show(repo_root: Path, years: list[int], days: list[int]):
-    db = ElvenCrisisArchive(repo_root)
-    for year, day in product(years, days):
-        show_day(repo_root, db, year, day)
+    years: list[int]
+    days: list[int]
+    show_input: bool = False
+    show_test: bool = False
 
+    def __init__(self, years: list[int], days: list[int], *, show_input: bool = False, show_test: bool = False):
+        super().__init__()
+        self.years = years
+        self.days = days
+        self.show_input = show_input
+        self.show_test = show_test
 
-def show_day(repo_root: Path, db: ElvenCrisisArchive, year: int, day: int):
-    dp = db.ECAPuzzle.find_single({"year": year, "day": day})
-    cache_sled = CacheInputSled(repo_root)
-    statement_file = cache_sled.path("statement", year, day)
-    if dp is None:
-        eprint_error(f"Solution for year {year} day {pad_day(day)} not cached. Please fetch first")
-        return
+    def execute(self):
+        for year, day in product(self.years, self.days):
+            self.show_day(year, day, show_input=self.show_input, show_test=self.show_test)
 
-    if not statement_file.is_file():
-        eprint_error("Problem not fetched yet!")
-    else:
-        oprint_none(statement_file.read_text())
+    def show_day(self, year: int, day: int, *, show_input: bool, show_test: bool):
+        dp = self.db.ECAPuzzle.find_single({"year": year, "day": day})
+        cache_sled = CacheInputSled(self.repo_root)
+        statement_file = cache_sled.path("statement", year, day)
+        if dp is None:
+            eprint_error(f"Solution for year {year} day {pad_day(day)} not cached. Please fetch first")
+            return
 
-    not_solved = "<'Not solved yet'>"
-    oprint_info()
-    if dp.pt1_answer is not None:
-        oprint_info(f"Solution pt1: {dp.pt1_answer}")
-    else:
-        oprint_error(f"Solution pt1: {not_solved}")
-
-    if day != ESBConfig.last_day:
-        if dp.pt2_answer is not None:
-            oprint_info(f"Solution pt2: {dp.pt2_answer}")
+        if not statement_file.is_file():
+            eprint_error("Problem not fetched yet!")
         else:
-            oprint_error(f"Solution pt2: {not_solved}")
+            oprint_none(statement_file.read_text())
 
-    dl = db.ECALanguage.find({"year": year, "day": day})
-    if dl is not None:
+        if show_input:
+            input_file = cache_sled.path("input", year, day)
+            if input_file.is_file():
+                oprint_none()
+                oprint_none(input_file.read_text())
+
+        if show_test:
+            for test_file in self.find_test_files(year, day):
+                oprint_none()
+                oprint_none(Syntax(test_file.read_text(), "toml"))
+
+        not_solved = "<'Not solved yet'>"
         oprint_info()
-        oprint_info("Languages:")
-    for eca_language in dl:
-        stars = int(eca_language.finished_pt1) + int(eca_language.finished_pt2)
-        oprint_info(f"{eca_language.language}: [yellow]{'*' * stars}[/yellow]")
+        if dp.pt1_answer is not None:
+            oprint_info(f"Solution pt1: {dp.pt1_answer}")
+        else:
+            oprint_error(f"Solution pt1: {not_solved}")
+
+        if day != ESBConfig.last_day:
+            if dp.pt2_answer is not None:
+                oprint_info(f"Solution pt2: {dp.pt2_answer}")
+            else:
+                oprint_error(f"Solution pt2: {not_solved}")
+
+        dl = self.db.ECALanguage.find({"year": year, "day": day})
+        if dl is not None:
+            oprint_info()
+            oprint_info("Languages:")
+        for eca_language in dl:
+            stars = int(eca_language.finished_pt1) + int(eca_language.finished_pt2)
+            oprint_info(f"{eca_language.language}: [yellow]{'*' * stars}[/yellow]")

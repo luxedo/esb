@@ -80,7 +80,7 @@ class TestParserTypes(unittest.TestCase):
 class TestEsbParser(TestWithInitializedEsbRepo):
     def test_working_commands(self):
         commands = [
-            "esb new",
+            "esb init",
             "esb fetch --year 2016 --day 9",
             "esb start --lang python --year 2016 --day 9",
             "esb test --year 2016 --day 9 --lang python -p 1",
@@ -99,7 +99,7 @@ class TestEsbParser(TestWithInitializedEsbRepo):
 
     def test_non_working_commands(self):
         commands = [
-            "esb new --year 2014",
+            "esb init --year 2014",
             "esb fetch --year 2014 --day 9",
             "esb fetch --year 2016 --day 40",
             "esb wrong_command",
@@ -117,7 +117,7 @@ class TestCli(TestWithTemporaryDirectory):
     """
     Commands:
 
-    new
+    init
     fetch
     start
     show
@@ -131,7 +131,7 @@ class TestCli(TestWithTemporaryDirectory):
     TEST_DAY = 1
     TEST_PART = 1
 
-    cmd_new = "esb new".split()
+    cmd_init = "esb init".split()
     cmd_fetch = f"esb fetch --year {TEST_YEAR} --day {TEST_DAY}".split()
     language_name = "python"
     cmd_start = f"esb start --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name}".split()
@@ -142,7 +142,7 @@ class TestCli(TestWithTemporaryDirectory):
     cmd_test = f"esb test --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name} --part {TEST_PART}".split()
 
     def esb_new(self):
-        with CliMock(self.cmd_new, [""]):
+        with CliMock(self.cmd_init, [""]):
             main()
 
     def esb_fetch(self):
@@ -151,7 +151,7 @@ class TestCli(TestWithTemporaryDirectory):
             main()
 
     def test_new(self):
-        command = self.cmd_new
+        command = self.cmd_init
         with CliMock(command) as clim:
             main()
         text = clim.stderr.getvalue()
@@ -159,7 +159,7 @@ class TestCli(TestWithTemporaryDirectory):
 
     def test_new_must_fail_when_runing_in_an_esb_repo(self):
         self.esb_new()
-        command = self.cmd_new
+        command = self.cmd_init
         with CliMock(command) as clim, pytest.raises(SystemExit, match="1"):
             main()
         text = clim.stderr.getvalue()

@@ -9,13 +9,13 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
-from esb.commands.dashboard import dashboard
-from esb.commands.fetch import fetch
-from esb.commands.new import new
-from esb.commands.run import run
-from esb.commands.show import show
-from esb.commands.start import start
-from esb.commands.status import status
-from esb.commands.test import test
+from esb.commands.dashboard import Dashboard
+from esb.commands.fetch import Fetch
+from esb.commands.init import Init
+from esb.commands.run import Run
+from esb.commands.show import Show
+from esb.commands.start import Start
+from esb.commands.status import Status
+from esb.commands.test import Test
 
-__all__ = ["dashboard", "fetch", "new", "run", "show", "start", "status", "test"]
+__all__ = ["Dashboard", "Fetch", "Init", "Run", "Show", "Start", "Status", "Test"]

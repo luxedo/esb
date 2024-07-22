@@ -11,24 +11,17 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from esb.commands.base import is_esb_repo, oprint_error, oprint_info
+from esb.commands.base import Command, oprint_error, oprint_info
 from esb.dash import MdDash
-from esb.db import ElvenCrisisArchive
-from esb.langs import LangMap
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
-@is_esb_repo
-def dashboard(repo_root: Path, *, reset: bool = False):
-    db = ElvenCrisisArchive(repo_root)
-    lmap = LangMap.load()
-    md_dash = MdDash(db, lmap, repo_root)
-    try:
-        md_dash.build_dash(reset=reset)
-        oprint_info("Dashboard rebuilt successfully!")
-    except ValueError:
-        oprint_error("Error building dashboard. Check if you have all the needed tags in the template")
+class Dashboard(Command):
+    esb_repo: bool = True
+
+    def execute(self):
+        md_dash = MdDash(self.db, self.lang_map, self.repo_root)
+        try:
+            md_dash.build_dash(reset=False)
+            oprint_info("Dashboard rebuilt successfully!")
+        except ValueError:
+            oprint_error("Error building dashboard. Check if you have all the needed tags in the template")

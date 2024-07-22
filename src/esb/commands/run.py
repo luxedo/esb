@@ -14,126 +14,133 @@ from __future__ import annotations
 import sys
 from datetime import datetime
 from itertools import product
-from typing import TYPE_CHECKING
 
-from esb.commands.base import eprint_error, eprint_info, eprint_warn, find_puzzle, find_solution, is_esb_repo
-from esb.db import ElvenCrisisArchive
+from esb.commands.base import Command, eprint_error, eprint_info, eprint_warn, find_puzzle, find_solution
+from esb.commands.dashboard import Dashboard
 from esb.fetch import RudolphFetcher, RudolphSubmitStatus
 from esb.langs import LangRunner, LangSpec
 from esb.paths import CacheInputSled, LangSled, pad_day
 from esb.protocol import fireplace
 
-if TYPE_CHECKING:
-    from pathlib import Path
 
+class Run(Command):
+    esb_repo: bool = True
 
-@is_esb_repo
-def run(
-    repo_root: Path,
-    lang: LangSpec,
-    parts: list[fireplace.FPPart],
-    years: list[int],
-    days: list[int],
-    *,
-    submit: bool = False,
-):
-    db = ElvenCrisisArchive(repo_root)
-    for year, day, part in product(years, days, parts):
-        run_day(repo_root, db, lang, part, year, day, submit=submit)
+    lang: LangSpec
+    years: list[int]
+    days: list[int]
+    parts: list[fireplace.FPPart]
+    submit: bool
 
+    def __init__(
+        self, lang: LangSpec, years: list[int], days: list[int], parts: list[fireplace.FPPart], *, submit: bool = False
+    ):
+        super().__init__()
+        self.lang = lang
+        self.years = years
+        self.days = days
+        self.parts = parts
+        self.submit = submit
 
-def run_day(
-    repo_root: Path,
-    db: ElvenCrisisArchive,
-    lang: LangSpec,
-    part: fireplace.FPPart,
-    year: int,
-    day: int,
-    *,
-    submit: bool,
-):
-    if (dl := find_solution(db, year, day, lang)) is None:
-        return
+    def execute(self):
+        for year, day, part in product(self.years, self.days, self.parts):
+            self.run_day(self.lang, year, day, part, submit=self.submit)
 
-    if (dp := find_puzzle(db, year, day)) is None:
-        return
+    def run_day(
+        self,
+        lang: LangSpec,
+        year: int,
+        day: int,
+        part: fireplace.FPPart,
+        *,
+        submit: bool,
+    ):
+        if (dl := find_solution(self.db, year, day, lang)) is None:
+            return
 
-    cache_sled = CacheInputSled(repo_root)
-    lang_sled = LangSled.from_spec(repo_root, lang)
-    runner = LangRunner(lang, lang_sled)
+        if (dp := find_puzzle(self.db, year, day)) is None:
+            return
 
-    day_wd = lang_sled.working_dir(year=year, day=day)
-
-    if lang.build_command is not None:
+        cache_sled = CacheInputSled(self.repo_root)
+        lang_sled = LangSled.from_spec(self.repo_root, lang)
         runner = LangRunner(lang, lang_sled)
-        p = runner.exec_command(lang.build_command, year, day)
-        if p.returncode != 0:
-            eprint_error(f"Could not build program for: {lang.name}, year {year} day {pad_day(day)}")
-            sys.exit(2)
 
-    run_command = runner.prepare_run_command(year=year, day=day)
-    day_input = cache_sled.path("input", year, day)
-    args = None
+        day_wd = lang_sled.working_dir(year=year, day=day)
 
-    eprint_info(f"Running solution for: {lang.name}, year {year} day {pad_day(day)} part {part}")
-    result = fireplace.exec_protocol_from_file(run_command, part, args, day_wd, day_input)
-    match result.status:
-        case fireplace.FPStatus.Ok:
-            pass
-        case fireplace.FPStatus.InputDoesNotExists:
-            eprint_error(
-                f"\nCould not find input for year {year} day {pad_day(day)}. "
-                "Data seems corrupted. Please fetch again with --force"
-            )
-            return
-        case fireplace.FPStatus.ProtocolError:
-            eprint_error()
-            eprint_error(f"Solution for year {year} day {pad_day(day)} does not follow FIREPLACE protocol.")
-            return
-    attempt = result.answer
-    answer = dp.get_answer(part)
+        if lang.build_command is not None:
+            runner = LangRunner(lang, lang_sled)
+            p = runner.exec_command(lang.build_command, year, day)
+            if p.returncode != 0:
+                eprint_error(f"Could not build program for: {lang.name}, year {year} day {pad_day(day)}")
+                sys.exit(2)
 
-    now = datetime.now().astimezone()
-    db.ECARun(
-        id=None,
-        datetime=now,
-        year=year,
-        day=day,
-        language=lang.name,
-        part=part,
-        answer=attempt,
-        time=result.running_time,
-        unit=result.unit,
-    ).insert()
+        run_command = runner.prepare_run_command(year=year, day=day)
+        day_input = cache_sled.path("input", year, day)
+        args = None
 
-    if answer is not None:
-        if attempt == answer:
-            eprint_info(f"✔ Answer pt{part}: {attempt}")
-            dl.set_solved(part)
-        else:
-            eprint_error(f"✘ Answer pt{part}: {attempt}. Expected: {answer}")
-            dl.set_unsolved(part)
-        return
-
-    if attempt is not None and submit:
-        rudolph = RudolphFetcher(repo_root)
-        match rudolph.fetch_submit(year, day, part, attempt):
-            case RudolphSubmitStatus.SUCCESS:
-                eprint_info("Hooray! Found the answer!")
-                eprint_info(f"✔ Answer pt{part}: {attempt}")
-            case RudolphSubmitStatus.FAIL:
-                eprint_info("That's not the correct answer :'(")
-                eprint_error(f"✘ Answer pt{part}: {attempt}")
-            case RudolphSubmitStatus.TIMEOUT:
-                eprint_warn("Cannot submit yet. Please wait before trying again")
-                eprint_warn(f"Answer pt{part}: {attempt}")
-            case RudolphSubmitStatus.ALREADY_COMPLETE:
-                eprint_info(
-                    "Puzzle already solved but solution not fetched yet. " "Please fetch again to compare solutions.",
+        eprint_info(f"Running solution for: {lang.name}, year {year} day {pad_day(day)} part {part}")
+        result = fireplace.exec_protocol_from_file(run_command, part, args, day_wd, day_input)
+        match result.status:
+            case fireplace.FPStatus.Ok:
+                pass
+            case fireplace.FPStatus.InputDoesNotExists:
+                eprint_error(
+                    f"\nCould not find input for year {year} day {pad_day(day)}. "
+                    "Data seems corrupted. Please fetch again with --force"
                 )
-                eprint_warn(f"Answer pt{part}: {attempt}")
-            case RudolphSubmitStatus.ERROR:
-                eprint_warn("Unexpected error submitting")
-                eprint_warn(f"Answer pt{part}: {attempt}")
-    else:
-        eprint_warn(f"Answer pt{part}: {attempt}")
+                return
+            case fireplace.FPStatus.ProtocolError:
+                eprint_error()
+                eprint_error(f"Solution for year {year} day {pad_day(day)} does not follow FIREPLACE protocol.")
+                return
+        attempt = result.answer
+        answer = dp.get_answer(part)
+
+        now = datetime.now().astimezone()
+        self.db.ECARun(
+            id=None,
+            datetime=now,
+            year=year,
+            day=day,
+            language=lang.name,
+            part=part,
+            answer=attempt,
+            time=result.running_time,
+            unit=result.unit,
+        ).insert()
+
+        if answer is not None:
+            if attempt == answer:
+                eprint_info(f"✔ Answer pt{part}: {attempt}")
+                dl.set_solved(part)
+            else:
+                eprint_error(f"✘ Answer pt{part}: {attempt}. Expected: {answer}")
+                dl.set_unsolved(part)
+            return
+
+        if attempt is not None and submit:
+            rudolph = RudolphFetcher(self.repo_root)
+            match rudolph.fetch_submit(year, day, part, attempt):
+                case RudolphSubmitStatus.SUCCESS:
+                    eprint_info("Hooray! Found the answer!")
+                    eprint_info(f"✔ Answer pt{part}: {attempt}")
+                    dl.set_solved(part)
+                    cmd = Dashboard()
+                    cmd.execute()
+                case RudolphSubmitStatus.FAIL:
+                    eprint_info("That's not the correct answer :'(")
+                    eprint_error(f"✘ Answer pt{part}: {attempt}")
+                case RudolphSubmitStatus.TIMEOUT:
+                    eprint_warn("Cannot submit yet. Please wait before trying again")
+                    eprint_warn(f"Answer pt{part}: {attempt}")
+                case RudolphSubmitStatus.ALREADY_COMPLETE:
+                    eprint_info(
+                        "Puzzle already solved but solution not fetched yet. "
+                        "Please fetch again to compare solutions.",
+                    )
+                    eprint_warn(f"Answer pt{part}: {attempt}")
+                case RudolphSubmitStatus.ERROR:
+                    eprint_warn("Unexpected error submitting")
+                    eprint_warn(f"Answer pt{part}: {attempt}")
+        else:
+            eprint_warn(f"Answer pt{part}: {attempt}")
