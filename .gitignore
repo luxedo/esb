@@ -2,6 +2,8 @@ __pycache__
 .coverage*
 cobertura.xml
 .mypy_cache
+.pytest_cache
+.ruff_cache
 *.egg-info
 dist/
 .venv

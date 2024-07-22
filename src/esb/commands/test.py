@@ -17,8 +17,6 @@ from esb.commands.base import (
     Command,
     eprint_error,
     eprint_info,
-    find_solution,
-    find_tests,
 )
 from esb.langs import LangRunner, LangSpec
 from esb.paths import LangSled, pad_day
@@ -52,10 +50,10 @@ class Test(Command):
         day: int,
         part: fireplace.FPPart,
     ):
-        if find_solution(self.db, year, day, lang) is None:
+        if self.find_solution(lang, year, day) is None:
             return
 
-        if (tests := find_tests(self.repo_root, year, day, part)) == []:
+        if (tests := self.find_tests(year, day, part)) == []:
             return
 
         lang_sled = LangSled.from_spec(self.repo_root, lang)

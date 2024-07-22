@@ -15,7 +15,6 @@ import sys
 import tomllib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from functools import wraps
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -72,7 +71,7 @@ class Command(ABC):
 
     def find_tests(self, year: int, day: int, part: FPPart) -> list[tuple[str, dict]]:
         test_files = self.find_test_files(year, day)
-        tests = [test for test_file in test_files for test in load_tests(test_file, part)]
+        tests = [test for test_file in test_files for test in self.load_tests(test_file, part)]
 
         if len(tests) == 0:
             ts = CacheTestSled(self.repo_root)
@@ -81,68 +80,40 @@ class Command(ABC):
             eprint_error(f"Create tests at: {day_dir!s}")
         return tests
 
+    def find_solution(self, lang: LangSpec, year: int, day: int) -> ECALanguage | None:
+        dl = self.db.ECALanguage.find_single({"year": year, "day": day, "language": lang.name})
 
-def is_esb_repo(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        repo_root = find_esb_root(Path.cwd())
-        if repo_root is None:
-            eprint_error("Fatal: this is not an ElfScript Brigade repo.")
-            sys.exit(2)
-        return fn(repo_root, *args, **kwargs)
+        if dl is not None:
+            return dl
+        eprint_error(f"Could not find code for year {year} day {pad_day(day)}. Please start first with:")
+        eprint_info(f"esb start --year {year} --day {day} --lang {lang.name}")
+        return None
 
-    return wrapper
+    def find_puzzle(self, year: int, day: int) -> ECAPuzzle | None:
+        dp = self.db.ECAPuzzle.find_single({"year": year, "day": day})
+        if dp is not None:
+            return dp
+        eprint_error(f"Could not find input for year {year} day {pad_day(day)}. Please fetch first.")
+        eprint_info(
+            f"esb fetch --year {year} --day {day}",
+        )
+        return None
 
+    @staticmethod
+    def load_tests(filename: Path, part: FPPart) -> list[tuple[str, dict]]:
+        cases_str = filename.read_text()
+        try:
+            cases = tomllib.loads(cases_str).get("test", {})
+        except tomllib.TOMLDecodeError:
+            eprint_error(f"Test file {filename.name} is malformed")
+            return []
 
-def find_solution(db: ElvenCrisisArchive, year: int, day: int, lang: LangSpec) -> ECALanguage | None:
-    dl = db.ECALanguage.find_single({"year": year, "day": day, "language": lang.name})
-
-    if dl is not None:
-        return dl
-    eprint_error(f"Could not find code for year {year} day {pad_day(day)}. Please start first with:")
-    eprint_info(f"esb start --year {year} --day {day} --lang {lang.name}")
-    return None
-
-
-def find_puzzle(db: ElvenCrisisArchive, year: int, day: int) -> ECAPuzzle | None:
-    dp = db.ECAPuzzle.find_single({"year": year, "day": day})
-    if dp is not None:
-        return dp
-    eprint_error(f"Could not find input for year {year} day {pad_day(day)}. Please fetch first.")
-    eprint_info(
-        f"esb fetch --year {year} --day {day}",
-    )
-    return None
-
-
-def find_tests(repo_root: Path, year: int, day: int, part: FPPart) -> list[tuple[str, dict]]:
-    ts = CacheTestSled(repo_root)
-    day_dir = ts.day_dir(year, day)
-
-    test_files = [file for file in day_dir.iterdir() if file.suffix == ".toml"] if day_dir.is_dir() else []
-
-    tests = [test for test_file in test_files for test in load_tests(test_file, part)]
-
-    if len(tests) == 0:
-        eprint_error(f"Could not find tests for year {year} day {pad_day(day)}")
-        eprint_error(f"Create tests at: {day_dir!s}")
-    return tests
-
-
-def load_tests(filename: Path, part: FPPart) -> list[tuple[str, dict]]:
-    cases_str = filename.read_text()
-    try:
-        cases = tomllib.loads(cases_str).get("test", {})
-    except tomllib.TOMLDecodeError:
-        eprint_error(f"Test file {filename.name} is malformed")
-        return []
-
-    tests = []
-    for name, c in cases.items():
-        test_name = f"{filename.stem}.{name}"
-        if not all(key in c for key in ["input", "answer", "part"]):
-            eprint_error(f'Test {test_name} is missing one of the following keys: "input", "answer" or "part"')
-            continue
-        if c["part"] == part:
-            tests.append((test_name, c))
-    return tests
+        tests = []
+        for name, c in cases.items():
+            test_name = f"{filename.stem}.{name}"
+            if not all(key in c for key in ["input", "answer", "part"]):
+                eprint_error(f'Test {test_name} is missing one of the following keys: "input", "answer" or "part"')
+                continue
+            if c["part"] == part:
+                tests.append((test_name, c))
+        return tests

@@ -15,7 +15,7 @@ import sys
 from datetime import datetime
 from itertools import product
 
-from esb.commands.base import Command, eprint_error, eprint_info, eprint_warn, find_puzzle, find_solution
+from esb.commands.base import Command, eprint_error, eprint_info, eprint_warn
 from esb.commands.dashboard import Dashboard
 from esb.fetch import RudolphFetcher, RudolphSubmitStatus
 from esb.langs import LangRunner, LangSpec
@@ -55,10 +55,10 @@ class Run(Command):
         *,
         submit: bool,
     ):
-        if (dl := find_solution(self.db, year, day, lang)) is None:
+        if (dl := self.find_solution(lang, year, day)) is None:
             return
 
-        if (dp := find_puzzle(self.db, year, day)) is None:
+        if (dp := self.find_puzzle(year, day)) is None:
             return
 
         cache_sled = CacheInputSled(self.repo_root)

@@ -14,12 +14,14 @@ import shutil
 import unittest
 from unittest.mock import patch
 
-from esb.commands.base import find_tests
-from esb.commands.base import load_tests as esb_load_tests
+from esb.commands import Status
+from esb.commands.base import Command
 from esb.paths import CacheTestSled
 from esb.protocol.fireplace import FPPart
 from tests.lib import TestWithInitializedEsbRepo
 from tests.mock import TESTS_ERROR_TOML, TESTS_MISSING_TOML, TESTS_SUCCESS_TOML
+
+esb_load_tests = Command.load_tests
 
 
 class TestCommandsBaseLoadTests(unittest.TestCase):
@@ -61,12 +63,14 @@ class TestCommandsBaseFindTests(TestWithInitializedEsbRepo):
         day_dir = ts.day_dir(self.year, self.day)
         day_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy(TESTS_SUCCESS_TOML, day_dir)
-        tests = find_tests(self.repo_root, self.year, self.day, self.part)
+        cmd = Status()
+        tests = cmd.find_tests(self.year, self.day, self.part)
         assert len(tests) == 4
 
     def test_find_tests_with_empty_directory(self):
+        cmd = Status()
         with patch("sys.stderr", new_callable=io.StringIO) as stderr:
-            tests = find_tests(self.repo_root, self.year, self.day, self.part)
+            tests = cmd.find_tests(self.year, self.day, self.part)
 
         assert len(tests) == 0
 
