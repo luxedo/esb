@@ -199,12 +199,18 @@ class Table:
         return self
 
     @check_connection
-    def update(self, key: dict):
+    def update(self, key: dict, where: list[str] | None = None):
         for k, v in key.items():
             setattr(self, k, v)
 
         d = self.to_dict() | key
-        where_values = {k: v for k, v in d.items() if k not in key}
+        if where is None:
+            where_values = {k: v for k, v in d.items() if k not in key}
+        else:
+            if any(w in key for w in where):
+                message = "Cannot update and index with the same key"
+                raise ValueError(message)
+            where_values = {k: v for k, v in d.items() if k in where}
 
         where_params = self.query_named_placeholders(where_values, sep=" AND ")
         set_params = self.query_named_placeholders(key, sep=", ")
@@ -277,9 +283,11 @@ class ECALanguage(Table):
 
 @dataclass(unsafe_hash=True)
 class ECAArgCache(Table):
-    year: int
-    day: int
-    language: str
+    id: int
+    year: int | None
+    day: int | None
+    part: int | None
+    language: str | None
 
 
 @dataclass(unsafe_hash=True)
@@ -339,10 +347,12 @@ class ElvenCrisisArchive:
                                 unit INTEGER
                             )""",
         ECAArgCache: """CREATE TABLE {table_name} (
-                                year INTEGER NOT NULL,
-                                day INTEGER NOT NULL,
-                                language TEXT NOT NULL,
-                                PRIMARY KEY (year, day, language)
+                                id INTEGER NOT NULL,
+                                year INTEGER,
+                                day INTEGER,
+                                part INTEGER,
+                                language TEXT,
+                                PRIMARY KEY (id)
                             )""",
     }
     ECABrigadista = ECABrigadista
@@ -369,6 +379,10 @@ class ElvenCrisisArchive:
     def new_brigadista(self):
         self.ECABrigadista(brigadista_id=str(uuid.uuid4()), creation_date=datetime.now().astimezone()).insert()
 
+    def new_arg_cache(self):
+        self.ECAArgCache(id=1, year=None, day=None, part=None, language=None).insert()
+
     def new_repo(self):
         self.create_tables()
         self.new_brigadista()
+        self.new_arg_cache()

@@ -147,16 +147,15 @@ def esb_parser() -> argparse.ArgumentParser:
     )
     year_arg = (
         ["-y", "--year"],
-        {"required": True, "nargs": "+", "type": aoc_year, "help": "AoC year"},
+        {"nargs": "+", "type": aoc_year, "help": "AoC year"},
     )
     day_arg = (
         ["-d", "--day"],
-        {"required": True, "nargs": "+", "type": aoc_day, "help": "AoC day"},
+        {"nargs": "+", "type": aoc_day, "help": "AoC day"},
     )
     lang_arg = (
         ["-l", "--language"],
         {
-            "required": True,
             "action": AocLangAction,
             "lmap": lmap,
             "choices": lmap.names,
@@ -169,7 +168,6 @@ def esb_parser() -> argparse.ArgumentParser:
     part_arg = (
         ["-p", "--part"],
         {
-            "required": True,
             "nargs": "+",
             "type": aoc_part,
             "help": "Runs part 1, part 2 or both parts",
@@ -225,7 +223,9 @@ def normalize_arg(args, name):
     if not hasattr(args, name):
         return args
     arg = getattr(args, name)
-    if len(arg) == 1 and isinstance(arg[0], list | tuple):
+    if arg is None:
+        arg = []
+    elif len(arg) == 1 and isinstance(arg[0], list | tuple):
         arg = arg[0]
     setattr(args, name, list(set(arg)))
     return args
@@ -264,3 +264,5 @@ def main():
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)
     cmd.execute()
+    if cmd.esb_repo:
+        cmd.update_arg_cache()

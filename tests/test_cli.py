@@ -100,11 +100,8 @@ class TestEsbParser(TestWithInitializedEsbRepo):
     def test_non_working_commands(self):
         commands = [
             "esb init --year 2014",
-            "esb fetch --year 2014 --day 9",
-            "esb fetch --year 2016 --day 40",
             "esb wrong_command",
-            "esb start --year 2016 --day 9",
-            "esb run --year 2016 --day 9",
+            "esb start --year 2016 --day 9 --jorge 123",
         ]
         self.parser = esb_parser()
         for command in commands:

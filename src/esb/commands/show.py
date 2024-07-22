@@ -34,6 +34,7 @@ class Show(Command):
         self.days = days
         self.show_input = show_input
         self.show_test = show_test
+        self.load_from_arg_cache()
 
     def execute(self):
         for year, day in product(self.years, self.days):

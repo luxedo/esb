@@ -115,10 +115,16 @@ class CliDash(BaseDash):
             ret[year] = f"{year_title}\n{langs_str}\n{stars_str}\n{days_str}\n{sep_str}\n"
         return ret
 
+    def working_on(self) -> str:
+        ac = self.db.ECAArgCache.fetch_single()
+        return f"= Working on: {ac.language}, {ac.year} day {ac.day} part {ac.part} ="
+
     def build_dash(self) -> str:
         report = ""
         brigadista = self.brigadista()
+        working_on = self.working_on()
         report += "[bold red]ELFSCRIPT BRIGADE STATUS REPORT[/bold red]\n\n"
+        report += f"{working_on}\n\n"
         report += f"{brigadista}\n\n"
         report += "SERVICE STARS\n"
 

@@ -14,7 +14,6 @@ from __future__ import annotations
 import sys
 import tomllib
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -43,7 +42,6 @@ oprint_none = Console(theme=Theme(inherit=False)).print
 oprint_warn = Console(style=COLOR_WARN).print
 
 
-@dataclass
 class Command(ABC):
     db: ElvenCrisisArchive
     repo_root: Path
@@ -62,7 +60,41 @@ class Command(ABC):
             self.lang_map = LangMap.load()
 
     @abstractmethod
-    def execute(self, *args, **kwargs): ...
+    def execute(self): ...
+
+    def load_from_arg_cache(self):
+        ac = self.db.ECAArgCache.fetch_single()
+        if hasattr(self, "years") and len(self.years) == 0:
+            if ac.year is None:
+                eprint_error("Cannot find cached year. Please run the command passing --year")
+                sys.exit(2)
+            self.years = [ac.year]
+        if hasattr(self, "days") and len(self.days) == 0:
+            if ac.day is None:
+                eprint_error("Cannot find cached day. Please run the command passing --day")
+                sys.exit(2)
+            self.days = [ac.day]
+        if hasattr(self, "parts") and len(self.parts) == 0:
+            if ac.part is None:
+                eprint_error("Cannot find cached part. Please run the command passing --part")
+                sys.exit(2)
+            self.parts = [ac.part]
+        if hasattr(self, "lang") and self.lang is None:
+            if ac.language is None:
+                eprint_error("Cannot find cached language. Please run the command passing --language")
+                sys.exit(2)
+            self.lang = self.lang_map.get(ac.language)
+
+    def update_arg_cache(self):
+        ac = self.db.ECAArgCache.fetch_single()
+        if hasattr(self, "years"):
+            ac.update({"year": self.years[-1]}, where="id")
+        if hasattr(self, "days"):
+            ac.update({"day": self.days[-1]}, where="id")
+        if hasattr(self, "parts"):
+            ac.update({"part": self.parts[-1]}, where="id")
+        if hasattr(self, "lang"):
+            ac.update({"language": self.lang.name}, where="id")
 
     def find_test_files(self, year: int, day: int) -> list[Path]:
         ts = CacheTestSled(self.repo_root)

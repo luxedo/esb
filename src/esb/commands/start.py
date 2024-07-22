@@ -38,6 +38,7 @@ class Start(Command):
         self.years = years
         self.days = days
         self.force = force
+        self.load_from_arg_cache()
 
     def execute(self):
         for year, day in product(self.years, self.days):

@@ -41,6 +41,7 @@ class Run(Command):
         self.days = days
         self.parts = parts
         self.submit = submit
+        self.load_from_arg_cache()
 
     def execute(self):
         for year, day, part in product(self.years, self.days, self.parts):
