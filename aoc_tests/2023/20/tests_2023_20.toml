@@ -1,0 +1,35 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2023            #
+#           Day: 20             #
+#################################
+[test.test_01]
+part = 1
+input = """broadcaster -> a, b, c
+%a -> b
+%b -> c
+%c -> inv
+&inv -> a
+"""
+answer = 32000000
+
+[test.test_02]
+part = 1
+input = """broadcaster -> a
+%a -> inv, con
+&inv -> b
+%b -> con
+&con -> output
+"""
+answer = 11687500
+
+# No tests for part 2
+# [test.test_03]
+# part = 2
+# input = """broadcaster -> a, b, c
+# %a -> b
+# %b -> c
+# %c -> inv
+# &inv -> a
+# """
+# answer = 32000000

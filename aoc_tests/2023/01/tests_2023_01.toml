@@ -1,0 +1,25 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2023            #
+#           Day: 01             #
+#################################
+[test.test_01]
+part = 1
+input = """1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet
+"""
+answer = 142
+
+[test.test_02]
+part = 2
+input = """two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+"""
+answer = 281

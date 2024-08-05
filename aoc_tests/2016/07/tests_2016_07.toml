@@ -1,0 +1,22 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 07             #
+#################################
+[test.test_01]
+part = 1
+input = """abba[mnop]qrst
+abcd[bddb]xyyx
+aaaa[qwer]tyui
+ioxxoj[asdfgh]
+"""
+answer = 2
+
+[test.test_02]
+part = 2
+input = """aba[bab]xyz
+xyx[xyx]xyx
+aaa[kek]eke
+zazbz[bzb]cdb
+"""
+answer = 3

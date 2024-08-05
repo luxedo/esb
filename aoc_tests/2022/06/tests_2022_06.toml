@@ -1,0 +1,54 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2022            #
+#           Day: 06             #
+#################################
+[test.test_01]
+part = 1
+input = "mjqjpqmgbljsphdztnvjfqwrcgsmlb"
+answer = 7
+
+[test.test_02]
+part = 1
+input = "bvwbjplbgvbhsrlpgdmjqwftvncz"
+answer = 5
+
+[test.test_03]
+part = 1
+input = "nppdvjthqldpwncqszvftbrmjlhg"
+answer = 6
+
+[test.test_04]
+part = 1
+input = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg"
+answer = 10
+
+[test.test_05]
+part = 1
+input = "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw"
+answer = 11
+
+[test.test_06]
+part = 2
+input = "mjqjpqmgbljsphdztnvjfqwrcgsmlb"
+answer = 19
+
+[test.test_07]
+part = 2
+input = "bvwbjplbgvbhsrlpgdmjqwftvncz"
+answer = 23
+
+[test.test_08]
+part = 2
+input = "nppdvjthqldpwncqszvftbrmjlhg"
+answer = 23
+
+[test.test_09]
+part = 2
+input = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg"
+answer = 29
+
+[test.test_10]
+part = 2
+input = "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw"
+answer = 26

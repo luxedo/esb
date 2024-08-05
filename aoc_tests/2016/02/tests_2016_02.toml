@@ -1,0 +1,20 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 02             #
+#################################
+[test.test_01]
+part = 1
+input = """ULL
+RRDDD
+LURDL
+UUUUD"""
+answer = "1985"
+
+[test.test_02]
+part = 2
+input = """ULL
+RRDDD
+LURDL
+UUUUD"""
+answer = "5DB3"

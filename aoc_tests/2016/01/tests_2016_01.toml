@@ -1,0 +1,24 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 01             #
+#################################
+[test.test_01]
+part = 1
+input = "R2, L3"
+answer = 5
+
+[test.test_02]
+part = 1
+input = "R2, R2, R2"
+answer = 2
+
+[test.test_03]
+part = 1
+input = "R5, L5, R5, R3"
+answer = 12
+
+[test.test_04]
+part = 2
+input = "R8, R4, R4, R8"
+answer = 4

@@ -1,0 +1,24 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2023            #
+#           Day: 07             #
+#################################
+[test.test_01]
+part = 1
+input = """32T3K 765
+T55J5 684
+KK677 28
+KTJJT 220
+QQQJA 483
+"""
+answer = 6440
+
+[test.test_02]
+part = 2
+input = """32T3K 765
+T55J5 684
+KK677 28
+KTJJT 220
+QQQJA 483
+"""
+answer = 5905

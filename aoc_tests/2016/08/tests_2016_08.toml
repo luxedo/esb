@@ -1,0 +1,28 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 08             #
+#################################
+[test.test_01]
+part = 1
+input = """rect 3x2
+rotate column x=1 by 1
+rotate row y=0 by 4
+rotate column x=1 by 1
+"""
+answer = 6
+
+[test.test_02]
+part = 2
+input = """rect 3x2
+rotate column x=1 by 1
+rotate row y=0 by 4
+rotate column x=1 by 1
+"""
+answer = """
+
+    # #
+# #
+ #
+ #
+"""

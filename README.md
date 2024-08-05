@@ -55,6 +55,8 @@ pip install esb
 > # Create boilerplate code and fetches input data
 > esb start --lang rust --year 2023 --day 13
 >
+> # Code, code, code...
+>
 > # Run code and submit answer
 > esb run --lang rust --year 2023 --day 13 --part 1 --submit
 >
@@ -87,7 +89,7 @@ How to find your Session Cookie? Check [SESSION_COOKIE.md](doc/SESSION_COOKIE.md
 
 ### Fetching problems
 
-Downloads puzzle statement, data and correct answers (when applicable).
+Downloads puzzle statement, data and correct answers (if already solved).
 
 ```shell
 esb fetch --year 2016 --day 9
@@ -95,6 +97,8 @@ esb fetch --year 2016 --day 9
 # Hint: Use brace expansion for fetching multiple days or years
 esb fetch --year 2023 --day {1..25}
 ```
+
+Also fetches default testing files. Check [TESTING.md](doc/TESTING.md) for more information.
 
 ### Creating boilerplate code
 
@@ -112,6 +116,8 @@ Runs tests or selected tests
 esb test --lang rust --year 2016 --day 9 --part 1
 ```
 
+Check [TESTING.md](doc/TESTING.md) for more information.
+
 ### Running for real
 
 Runs the code for the given input. Also can submit solutions.
@@ -123,15 +129,45 @@ esb run --lang rust --year 2016 --day 9 --part 1
 esb run --lang rust --year 2016 --day 9 --part 1 --submit
 ```
 
+> **💡 Hint**: `--lang`, `--year`, '--day' and `--part` arguments are cached.
+>
+> ```shell
+> esb start --lang python --year 2018 --day 4
+> esb test  # Will test the solution created above
+> ```
+>
+> Check current arguments with `esb status` > `= Working on: python, 2018 day 4 part 1 =`
+
 ### Check your progress in the command line
+
+`esb status` shows current collected stars and some additional information.
 
 ```shell
 esb status
 ```
 
+![esb stats](doc/assets/img/cli_status.png)
+
+### Viewing problem statement and inputs
+
+To read the problem statements run `esb show`. The flags `--show-input` and `--show-test`
+might be helpful for viewing the inputs.
+
+```shell
+esb show --year 2019 --day 19
+```
+
 ### The dashboards
 
-The dashboards are created automatically when events happen. It's possible to generate
+`esb` generates two dashboards.
+
+1. A section in README.md to place a summary of the solutions;
+2. The file REPORT.md with detailed data on solution attempts and timing;
+
+> ⚠️ Both files are editable and can be modified manually, except for the section in
+> between the tags `<!-- Do not delete ...`.
+
+The dashboards are updated automatically when solutions are correct. It's possible to generate
 again by running:
 
 ```shell

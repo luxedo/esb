@@ -1,0 +1,20 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2022            #
+#           Day: 02             #
+#################################
+[test.test_01]
+part = 1
+input = """A Y
+B X
+C Z
+"""
+answer = 15
+
+[test.test_02]
+part = 2
+input = """A Y
+B X
+C Z
+"""
+answer = 12

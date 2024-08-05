@@ -1,0 +1,19 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 04             #
+#################################
+[test.test_01]
+part = 1
+input = """aaaaa-bbb-z-y-x-123[abxyz]
+a-b-c-d-e-f-g-h-987[abcde]
+not-a-real-room-404[oarel]
+totally-real-room-200[decoy]
+"""
+answer = 1514
+
+[test.test_02]
+part = 2
+args=["very encrypted name"]
+input = "qzmt-zixmtkozy-ivhz-343[zimth]"
+answer = 343

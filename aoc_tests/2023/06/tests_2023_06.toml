@@ -1,0 +1,18 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2023            #
+#           Day: 06             #
+#################################
+[test.test_01]
+part = 1
+input = """Time:      7  15   30
+Distance:  9  40  200
+"""
+answer = 288
+
+[test.test_02]
+part = 2
+input = """Time:      7  15   30
+Distance:  9  40  200
+"""
+answer = 71503

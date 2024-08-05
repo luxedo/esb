@@ -1,0 +1,14 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 05             #
+#################################
+[test.test_01]
+part = 1
+input = "abc"
+answer = "18f47a30"
+
+[test.test_02]
+part = 2
+input = "abc"
+answer = "05ace8e3"

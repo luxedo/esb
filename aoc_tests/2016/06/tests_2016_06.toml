@@ -1,0 +1,46 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 06             #
+#################################
+[test.test_01]
+part = 1
+input = """eedadn
+drvtee
+eandsr
+raavrd
+atevrs
+tsrnev
+sdttsa
+rasrtv
+nssdts
+ntnada
+svetve
+tesnvt
+vntsnd
+vrdear
+dvrsen
+enarar
+"""
+answer = "easter"
+
+[test.test_02]
+part = 2
+input = """eedadn
+drvtee
+eandsr
+raavrd
+atevrs
+tsrnev
+sdttsa
+rasrtv
+nssdts
+ntnada
+svetve
+tesnvt
+vntsnd
+vrdear
+dvrsen
+enarar
+"""
+answer = "advent"

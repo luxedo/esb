@@ -64,6 +64,9 @@ class Show(Command):
                 oprint_none()
                 oprint_none(Syntax(test_file.read_text(), "toml"))
 
+        oprint_info()
+        oprint_info(f"Advent of Code - {year} day {day}")
+
         not_solved = "<'Not solved yet'>"
         oprint_info()
         if dp.pt1_answer is not None:

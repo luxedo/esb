@@ -1,0 +1,14 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2023            #
+#           Day: 15             #
+#################################
+[test.test_01]
+part = 1
+input = "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7"
+answer = 1320
+
+[test.test_02]
+part = 2
+input = "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7"
+answer = 145
