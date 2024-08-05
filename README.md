@@ -129,14 +129,18 @@ esb run --lang rust --year 2016 --day 9 --part 1
 esb run --lang rust --year 2016 --day 9 --part 1 --submit
 ```
 
-> **💡 Hint**: `--lang`, `--year`, '--day' and `--part` arguments are cached.
+> **💡 Hint**: `--lang`, `--year`, `--day` and `--part` arguments are cached.
 >
 > ```shell
 > esb start --lang python --year 2018 --day 4
 > esb test  # Will test the solution created above
 > ```
 >
-> Check current arguments with `esb status` > `= Working on: python, 2018 day 4 part 1 =`
+> Check current cached arguments with `esb status` Eg:
+>
+> ```
+> = Working on: python, 2018 day 4 part 1 =
+> ```
 
 ### Check your progress in the command line
 
@@ -161,8 +165,8 @@ esb show --year 2019 --day 19
 
 `esb` generates two dashboards.
 
-1. A section in README.md to place a summary of the solutions;
-2. The file REPORT.md with detailed data on solution attempts and timing;
+1. A section in `README.md` to place a summary of the solutions;
+2. A section in `REPORT.md` with detailed data on solution attempts and timing;
 
 > ⚠️ Both files are editable and can be modified manually, except for the section in
 > between the tags `<!-- Do not delete ...`.
@@ -183,7 +187,7 @@ for each language and how to create your own boilerplate.
 - Python
 - Rust
 - Elixir
-- [_Create your own_](doc/FIREPLACEv1.0.md)
+- [_Create your own_](doc/BOILERPLATE.md)
 
 Any program that supports the [FIREPLACEv1](doc/FIREPLACEv1.0.md) prococol can use `esb` tooling.
 
@@ -221,6 +225,12 @@ ElfScript Brigade does follow the [automation guidelines](https://www.reddit.com
 Specifically:
 
 Once inputs are downloaded, they are cached locally in the `.cache` directory.
+
+_⚠️ This cache data is `.gitignonre`'d along with the database used to track user progress.
+If you wish to store this information, please do it in private repositores given that
+sharing some of this data goes against the ["Code of Conduct"](https://adventofcode.com/about)
+for AoC._
+
 If you suspect your input is corrupted, you can manually request a fresh copy using `esb fetch ... --force`
 The User-Agent header for the HTTP requests is set to me [@luxedo](https://github.com/luxedo)
 since I maintain this tool :)

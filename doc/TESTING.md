@@ -77,7 +77,7 @@ tests
 
 Creating new tests is as easy as adding a new `toml` file to the corresponding year and
 day to be tested. The relevant fields for each test in the file are `part`, `input` and
-`answer`.
+`answer`:
 
 ```toml
 [test.test_03]             # Test name
@@ -88,4 +88,4 @@ answer = 12                # Expected output
 
 Additionally, an `args` field might be necessary when the example tests run with different
 parameters than the real input, check tests
-[2022 day 15](aoc_tests/2022/15/tests_2022_15.toml) for examples with `args`.
+[2022 day 15](../aoc_tests/2022/15/tests_2022_15.toml) for examples with `args`.
