@@ -4,7 +4,7 @@
     "src/main.rs": "src/main.rs"
   },
   "run_command": ["cargo", "run", "--"],
-  "symbol": "[orange]r[/orange]",
+  "symbol": "[red]r[/red]",
   "emoji": "🦀",
   "base": true
 }
