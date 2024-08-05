@@ -30,14 +30,22 @@ class Test(Command):
     years: list[int]
     days: list[int]
     parts: list[fireplace.FPPart]
-    submit: bool
+    filter_test: str | None
 
-    def __init__(self, lang: LangSpec, years: list[int], days: list[int], parts: list[fireplace.FPPart]):
+    def __init__(
+        self,
+        lang: LangSpec,
+        years: list[int],
+        days: list[int],
+        parts: list[fireplace.FPPart],
+        filter_test: str | None = None,
+    ):
         super().__init__()
         self.lang = lang
         self.years = years
         self.days = days
         self.parts = parts
+        self.filter_test = filter_test
         self.load_from_arg_cache()
 
     def execute(self):
@@ -54,7 +62,7 @@ class Test(Command):
         if self.find_solution(lang, year, day) is None:
             return
 
-        if (tests := self.find_tests(year, day, part)) == []:
+        if (tests := self.find_tests(year, day, part, self.filter_test)) == []:
             return
 
         lang_sled = LangSled.from_spec(self.repo_root, lang)
@@ -70,12 +78,12 @@ class Test(Command):
             if "args" in test:
                 test["args"] = [str(arg) for arg in test["args"]]
             args = test.get("args")
-            eprint_info(f"Testing solution for: {lang.name}, year {year} day {pad_day(day)} part {part}")
+            eprint_info(f"Testing: {name}. Lang: {lang.name}, year {year} day {pad_day(day)} part {part}")
             result = fireplace.exec_protocol(run_command, part, args, day_wd, day_input_text)
             match (result.status, result.answer == str(test["answer"])):
                 case (fireplace.FPStatus.Ok, True):
-                    eprint_info(f"✔ Answer {name} pt{part}: {result.answer}")
+                    eprint_info(f"✔ Answer pt{part}: {result.answer}")
                 case (fireplace.FPStatus.Ok, False):
-                    eprint_error(f"✘ Answer {name} pt{part}: {result.answer}. Expected: {test['answer']}")
+                    eprint_error(f"✘ Answer pt{part}: {result.answer}. Expected: {test['answer']}")
                 case _:
                     eprint_error(f"✘ Could not run {name}")

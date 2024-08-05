@@ -173,6 +173,13 @@ def esb_parser() -> argparse.ArgumentParser:
             "help": "Runs part 1, part 2 or both parts",
         },
     )
+    filter_arg = (
+        ["-f", "--filter"],
+        {
+            # "nargs": 1,
+            "help": "Filters the tests with substring match",
+        },
+    )
     show_input_arg = (
         ["--show-input"],
         {"action": "store_true", "help": "Shows puzzle input"},
@@ -206,6 +213,7 @@ def esb_parser() -> argparse.ArgumentParser:
     set_arguments(parsers[Command.test], *day_arg)
     set_arguments(parsers[Command.test], *lang_arg)
     set_arguments(parsers[Command.test], *part_arg)
+    set_arguments(parsers[Command.test], *filter_arg)
 
     # Run
     set_arguments(parsers[Command.run], *year_arg)
@@ -257,7 +265,7 @@ def main():
         case Command.run:
             cmd = esb_commands.Run(args.language, args.year, args.day, args.part, submit=args.submit)
         case Command.test:
-            cmd = esb_commands.Test(args.language, args.year, args.day, args.part)
+            cmd = esb_commands.Test(args.language, args.year, args.day, args.part, args.filter)
         case Command.dashboard:
             cmd = esb_commands.Dashboard()
         case _:

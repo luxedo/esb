@@ -288,5 +288,5 @@ class TestCli(TestWithTemporaryDirectory):
         with CliMock(command) as clim:
             main()
         text = clim.stderr.getvalue()
-        assert "✔ Answer test" in text
+        assert "✔ Answer" in text
         assert "✘" not in text

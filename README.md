@@ -110,10 +110,16 @@ esb start --lang rust --year 2023 --day 13
 
 ### Running tests
 
-Runs tests or selected tests
+Runs tests or selected tests with:
 
 ```shell
 esb test --lang rust --year 2016 --day 9 --part 1
+```
+
+To select tests, pass `--filter` and select the test name:
+
+```shell
+esb test --lang rust --year 2016 --day 9 --part 1 --filter "test_01"
 ```
 
 Check [TESTING.md](doc/TESTING.md) for more information.

@@ -101,7 +101,7 @@ class Command(ABC):
         day_dir = ts.day_dir(year, day)
         return [file for file in day_dir.iterdir() if file.suffix == ".toml"] if day_dir.is_dir() else []
 
-    def find_tests(self, year: int, day: int, part: FPPart) -> list[tuple[str, dict]]:
+    def find_tests(self, year: int, day: int, part: FPPart, filter_test: str | None = None) -> list[tuple[str, dict]]:
         test_files = self.find_test_files(year, day)
         tests = [test for test_file in test_files for test in self.load_tests(test_file, part)]
 
@@ -110,6 +110,12 @@ class Command(ABC):
             day_dir = ts.day_dir(year, day)
             eprint_error(f"Could not find tests for year {year} day {pad_day(day)}")
             eprint_error(f"Create tests at: {day_dir!s}")
+
+        if filter_test is not None:
+            tests = [test for test in tests if filter_test in test[0]]
+            if len(tests) == 0:
+                eprint_error(f'Filter "{filter_test}" did not match any tests')
+
         return tests
 
     def find_solution(self, lang: LangSpec, year: int, day: int) -> ECALanguage | None:
