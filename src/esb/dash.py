@@ -138,36 +138,43 @@ class CliDash(BaseDash):
 class MdDash(BaseDash):
     repo_root: Path
     readme: Path = field(init=False)
+    report: Path = field(init=False)
     start_tag: str = "<!-- Do not delete - Report start -->"
     end_tag: str = "<!-- Do not delete - Report end -->"
 
     def __post_init__(self):
         self.readme = self.repo_root / "README.md"
+        self.report = self.repo_root / "REPORT.md"
 
     def build_dash(self, *, reset: bool) -> str:
-        template = self.load_template(reset=reset)
+        template = ESBConfig.blank_dash.read_text() if reset else self.readme.read_text()
+        self.validate_tags(template)
 
         brigadista = self.brigadista()
-        report = "## ELFSCRIPT BRIGADE STATUS REPORT\n\n"
-        report += f"{brigadista}\n\n"
-        report += "### SERVICE STARS\n"
-
-        start_idx = template.index(self.start_tag)
-        end_idx = template.index(self.end_tag)
+        summary_msg = "## ELFSCRIPT BRIGADE STATUS REPORT\n\n"
+        summary_msg += f"{brigadista}\n\n"
+        summary_msg += "### SERVICE STARS\n"
 
         ys = self.years_summary()
         for year in sorted(ys.keys(), reverse=True):
-            report += f"\n{ys[year]}"
-        report += "\n"
+            summary_msg += f"\n{ys[year]}"
+        summary_msg += "\n"
 
-        report = template[: start_idx + len(self.start_tag) + 1] + report + template[end_idx:]
+        final_text = self.paste_text(template, summary_msg)
+        self.readme.write_text(final_text)
+        return final_text
 
-        self.save_report(report)
-        return report
+    def build_report(self, *, reset: bool) -> str:
+        template = ESBConfig.blank_report.read_text() if reset else self.report.read_text()
+        self.validate_tags(template)
 
-    def load_template(self, *, reset: bool) -> str:
-        template = ESBConfig.blank_dash.read_text() if reset else self.readme.read_text()
+        report_msg = ""
 
+        final_text = self.paste_text(template, report_msg)
+        self.report.write_text(final_text)
+        return final_text
+
+    def validate_tags(self, template: str):
         if self.start_tag not in template:
             message = "Could not find start tag in the markdown file"
             raise ValueError(message)
@@ -176,10 +183,11 @@ class MdDash(BaseDash):
             message = "Could not find end tag in the markdown file"
             raise ValueError(message)
 
-        return template
+    def paste_text(self, template: str, msg: str) -> str:
+        start_idx = template.index(self.start_tag)
+        end_idx = template.index(self.end_tag)
 
-    def save_report(self, report: str):
-        self.readme.write_text(report)
+        return template[: start_idx + len(self.start_tag) + 1] + msg + template[end_idx:]
 
     def years_summary(self) -> dict[int, str]:
         year_stars = self.fetch_year_stars()

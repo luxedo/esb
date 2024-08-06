@@ -188,6 +188,10 @@ def esb_parser() -> argparse.ArgumentParser:
         ["--show-test"],
         {"action": "store_true", "help": "Shows puzzle tests"},
     )
+    reset_arg = (
+        ["--reset"],
+        {"action": "store_true", "help": "Resets the dashboard"},
+    )
 
     # New
     # Fetch
@@ -223,6 +227,7 @@ def esb_parser() -> argparse.ArgumentParser:
     set_arguments(parsers[Command.run], *submit_arg)
 
     # Dashboard
+    set_arguments(parsers[Command.dashboard], *reset_arg)
 
     return parser
 
@@ -267,7 +272,7 @@ def main():
         case Command.test:
             cmd = esb_commands.Test(args.language, args.year, args.day, args.part, args.filter)
         case Command.dashboard:
-            cmd = esb_commands.Dashboard()
+            cmd = esb_commands.Dashboard(reset=args.reset)
         case _:
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)

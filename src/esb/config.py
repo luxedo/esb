@@ -34,3 +34,4 @@ class ESBConfig:
     max_parts = 2
     parts = (1, 2)
     blank_dash = package_root / blank_dir / "README.md"
+    blank_report = package_root / blank_dir / "REPORT.md"

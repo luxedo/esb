@@ -16,12 +16,18 @@ from esb.dash import MdDash
 
 
 class Dashboard(Command):
+    reset: bool
     esb_repo: bool = True
+
+    def __init__(self, *, reset: bool = False):
+        super().__init__()
+        self.reset = reset
 
     def execute(self):
         md_dash = MdDash(self.db, self.lang_map, self.repo_root)
         try:
-            md_dash.build_dash(reset=False)
+            md_dash.build_dash(reset=self.reset)
+            md_dash.build_report(reset=self.reset)
             oprint_info("Dashboard rebuilt successfully!")
         except ValueError:
             oprint_error("Error building dashboard. Check if you have all the needed tags in the template")
