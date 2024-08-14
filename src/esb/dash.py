@@ -91,6 +91,16 @@ class BaseDash:
             ret.append("".join([symbol] * solved + [" "] * unsolved))
         return " ".join(ret)
 
+    def build_lang_stars_str(self, lang_stars: LangStars, year: int) -> str:
+        ret = ""
+        for lang in sorted(lang_stars.keys()):
+            match lang_stars[lang].get(year, {}):
+                case {**keys} if not keys:
+                    continue
+                case stars:
+                    ret += self.build_stars_str(stars, self.lmap.get(lang).symbol)
+        return ret
+
     def brigadista(self) -> str:
         b = self.db.ECABrigadista.fetch_single()
         return f"* Brigadista ID: {b.brigadista_id}\n* In Duty Since: {b.creation_date}"
@@ -101,14 +111,11 @@ class CliDash(BaseDash):
     def years_summary(self) -> dict[int, str]:
         year_stars = self.fetch_year_stars()
         lang_stars = self.fetch_lang_stars()
-        langs = sorted(lang_stars.keys())
 
         ret = {}
         for year, days in year_stars.items():
             year_title = self.build_year_str(year, days)
-            langs_str = "\n".join([
-                self.build_stars_str(lang_stars[lang].get(year, {}), self.lmap.get(lang).symbol) for lang in langs
-            ]).rstrip()
+            langs_str = self.build_lang_stars_str(lang_stars, year)
             stars_str = f'[yellow]{self.build_stars_str(days, "*")}[/yellow]'
             days_str = " ".join([f"{pad_day(day)}" for day in range(1, 26)])
             sep_str = f'[yellow]{"=".join(["==" for _ in range(1, 26)])}[/yellow]'
