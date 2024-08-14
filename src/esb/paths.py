@@ -97,6 +97,11 @@ class CacheInputSled(YearSled):
 @dataclass
 class CacheTestSled(YearSled):
     subdirs: SledSubdirs = field(default_factory=lambda: [ESBConfig.tests_dir])
+    files: SledFiles = field(
+        default_factory=lambda: {
+            "tests": "tests_{year}_{day}.toml",
+        }
+    )
 
 
 @dataclass

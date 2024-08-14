@@ -22,6 +22,7 @@ from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 
 from esb import __version__
+from esb.paths import pad_day
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -45,6 +46,9 @@ class RudolphFetcher:
     st_route = "/{year}/day/{day}"
     in_route = "{st_route}/input"  # noqa: RUF027
     ans_route = "{st_route}/answer"  # noqa: RUF027
+    test_host = "raw.githubusercontent.com"
+    test_route = "/luxedo/esb/main/aoc_tests/{year}/{day}/tests_{year}_{day}.toml"
+    http_ok = 200
 
     def __init__(self, repo_root: Path):
         self.repo_root = repo_root
@@ -65,46 +69,45 @@ class RudolphFetcher:
             case str(_):
                 return env_cookie
 
-    def http_get(self, host: str, route: str) -> str:
+    @staticmethod
+    def request(
+        host: str, route: str, method: str, headers: dict | None = None, data: dict | None = None
+    ) -> http.client.HTTPResponse:
         conn = http.client.HTTPSConnection(host)
         conn.request(
-            "GET",
+            method,
             route,
-            headers={
-                "Cookie": f"session={self.cookie}",
-                "User-Agent": f"ElfScipt Brigade/{__version__}; github.com/luxedo/esb by luizamaral306@gmail.com",
-            },
+            body=None if data is None else urlencode(data).encode("utf-8"),
+            headers={} if headers is None else headers,
         )
-        res = conn.getresponse()
-        http_ok = 200
-        if res.status != http_ok:
+        return conn.getresponse()
+
+    def aoc_get(self, host: str, route: str) -> str:
+        headers = {
+            "Cookie": f"session={self.cookie}",
+            "User-Agent": f"ElfScipt Brigade/{__version__}; github.com/luxedo/esb by luizamaral306@gmail.com",
+        }
+        res = self.request(host, route, "GET", headers)
+        if res.status != self.http_ok:
             message = "Could not fetch! Maybe your cookie have expired"
             raise ValueError(message)
         return res.read().decode("utf-8")
 
-    def http_post(self, host: str, route: str, form_data: dict) -> str:
-        conn = http.client.HTTPSConnection(host)
-        data = urlencode(form_data).encode("utf-8")
-        conn.request(
-            "POST",
-            route,
-            data,
-            headers={
-                "Cookie": f"session={self.cookie}",
-                "User-Agent": f"ElfScipt Brigade/{__version__}; github.com/luxedo/esb by luizamaral306@gmail.com",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-        )
-        res = conn.getresponse()
-        http_ok = 200
-        if res.status != http_ok:
+    def aoc_post(self, host: str, route: str, form_data: dict) -> str:
+        headers = {
+            "Cookie": f"session={self.cookie}",
+            "User-Agent": f"ElfScipt Brigade/{__version__}; github.com/luxedo/esb by luizamaral306@gmail.com",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        res = self.request(host, route, "POST", headers, form_data)
+        if res.status != self.http_ok:
             message = "Could not post! Maybe your cookie have expired"
             raise ValueError(message)
         return res.read().decode("utf-8")
 
     def fetch_statement(self, year: int, day: int) -> tuple[str, str, str | None, str | None]:
         route = self.st_route.format(year=year, day=day)
-        body = self.http_get(self.host, route)
+        body = self.aoc_get(self.host, route)
 
         soup = BeautifulSoup(body, "html.parser")
         statement = ""
@@ -128,11 +131,11 @@ class RudolphFetcher:
 
     def fetch_input(self, year: int, day: int) -> str:
         route = self.in_route.format(st_route=self.st_route.format(year=year, day=day))
-        return self.http_get(self.host, route)
+        return self.aoc_get(self.host, route)
 
     def fetch_submit(self, year: int, day: int, part: FPPart, answer: str) -> RudolphSubmitStatus:
         ans_route = self.ans_route.format(st_route=self.st_route.format(year=year, day=day))
-        body = self.http_post(self.host, ans_route, form_data={"level": part, "answer": answer})
+        body = self.aoc_post(self.host, ans_route, form_data={"level": part, "answer": answer})
         soup = BeautifulSoup(body, "html.parser")
         matches = {
             RudolphSubmitStatus.SUCCESS: "That's the right answer!",
@@ -154,3 +157,11 @@ class RudolphFetcher:
             if soup.find(match_substr(substr)) is not None:
                 return ret
         return RudolphSubmitStatus.ERROR
+
+    def fetch_tests(self, year: int, day: int) -> str:
+        route = self.test_route.format(year=year, day=pad_day(day))
+        res = self.request(self.test_host, route, "GET")
+        if res.status != self.http_ok:
+            message = "Could not fetch tests :("
+            raise ValueError(message)
+        return res.read().decode("utf-8")

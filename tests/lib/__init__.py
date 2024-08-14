@@ -59,8 +59,8 @@ class HttpMock:
         self.stderr = io.StringIO()
         self.stdout = io.StringIO()
         self.patchers = [
-            patch("esb.fetch.RudolphFetcher.http_get", side_effect=self.next_response),
-            patch("esb.fetch.RudolphFetcher.http_post", side_effect=self.next_response),
+            patch("esb.fetch.RudolphFetcher.aoc_get", side_effect=self.next_response),
+            patch("esb.fetch.RudolphFetcher.aoc_post", side_effect=self.next_response),
             patch.dict(os.environ, {RudolphFetcher.sess_env: "mocka moccha"}),
         ]
 

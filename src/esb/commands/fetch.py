@@ -16,7 +16,7 @@ from itertools import product
 
 from esb.commands.base import Command, eprint_error, eprint_info
 from esb.fetch import RudolphFetcher
-from esb.paths import CacheInputSled, pad_day
+from esb.paths import CacheInputSled, CacheTestSled, pad_day
 
 
 class Fetch(Command):
@@ -59,16 +59,25 @@ class Fetch(Command):
         st_file.write_text(statement)
 
         [_, title, *_] = statement.split("---")
-        self.db.ECAPuzzle(
-            year=year, day=day, title=title.strip(), url=url, pt1_answer=pt1_answer, pt2_answer=pt2_answer
-        ).insert(replace=True)
 
         input_file = cache_sled.path("input", year, day)
         if not force and input_file.is_file():
             eprint_info(f"Input for year {year} day {pad_day(day)} already cached")
             return
         puzzle_input = rudolph.fetch_input(year, day)
-
         input_file.parent.mkdir(parents=True, exist_ok=True)
         input_file.write_text(puzzle_input)
+
+        test_sled = CacheTestSled(self.repo_root)
+        tests_file = test_sled.path("tests", year, day)
+        if not force and tests_file.is_file():
+            eprint_info(f"Tests for year {year} day {pad_day(day)} already cached")
+        else:
+            tests_input = rudolph.fetch_tests(year, day)
+            tests_file.parent.mkdir(parents=True, exist_ok=True)
+            tests_file.write_text(tests_input)
+
         eprint_info(f"Fetched year {year} day {pad_day(day)}!")
+        self.db.ECAPuzzle(
+            year=year, day=day, title=title.strip(), url=url, pt1_answer=pt1_answer, pt2_answer=pt2_answer
+        ).insert(replace=True)
