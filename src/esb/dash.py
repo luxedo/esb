@@ -194,10 +194,13 @@ class MdDash(BaseDash):
         lang_stars = self.fetch_lang_stars()
 
         ret = {}
+        days_10 = range(1, 11)
+        days_20 = range(11, 21)
+        days_25 = range(21, 26)
         for year, days in year_stars.items():
-            table0 = self.build_stars_table(year, days, lang_stars, range(1, 11))
-            table1 = self.build_stars_table(year, days, lang_stars, range(11, 21))
-            table2 = self.build_stars_table(year, days, lang_stars, range(21, 26))
+            table0 = self.build_stars_table(year, days, lang_stars, days_10)
+            table1 = self.build_stars_table(year, days, lang_stars, days_20)
+            table2 = self.build_stars_table(year, days, lang_stars, days_25)
             year_title = f"#### {year}"
             ret[year] = f"\n{year_title}\n\n{table0}\n{table1}\n{table2}"
         return ret
