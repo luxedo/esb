@@ -56,6 +56,7 @@ class CodeFurnace:
                 dst.read_text(),
                 year=year,
                 day=pad_day(day),
+                language=self.lang_sled.name,
                 problem_title=title,
                 problem_url=url,
             )
