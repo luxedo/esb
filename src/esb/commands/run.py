@@ -19,7 +19,7 @@ from esb.commands.base import Command, eprint_error, eprint_info, eprint_warn
 from esb.commands.dashboard import Dashboard
 from esb.fetch import RudolphFetcher, RudolphSubmitStatus
 from esb.langs import LangRunner, LangSpec
-from esb.paths import CacheInputSled, LangSled, pad_day
+from esb.paths import LangSled, pad_day
 from esb.protocol import fireplace
 
 
@@ -62,7 +62,6 @@ class Run(Command):
         if (dp := self.find_puzzle(year, day)) is None:
             return
 
-        cache_sled = CacheInputSled(self.repo_root)
         lang_sled = LangSled.from_spec(self.repo_root, lang)
         runner = LangRunner(lang, lang_sled)
 
@@ -76,7 +75,7 @@ class Run(Command):
                 sys.exit(2)
 
         run_command = runner.prepare_run_command(year=year, day=day)
-        day_input = cache_sled.path("input", year, day)
+        day_input = self.cache_sled.path("input", year, day)
         args = None
 
         eprint_info(f"Running solution for: {lang.name}, year {year} day {pad_day(day)} part {part}")

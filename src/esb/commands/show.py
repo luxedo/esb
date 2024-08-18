@@ -17,7 +17,7 @@ from rich.syntax import Syntax
 
 from esb.commands.base import Command, eprint_error, oprint_error, oprint_info, oprint_none
 from esb.config import ESBConfig
-from esb.paths import CacheInputSled, pad_day
+from esb.paths import pad_day
 
 
 class Show(Command):
@@ -42,8 +42,7 @@ class Show(Command):
 
     def show_day(self, year: int, day: int, *, show_input: bool, show_test: bool):
         dp = self.db.ECAPuzzle.find_single({"year": year, "day": day})
-        cache_sled = CacheInputSled(self.repo_root)
-        statement_file = cache_sled.path("statement", year, day)
+        statement_file = self.cache_sled.path("statement", year, day)
         if dp is None:
             eprint_error(f"Solution for year {year} day {pad_day(day)} not cached. Please fetch first")
             return
@@ -54,7 +53,7 @@ class Show(Command):
             oprint_none(statement_file.read_text())
 
         if show_input:
-            input_file = cache_sled.path("input", year, day)
+            input_file = self.cache_sled.path("input", year, day)
             if input_file.is_file():
                 oprint_none()
                 oprint_none(input_file.read_text())

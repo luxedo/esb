@@ -22,7 +22,7 @@ from rich.theme import Theme
 
 from esb.db import ElvenCrisisArchive
 from esb.langs import LangMap
-from esb.paths import CacheTestSled, find_esb_root, pad_day
+from esb.paths import CacheInputSled, CacheTestSled, find_esb_root, pad_day
 
 if TYPE_CHECKING:
     from esb.db import ECALanguage, ECAPuzzle
@@ -46,7 +46,8 @@ class Command(ABC):
     db: ElvenCrisisArchive
     repo_root: Path
     lang_map: LangMap
-
+    cache_sled: CacheInputSled
+    test_sled: CacheTestSled
     esb_repo: bool = False
 
     def __init__(self):
@@ -58,6 +59,8 @@ class Command(ABC):
             self.repo_root = repo_root
             self.db = ElvenCrisisArchive(self.repo_root)
             self.lang_map = LangMap.load()
+            self.cache_sled = CacheInputSled(self.repo_root)
+            self.test_sled = CacheTestSled(self.repo_root)
 
     @abstractmethod
     def execute(self): ...

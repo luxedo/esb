@@ -16,7 +16,7 @@ from itertools import product
 
 from esb.commands.base import Command, eprint_error, eprint_info
 from esb.fetch import RudolphFetcher
-from esb.paths import CacheInputSled, CacheTestSled, pad_day
+from esb.paths import pad_day
 
 
 class Fetch(Command):
@@ -53,14 +53,13 @@ class Fetch(Command):
 
         url, statement, pt1_answer, pt2_answer = rudolph.fetch_statement(year, day)
 
-        cache_sled = CacheInputSled(self.repo_root)
-        st_file = cache_sled.path("statement", year, day)
+        st_file = self.cache_sled.path("statement", year, day)
         st_file.parent.mkdir(parents=True, exist_ok=True)
         st_file.write_text(statement)
 
         [_, title, *_] = statement.split("---")
 
-        input_file = cache_sled.path("input", year, day)
+        input_file = self.cache_sled.path("input", year, day)
         if not force and input_file.is_file():
             eprint_info(f"Input for year {year} day {pad_day(day)} already cached")
             return
@@ -68,8 +67,7 @@ class Fetch(Command):
         input_file.parent.mkdir(parents=True, exist_ok=True)
         input_file.write_text(puzzle_input)
 
-        test_sled = CacheTestSled(self.repo_root)
-        tests_file = test_sled.path("tests", year, day)
+        tests_file = self.test_sled.path("tests", year, day)
         if not force and tests_file.is_file():
             eprint_info(f"Tests for year {year} day {pad_day(day)} already cached")
         else:
