@@ -208,7 +208,10 @@ class MdDash(BaseDash):
             table0 = self.build_stars_table(year, days, lang_stars, days_10)
             table1 = self.build_stars_table(year, days, lang_stars, days_20)
             table2 = self.build_stars_table(year, days, lang_stars, days_25)
-            year_title = f"#### {year}"
+            solved = (v == ESBConfig.max_parts for v in days.values())
+            year_title = f"#### {year} ({sum(solved)}/{ESBConfig.last_day})"
+            if all(solved) and len(set(days.keys())) == ESBConfig.last_day:
+                year_title += " ⭐"
             ret[year] = f"\n{year_title}\n\n{table0}\n{table1}\n{table2}"
         return ret
 
