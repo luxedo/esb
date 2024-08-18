@@ -17,6 +17,7 @@ from itertools import product
 
 from esb.commands.base import Command, eprint_error, eprint_info, eprint_warn
 from esb.commands.dashboard import Dashboard
+from esb.config import ESBConfig
 from esb.fetch import RudolphFetcher, RudolphSubmitStatus
 from esb.langs import LangRunner, LangSpec
 from esb.paths import LangSled, pad_day
@@ -94,6 +95,8 @@ class Run(Command):
                 eprint_error(f"Solution for year {year} day {pad_day(day)} does not follow FIREPLACE protocol.")
                 return
         attempt = result.answer
+        if attempt is not None and len(attempt) > ESBConfig.truncate_answer:
+            attempt = f"{attempt[: ESBConfig.truncate_answer]}..."
         answer = dp.get_answer(part)
 
         now = datetime.now().astimezone()

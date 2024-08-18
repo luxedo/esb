@@ -89,3 +89,6 @@ class MetricPrefix(Enum):
     @classmethod
     def deserialize(cls, value):
         return cls(value)
+
+    def to_float(self, mantissa: float = 1):
+        return mantissa * 10**self.value

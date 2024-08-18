@@ -11,7 +11,9 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
+from statistics import StatisticsError, mean, stdev
 from typing import TYPE_CHECKING
 
 from esb.config import ESBConfig
@@ -74,6 +76,27 @@ class BaseDash:
             return s.finished_pt1 + s.finished_pt2
 
         return {lang: self.count_stars(rows, cmp_lang) for lang, rows in self.groupby(langs, "language").items()}
+
+    def fetch_runs(self):
+        runs = defaultdict(list)
+        for run in self.db.ECARun.fetch_all():
+            runs[run.year].append(run.to_dict())
+        return runs
+
+    @staticmethod
+    def runs_summary(runs):
+        runs_sum = {}
+        for year, rs in runs.items():
+            times = []
+            for r in rs:
+                if r["unit"] is None:
+                    continue
+                times.append(r["unit"].to_float(r["time"]))
+            try:
+                runs_sum[year] = {"mean": mean(times), "stdev": stdev(times)}
+            except StatisticsError:
+                continue
+        return runs_sum
 
     @staticmethod
     def build_year_str(year: int, days: DayStars) -> str:
@@ -199,6 +222,8 @@ class MdDash(BaseDash):
     def years_summary(self) -> dict[int, str]:
         year_stars = self.fetch_year_stars()
         lang_stars = self.fetch_lang_stars()
+        runs = self.fetch_runs()
+        runs_summary = self.runs_summary(runs)
 
         ret = {}
         days_10 = range(1, 11)
@@ -212,6 +237,9 @@ class MdDash(BaseDash):
             year_title = f"#### {year} ({sum(solved)}/{ESBConfig.last_day})"
             if all(solved) and len(set(days.keys())) == ESBConfig.last_day:
                 year_title += " ⭐"
+            if runs_sum := runs_summary.get(year):
+                year_title += "\n\n"
+                year_title += f"Run times: mean - {runs_sum["mean"]:.2e}, stdev - {runs_sum["stdev"]:.2e}"
             ret[year] = f"\n{year_title}\n\n{table0}\n{table1}\n{table2}"
         return ret
 
