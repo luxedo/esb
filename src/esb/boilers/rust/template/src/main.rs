@@ -25,5 +25,6 @@ fn solve_pt2(input_data: &str, _args: Vec<String>) -> FireplaceResult<impl Displ
 fn main() -> Result<(), FireplaceError> {
     // 🎅🎄❄️☃️🎁🦌
     // Bright christmas lights HERE
-    esb_fireplace::v1_run(solve_pt1, solve_pt2)
+    esb_fireplace::v1_run(solve_pt1, solve_pt2)?;
+    Ok(())
 }
