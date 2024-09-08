@@ -209,6 +209,7 @@ class TestMetricPrefix:
             "abc",
             "petermeters",
             "nanopeters",
+            "Xm",
         ],
     )
     def test_parse_fail(self, test_value):
@@ -260,6 +261,10 @@ class TestMetricPrefix:
         val, mprefix = MetricPrefix.from_float(test_value)
         assert pytest.approx(val) == answer_mantissa
         assert mprefix is answer_exponent
+
+    def test_from_float_raises(self):
+        with pytest.raises(ValueError, match="Value is out of range"):
+            MetricPrefix.from_float(1e123)
 
     @pytest.mark.parametrize(
         ("test_value", "test_exponent", "answer_mantissa", "answer_exponent"),
