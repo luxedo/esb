@@ -239,7 +239,9 @@ class MdDash(BaseDash):
                 year_title += " ⭐"
             if runs_sum := runs_summary.get(year):
                 year_title += "\n\n"
-                year_title += f"Run times: mean - {runs_sum["mean"]:.2e}, stdev - {runs_sum["stdev"]:.2e}"
+                runs_mean = runs_sum["mean"]
+                runs_stdev = runs_sum["stdev"]
+                year_title += f"Run times: mean - {runs_mean:.2e}, stdev - {runs_stdev:.2e}"
             ret[year] = f"\n{year_title}\n\n{table0}\n{table1}\n{table2}"
         return ret
 
