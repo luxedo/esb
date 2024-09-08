@@ -112,15 +112,6 @@ class Run(Command):
             unit=result.unit,
         ).insert()
 
-        if answer is not None:
-            if attempt == answer:
-                eprint_info(f"✔ Answer pt{part}: {attempt}")
-                dl.set_solved(part)
-            else:
-                eprint_error(f"✘ Answer pt{part}: {attempt}. Expected: {answer}")
-                dl.set_unsolved(part)
-            return
-
         if attempt is not None and submit:
             rudolph = RudolphFetcher(self.repo_root)
             match rudolph.fetch_submit(year, day, part, attempt):
@@ -145,5 +136,14 @@ class Run(Command):
                 case RudolphSubmitStatus.ERROR:
                     eprint_warn("Unexpected error submitting")
                     eprint_warn(f"Answer pt{part}: {attempt}")
+        elif answer is not None:
+            if attempt == answer:
+                eprint_info(f"✔ Answer pt{part}: {attempt}")
+                dl.set_solved(part)
+            else:
+                eprint_error(f"✘ Answer pt{part}: {attempt}. Expected: {answer}")
         else:
             eprint_warn(f"Answer pt{part}: {attempt}")
+
+        if result.unit is not None:
+            eprint_warn(f"Running time: {result.running_time} {result.unit.name}seconds")

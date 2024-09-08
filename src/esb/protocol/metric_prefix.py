@@ -11,6 +11,7 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from __future__ import annotations
 
+import math
 from enum import Enum
 
 
@@ -74,21 +75,40 @@ class MetricPrefix(Enum):
             match value.removesuffix("s").removesuffix(suffix):
                 case "":
                     return cls._
-                case unit:
+                case unit if unit in MetricPrefix.__members__:
                     return cls[unit]
+                case _:
+                    msg = f"Cannot parse '{value}' to {cls.__name__}"
+                    raise ValueError(msg)
+        if not value.endswith((abbrev, abbrev + "s")):
+            msg = f"Cannot parse '{value}' to {cls.__name__}"
+            raise ValueError(msg)
         match value.removesuffix(abbrev):
             case "":
                 return cls._
-            case unit:
+            case unit if unit in MetricPrefixAbbrev.__members__:
                 mp_map = {member.value: member for member in MetricPrefix}
                 return mp_map[MetricPrefixAbbrev[unit].value]
+            case _:
+                msg = f"Cannot parse '{value}' to {cls.__name__}"
+                raise ValueError(msg)
 
-    def serialize(self):
+    def serialize(self) -> int:
         return self.value
 
     @classmethod
-    def deserialize(cls, value):
+    def deserialize(cls, value) -> MetricPrefix:
         return cls(value)
 
-    def to_float(self, mantissa: float = 1):
+    def to_float(self, mantissa: float = 1) -> float:
         return mantissa * 10**self.value
+
+    @classmethod
+    def from_float(cls, value: float) -> tuple[float, MetricPrefix]:
+        exponent = int(math.log10(abs(value)))
+        prefix = int((exponent // 3) * 3)
+        if prefix not in cls:
+            msg = f"Cannot convert {value} to MetricPrefix. Value is out of range"
+            raise ValueError(msg)
+        mantissa = value / math.pow(10, prefix)
+        return mantissa, cls(prefix)

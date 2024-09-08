@@ -35,4 +35,4 @@ class ESBConfig:
     parts = (1, 2)
     blank_dash = package_root / blank_dir / "README.md"
     blank_report = package_root / blank_dir / "REPORT.md"
-    truncate_answer = 256
+    truncate_answer = 512

@@ -12,7 +12,6 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import io
-import unittest
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest.mock import patch
@@ -44,7 +43,7 @@ def solve_pt2(_input_data: str, _args: list[str] | None = None) -> int:
     return PT2_SOLUTION
 
 
-class TestRunSolutions(unittest.TestCase):
+class TestRunSolutions:
     command_args_pt1 = ("--part", "1")
     command_args_pt2 = ("--part", "2")
 
@@ -100,7 +99,7 @@ class TestRunSolutions(unittest.TestCase):
         assert output.startswith(f"{' '.join(args)}\n")
 
 
-class TestExecProtocol(unittest.TestCase):
+class TestExecProtocol:
     command = ("python", "tests/mock/solution.py")
 
     @staticmethod
@@ -142,3 +141,122 @@ class TestExecProtocol(unittest.TestCase):
         assert result.answer == TWO_LINES_INPUT
         assert isinstance(result.running_time, int)
         assert isinstance(result.unit, MetricPrefix)
+
+
+class TestMetricPrefix:
+    sample_value = 1.23
+
+    @pytest.mark.parametrize(
+        ("unit", "value"),
+        [
+            ("Qm", MetricPrefix.quetta),
+            ("Rm", MetricPrefix.ronna),
+            ("Ym", MetricPrefix.yotta),
+            ("Zm", MetricPrefix.zetta),
+            ("Em", MetricPrefix.exa),
+            ("Pm", MetricPrefix.peta),
+            ("Tm", MetricPrefix.tera),
+            ("Gm", MetricPrefix.giga),
+            ("Mm", MetricPrefix.mega),
+            ("km", MetricPrefix.kilo),
+            ("hm", MetricPrefix.hecto),
+            ("m", MetricPrefix._),  # noqa: SLF001
+            ("dm", MetricPrefix.deci),
+            ("cm", MetricPrefix.centi),
+            ("mm", MetricPrefix.milli),
+            ("μm", MetricPrefix.micro),
+            ("nm", MetricPrefix.nano),
+            ("pm", MetricPrefix.pico),
+            ("fm", MetricPrefix.femto),
+            ("am", MetricPrefix.atto),
+            ("zm", MetricPrefix.zepto),
+            ("ym", MetricPrefix.yocto),
+            ("rm", MetricPrefix.ronto),
+            ("qm", MetricPrefix.quecto),
+            ("quettameters", MetricPrefix.quetta),
+            ("ronnameters", MetricPrefix.ronna),
+            ("yottameters", MetricPrefix.yotta),
+            ("zettameters", MetricPrefix.zetta),
+            ("exameters", MetricPrefix.exa),
+            ("petameters", MetricPrefix.peta),
+            ("terameters", MetricPrefix.tera),
+            ("gigameters", MetricPrefix.giga),
+            ("megameters", MetricPrefix.mega),
+            ("kilometers", MetricPrefix.kilo),
+            ("hectometers", MetricPrefix.hecto),
+            ("decameters", MetricPrefix.deca),
+            ("meters", MetricPrefix._),  # noqa: SLF001
+            ("decimeters", MetricPrefix.deci),
+            ("centimeters", MetricPrefix.centi),
+            ("millimeters", MetricPrefix.milli),
+            ("micrometers", MetricPrefix.micro),
+            ("nanometers", MetricPrefix.nano),
+            ("picometers", MetricPrefix.pico),
+            ("femtometers", MetricPrefix.femto),
+            ("attometers", MetricPrefix.atto),
+            ("zeptometers", MetricPrefix.zepto),
+            ("yoctometers", MetricPrefix.yocto),
+            ("rontometers", MetricPrefix.ronto),
+            ("quectometers", MetricPrefix.quecto),
+        ],
+    )
+    def test_parse_success(self, unit, value):
+        assert MetricPrefix.parse(unit, "meter", "m") is value
+
+    @pytest.mark.parametrize(
+        "test_value",
+        [
+            "abc",
+            "petermeters",
+            "nanopeters",
+        ],
+    )
+    def test_parse_fail(self, test_value):
+        with pytest.raises(ValueError, match="Cannot parse"):
+            MetricPrefix.parse(test_value, "meter", "m")
+
+    @pytest.mark.parametrize(
+        ("test_value", "answer"),
+        [
+            (MetricPrefix._, 0),  # noqa: SLF001
+            (MetricPrefix.nano, -9),
+            (MetricPrefix.kilo, 3),
+        ],
+    )
+    def test_serialize(self, test_value, answer):
+        assert test_value.serialize() == answer
+
+    @pytest.mark.parametrize(
+        ("test_value", "answer"),
+        [
+            (0, MetricPrefix._),  # noqa: SLF001
+            (-9, MetricPrefix.nano),
+            (3, MetricPrefix.kilo),
+        ],
+    )
+    def test_deserialize(self, test_value, answer):
+        assert MetricPrefix.deserialize(test_value) is answer
+
+    @pytest.mark.parametrize(
+        ("test_value", "sample_value", "answer"),
+        [
+            (MetricPrefix._, sample_value, sample_value),  # noqa: SLF001
+            (MetricPrefix.nano, sample_value, sample_value * 1e-9),
+            (MetricPrefix.kilo, sample_value, sample_value * 1e3),
+        ],
+    )
+    def test_to_float(self, test_value, sample_value, answer):
+        assert test_value.to_float(sample_value) == pytest.approx(answer)
+
+    @pytest.mark.parametrize(
+        ("test_value", "answer_mantissa", "answer_exponent"),
+        [
+            (sample_value, sample_value, MetricPrefix._),  # noqa: SLF001
+            (sample_value * 1e3, sample_value, MetricPrefix.kilo),
+            (sample_value * 1e-9, sample_value, MetricPrefix.nano),
+        ],
+    )
+    def test_from_float(self, test_value, answer_mantissa, answer_exponent):
+        val, mprefix = MetricPrefix.from_float(test_value)
+        assert pytest.approx(val) == answer_mantissa
+        assert mprefix is answer_exponent
