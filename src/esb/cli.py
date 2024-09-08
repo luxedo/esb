@@ -238,8 +238,6 @@ def normalize_arg(args, name):
     arg = getattr(args, name)
     if arg is None:
         arg = []
-    elif len(arg) == 1 and isinstance(arg[0], list | tuple):
-        arg = arg[0]
     setattr(args, name, list(set(arg)))
     return args
 
@@ -273,7 +271,7 @@ def main():
             cmd = esb_commands.Test(args.language, args.year, args.day, args.part, args.filter)
         case Command.dashboard:
             cmd = esb_commands.Dashboard(reset=args.reset)
-        case _:
+        case _:  # pragma: no cover
             message = "Should never reach here :thinking_face:"
             raise ValueError(message)
     cmd.execute()

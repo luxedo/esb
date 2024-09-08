@@ -136,6 +136,7 @@ class TestCli(TestWithTemporaryDirectory):
     cmd_status = "esb status".split()
     cmd_dashboard = "esb dashboard".split()
     cmd_run = f"esb run --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name} --part {TEST_PART}".split()
+    cmd_run_cached = "esb run --part 1".split()
     cmd_test = f"esb test --year {TEST_YEAR} --day {TEST_DAY} --lang {language_name} --part {TEST_PART}".split()
 
     def esb_new(self):
@@ -290,3 +291,18 @@ class TestCli(TestWithTemporaryDirectory):
         text = clim.stderr.getvalue()
         assert "✔ Answer" in text
         assert "✘" not in text
+
+    def test_command_cache(self):
+        self.esb_new()
+
+        command = self.cmd_start
+        http_response = [STATEMENT_2016_01.read_text(), INPUT_2016_01.read_text()]
+        with CliMock(command, http_response):
+            main()
+
+        command = self.cmd_run_cached
+        with CliMock(command) as clim:
+            main()
+
+        text = clim.stderr.getvalue()
+        assert "✘ Answer" in text
