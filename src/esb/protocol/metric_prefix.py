@@ -108,9 +108,6 @@ class MetricPrefix(Enum):
         value *= 10**exponent
         exponent = int(math.log10(abs(value)))
         prefix = int((exponent // 3) * 3)
-        if prefix not in cls:
-            msg = f"Cannot convert {value} to MetricPrefix. Value is out of range"
-            raise ValueError(msg)
         mantissa = value / math.pow(10, prefix)
         return mantissa, cls(prefix)
 

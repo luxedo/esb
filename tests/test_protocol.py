@@ -263,7 +263,7 @@ class TestMetricPrefix:
         assert mprefix is answer_exponent
 
     def test_from_float_raises(self):
-        with pytest.raises(ValueError, match="Value is out of range"):
+        with pytest.raises(ValueError, match="is not a valid MetricPrefix"):
             MetricPrefix.from_float(1e123)
 
     @pytest.mark.parametrize(
