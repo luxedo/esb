@@ -18,24 +18,45 @@ from tests.lib import TestWithInitializedEsbRepo
 
 
 class TestBoiler(TestWithInitializedEsbRepo):
-    def test_code_furnace_start(self):
-        lmap = LangMap.load_defaults()
-        lang_name = "python"
-        lang_spec = lmap.get(lang_name)
-        lang_sled = LangSled(repo_root=Path.cwd(), name=lang_name, files=lang_spec.files)
+    year = 2016
+    day = 3
+    title = "Example title"
+    url = "https://my-url"
+    lmap = LangMap.load_defaults()
 
-        year = 2016
-        day = 3
-        title = "Example title"
-        url = "https://my-url"
+    def load_lang_sled(self, lang_name: str) -> tuple[LangSled, LangMap]:
+        lang_spec = self.lmap.get(lang_name)
+        return LangSled(repo_root=Path.cwd(), name=lang_name, files=lang_spec.files), lang_spec
 
-        cf = CodeFurnace(lang_spec, lang_sled)
-        cf.start(year, day, title, url)
-
-        for dst in lang_sled.copied_map(year, day).values():
+    def assert_files(self, lang_sled: LangSled):
+        for dst in lang_sled.copied_map(self.year, self.day).values():
             assert dst.is_file()
             text = dst.read_text()
-            assert str(year) in text
-            assert str(day) in text
-            assert title in text
-            assert url in text
+            assert str(self.year) in text
+            assert str(self.day) in text
+            assert self.title in text
+            assert self.url in text
+
+    def test_code_furnace_start(self):
+        for lang_name in ["python", "rust"]:
+            with self.subTest(lang_name=lang_name):
+                lang_sled, lang_spec = self.load_lang_sled(lang_name)
+                cf = CodeFurnace(lang_spec, lang_sled)
+                cf.start(self.year, self.day, self.title, self.url)
+                self.assert_files(lang_sled)
+
+    def test_code_furnace_clear_dir(self):
+        lang_name = "python"
+        lang_sled, lang_spec = self.load_lang_sled(lang_name)
+
+        cf = CodeFurnace(lang_spec, lang_sled)
+        cf.start(self.year, self.day, self.title, self.url)
+        test_file = lang_sled.day_dir(self.year, self.day) / "test.txt"
+        test_file.touch()
+        assert test_file.exists()
+
+        # Run again. Should clean the directory
+        cf.start(self.year, self.day, self.title, self.url)
+        assert not test_file.exists()
+
+        self.assert_files(lang_sled)
