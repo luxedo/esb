@@ -260,3 +260,27 @@ class TestMetricPrefix:
         val, mprefix = MetricPrefix.from_float(test_value)
         assert pytest.approx(val) == answer_mantissa
         assert mprefix is answer_exponent
+
+    @pytest.mark.parametrize(
+        ("test_value", "test_exponent", "answer_mantissa", "answer_exponent"),
+        [
+            (sample_value, 3, sample_value, MetricPrefix.kilo),
+            (sample_value * 1e3, 3, sample_value, MetricPrefix.mega),
+            (sample_value * 1e-9, 3, sample_value, MetricPrefix.micro),
+        ],
+    )
+    def test_from_float_with_exponent(self, test_value, test_exponent, answer_mantissa, answer_exponent):
+        val, mprefix = MetricPrefix.from_float(test_value, test_exponent)
+        assert pytest.approx(val) == answer_mantissa
+        assert mprefix is answer_exponent
+
+    @pytest.mark.parametrize(
+        ("test_value", "sample_value", "answer"),
+        [
+            (MetricPrefix._, sample_value, f"{sample_value} meters"),  # noqa: SLF001
+            (MetricPrefix.nano, sample_value, f"{sample_value} nanometers"),
+            (MetricPrefix.kilo, sample_value, f"{sample_value} kilometers"),
+        ],
+    )
+    def test_format(self, test_value, sample_value, answer):
+        assert test_value.format(sample_value, "meters") == answer

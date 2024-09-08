@@ -80,7 +80,8 @@ source_pkgs = ["esb", "tests"]
 branch = true
 parallel = true
 omit = [
-  "esb/boilers",
+  "src/esb/boilers",
+  "src/esb/__main__.py",
   "tests/**/*"
 ]
 
@@ -94,6 +95,7 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+show_missing = true
 
 [tool.ruff]
 line-length = 120

@@ -64,7 +64,8 @@ def v1_run(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
     ans = _v1_run(solve_pt1, solve_pt2, args.part, args.args)
     sys.stdout.write(f"{ans}\n")
     dt = perf_counter_ns() - t0
-    sys.stdout.write(f"RT {dt} ns\n")
+    time_value = MetricPrefix.nano.format(dt, "seconds")
+    sys.stdout.write(f"RT {time_value}\n")
 
 
 ###########################################################

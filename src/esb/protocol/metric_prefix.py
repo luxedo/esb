@@ -104,7 +104,8 @@ class MetricPrefix(Enum):
         return mantissa * 10**self.value
 
     @classmethod
-    def from_float(cls, value: float) -> tuple[float, MetricPrefix]:
+    def from_float(cls, value: float, exponent: int = 0) -> tuple[float, MetricPrefix]:
+        value *= 10**exponent
         exponent = int(math.log10(abs(value)))
         prefix = int((exponent // 3) * 3)
         if prefix not in cls:
@@ -112,3 +113,7 @@ class MetricPrefix(Enum):
             raise ValueError(msg)
         mantissa = value / math.pow(10, prefix)
         return mantissa, cls(prefix)
+
+    def format(self, value: float, suffix: str = "") -> str:
+        name = self.name if self is not self._ else ""
+        return f"{value} {name}{suffix}"

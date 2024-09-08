@@ -26,8 +26,9 @@ jobs:
         run: hatch fmt
 
       - name: Mypy
-        run: mkdir -p .mypy_cache
-        run: hatch run check
+        run: |
+          mkdir -p .mypy_cache
+          hatch run check
 
       - name: Build package
         run: hatch build
