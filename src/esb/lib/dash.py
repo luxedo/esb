@@ -17,15 +17,15 @@ from statistics import StatisticsError, mean, stdev
 from typing import TYPE_CHECKING
 
 from esb.config import ESBConfig
-from esb.paths import pad_day
+from esb.lib.paths import pad_day
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
     from pathlib import Path
     from typing import Any
 
-    from esb.db import ElvenCrisisArchive, Table
-    from esb.langs import LangMap
+    from esb.lib.db import ElvenCrisisArchive, Table
+    from esb.lib.langs import LangMap
 
 DayStars = dict[int, int]
 YearStars = dict[int, DayStars]

@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from esb import db
-from tests.lib import TestWithTemporaryDirectory
+from esb.lib import db
+from tests.fixtures import TestWithTemporaryDirectory
 
 
 class TestSqlConnection(TestWithTemporaryDirectory):

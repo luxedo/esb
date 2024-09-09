@@ -17,12 +17,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from esb.config import ESBConfig
-from esb.paths import pad_day
+from esb.lib.paths import pad_day
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from esb.paths import LangSled
+    from esb.lib.paths import LangSled
 
 
 @dataclass

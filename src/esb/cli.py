@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 from esb import __version__
 from esb import commands as esb_commands
 from esb.config import ESBConfig
-from esb.langs import LangMap
+from esb.lib.langs import LangMap
 
 
 ###########################################################

@@ -11,9 +11,9 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 import pytest
 
-from esb import paths
-from esb.langs import LangMap
-from tests.lib import TestWithInitializedEsbRepo
+from esb.lib import paths
+from esb.lib.langs import LangMap
+from tests.fixtures import TestWithInitializedEsbRepo
 
 
 class TestPaths(TestWithInitializedEsbRepo):

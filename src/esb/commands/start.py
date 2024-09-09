@@ -15,14 +15,14 @@ import sys
 from itertools import product
 from typing import TYPE_CHECKING
 
-from esb.boiler import CodeFurnace
 from esb.commands.base import Command, eprint_error, eprint_info, eprint_warn
 from esb.commands.fetch import Fetch
-from esb.langs import LangRunner
-from esb.paths import LangSled, pad_day
+from esb.lib.boiler import CodeFurnace
+from esb.lib.langs import LangRunner
+from esb.lib.paths import LangSled, pad_day
 
 if TYPE_CHECKING:
-    from esb.langs import LangSpec
+    from esb.lib.langs import LangSpec
 
 
 class Start(Command):

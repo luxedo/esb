@@ -12,7 +12,7 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 from esb.commands.base import Command, oprint_error, oprint_info
-from esb.dash import MdDash
+from esb.lib.dash import MdDash
 
 
 class Dashboard(Command):

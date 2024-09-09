@@ -20,13 +20,13 @@ from typing import TYPE_CHECKING
 from rich.console import Console
 from rich.theme import Theme
 
-from esb.db import ElvenCrisisArchive
-from esb.langs import LangMap
-from esb.paths import CacheInputSled, CacheTestSled, find_esb_root, pad_day
+from esb.lib.db import ElvenCrisisArchive
+from esb.lib.langs import LangMap
+from esb.lib.paths import CacheInputSled, CacheTestSled, find_esb_root, pad_day
 
 if TYPE_CHECKING:
-    from esb.db import ECALanguage, ECAPuzzle
-    from esb.langs import LangSpec
+    from esb.lib.db import ECALanguage, ECAPuzzle
+    from esb.lib.langs import LangSpec
     from esb.protocol.fireplace import FPPart
 
 COLOR_INFO = "bold green"
@@ -63,7 +63,7 @@ class Command(ABC):
             self.test_sled = CacheTestSled(self.repo_root)
 
     @abstractmethod
-    def execute(self): ...
+    def execute(self): ...  # pragma: no cover
 
     def load_from_arg_cache(self):
         ac = self.db.ECAArgCache.fetch_single()

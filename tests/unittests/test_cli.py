@@ -20,9 +20,9 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from esb.cli import aoc_day, aoc_part, aoc_year, esb_parser, main
-from esb.langs import LangMap
-from esb.paths import CacheInputSled, CacheTestSled, LangSled
-from tests.lib import CliMock, TestWithInitializedEsbRepo, TestWithTemporaryDirectory
+from esb.lib.langs import LangMap
+from esb.lib.paths import CacheInputSled, CacheTestSled, LangSled
+from tests.fixtures import CliMock, TestWithInitializedEsbRepo, TestWithTemporaryDirectory
 from tests.mock import INPUT_2016_01, SOLUTION_2016_01_PYTHON, STATEMENT_2016_01, TEST_2016_01
 
 

@@ -11,10 +11,10 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 
 from pathlib import Path
 
-from esb.boiler import CodeFurnace
-from esb.langs import LangMap
-from esb.paths import LangSled
-from tests.lib import TestWithInitializedEsbRepo
+from esb.lib.boiler import CodeFurnace
+from esb.lib.langs import LangMap
+from esb.lib.paths import LangSled
+from tests.fixtures import TestWithInitializedEsbRepo
 
 
 class TestBoiler(TestWithInitializedEsbRepo):

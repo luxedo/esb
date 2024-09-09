@@ -18,9 +18,9 @@ from itertools import product
 from esb.commands.base import Command, eprint_error, eprint_info, eprint_warn
 from esb.commands.dashboard import Dashboard
 from esb.config import ESBConfig
-from esb.fetch import RudolphFetcher, RudolphSubmitStatus
-from esb.langs import LangRunner, LangSpec
-from esb.paths import LangSled, pad_day
+from esb.lib.fetch import RudolphFetcher, RudolphSubmitStatus
+from esb.lib.langs import LangRunner, LangSpec
+from esb.lib.paths import LangSled, pad_day
 from esb.protocol import fireplace
 
 

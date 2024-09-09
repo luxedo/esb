@@ -15,8 +15,8 @@ import sys
 from pathlib import Path
 
 from esb.commands.base import Command, eprint_error, eprint_info
-from esb.db import ElvenCrisisArchive
-from esb.paths import BlankSled
+from esb.lib.db import ElvenCrisisArchive
+from esb.lib.paths import BlankSled
 
 
 class Init(Command):

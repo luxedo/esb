@@ -8,16 +8,3 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 [Advent Of Code](https://adventofcode.com/) yearly events
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
-
-from __future__ import annotations
-
-from esb.commands.base import Command, oprint_info
-from esb.lib.dash import CliDash
-
-
-class Status(Command):
-    esb_repo: bool = True
-
-    def execute(self):
-        cli_dash = CliDash(self.db, self.lang_map)
-        oprint_info(cli_dash.build_dash())

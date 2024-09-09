@@ -9,8 +9,8 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
 
-from esb.fetch import RudolphFetcher, RudolphSubmitStatus
-from tests.lib import HttpMock, TestWithInitializedEsbRepo
+from esb.lib.fetch import RudolphFetcher, RudolphSubmitStatus
+from tests.fixtures import HttpMock, TestWithInitializedEsbRepo
 from tests.mock import SUBMIT_ALREADY_COMPLETE, SUBMIT_FAIL, SUBMIT_SUCCESS, SUBMIT_TIMEOUT
 
 

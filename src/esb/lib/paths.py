@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Self
 from esb.config import ESBConfig
 
 if TYPE_CHECKING:
-    from esb.langs import LangSpec
+    from esb.lib.langs import LangSpec
 
 
 SledFiles = dict[str, str]

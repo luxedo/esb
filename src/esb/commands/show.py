@@ -17,7 +17,7 @@ from rich.syntax import Syntax
 
 from esb.commands.base import Command, eprint_error, oprint_error, oprint_info, oprint_none
 from esb.config import ESBConfig
-from esb.paths import pad_day
+from esb.lib.paths import pad_day
 
 
 class Show(Command):

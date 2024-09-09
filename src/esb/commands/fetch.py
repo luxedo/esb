@@ -15,8 +15,8 @@ import sys
 from itertools import product
 
 from esb.commands.base import Command, eprint_error, eprint_info
-from esb.fetch import RudolphFetcher
-from esb.paths import pad_day
+from esb.lib.fetch import RudolphFetcher
+from esb.lib.paths import pad_day
 
 
 class Fetch(Command):

@@ -12,7 +12,7 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 import unittest
 
 from esb.config import ESBConfig
-from esb.langs import LangMap, LangSpec
+from esb.lib.langs import LangMap, LangSpec
 
 
 class TestLangSpec(unittest.TestCase):

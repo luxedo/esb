@@ -22,7 +22,7 @@ from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 
 from esb import __version__
-from esb.paths import pad_day
+from esb.lib.paths import pad_day
 
 if TYPE_CHECKING:
     from pathlib import Path

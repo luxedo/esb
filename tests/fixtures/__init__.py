@@ -18,8 +18,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from esb.db import ElvenCrisisArchive
-from esb.fetch import RudolphFetcher
+from esb.lib.db import ElvenCrisisArchive
+from esb.lib.fetch import RudolphFetcher
 
 
 class TestWithTemporaryDirectory(unittest.TestCase):
@@ -59,8 +59,8 @@ class HttpMock:
         self.stderr = io.StringIO()
         self.stdout = io.StringIO()
         self.patchers = [
-            patch("esb.fetch.RudolphFetcher.aoc_get", side_effect=self.next_response),
-            patch("esb.fetch.RudolphFetcher.aoc_post", side_effect=self.next_response),
+            patch("esb.lib.fetch.RudolphFetcher.aoc_get", side_effect=self.next_response),
+            patch("esb.lib.fetch.RudolphFetcher.aoc_post", side_effect=self.next_response),
             patch.dict(os.environ, {RudolphFetcher.sess_env: "mocka moccha"}),
         ]
 

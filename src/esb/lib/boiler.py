@@ -15,13 +15,13 @@ import shutil
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from esb.paths import CacheTestSled, pad_day
+from esb.lib.paths import CacheTestSled, pad_day
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from esb.langs import LangSpec
-    from esb.paths import LangSled
+    from esb.lib.langs import LangSpec
+    from esb.lib.paths import LangSled
 
 
 @dataclass

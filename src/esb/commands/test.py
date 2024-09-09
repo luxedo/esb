@@ -18,8 +18,8 @@ from esb.commands.base import (
     eprint_error,
     eprint_info,
 )
-from esb.langs import LangRunner, LangSpec
-from esb.paths import LangSled, pad_day
+from esb.lib.langs import LangRunner, LangSpec
+from esb.lib.paths import LangSled, pad_day
 from esb.protocol import fireplace
 
 
