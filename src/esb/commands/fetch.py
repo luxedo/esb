@@ -39,7 +39,7 @@ class Fetch(Command):
 
     def fetch_day(self, year: int, day: int, *, force: bool = False):
         dp = self.db.ECAPuzzle.find_single({"year": year, "day": day})
-        if not force and dp is not None and dp.pt2_answer is not None:
+        if not force and dp is not None and dp.answer_pt2 is not None:
             eprint_error(f"Fetch for year {year} day {pad_day(day)} is already complete!")
             return
 
@@ -51,7 +51,7 @@ class Fetch(Command):
 
         rudolph = RudolphFetcher(self.repo_root)
 
-        url, statement, pt1_answer, pt2_answer = rudolph.fetch_statement(year, day)
+        url, statement, answer_pt1, answer_pt2 = rudolph.fetch_statement(year, day)
 
         st_file = self.cache_sled.path("statement", year, day)
         st_file.parent.mkdir(parents=True, exist_ok=True)
@@ -77,5 +77,12 @@ class Fetch(Command):
 
         eprint_info(f"Fetched year {year} day {pad_day(day)}!")
         self.db.ECAPuzzle(
-            year=year, day=day, title=title.strip(), url=url, pt1_answer=pt1_answer, pt2_answer=pt2_answer
+            year=year,
+            day=day,
+            title=title.strip(),
+            url=url,
+            answer_pt1=answer_pt1,
+            answer_pt2=answer_pt2,
+            solved_pt1=None,
+            solved_pt2=None,
         ).insert(replace=True)

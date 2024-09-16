@@ -119,6 +119,7 @@ class Run(Command):
                     eprint_info("Hooray! Found the answer!")
                     eprint_info(f"✔ Answer pt{part}: {attempt}")
                     dl.set_solved(part)
+                    dp.set_solved_date(part)
                     cmd = Dashboard()
                     cmd.execute()
                 case RudolphSubmitStatus.FAIL:
@@ -140,6 +141,7 @@ class Run(Command):
             if attempt == answer:
                 eprint_info(f"✔ Answer pt{part}: {attempt}")
                 dl.set_solved(part)
+                dp.set_solved_date(part)
             else:
                 eprint_error(f"✘ Answer pt{part}: {attempt}. Expected: {answer}")
         else:

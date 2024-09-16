@@ -29,7 +29,7 @@ classifiers = [
   "Environment :: Console",
   "Topic :: Software Development :: Code Generators",
 ]
-dependencies = ["rich==13.7.0", "beautifulsoup4==4.12.3"]
+dependencies = ["rich==13.7.0", "beautifulsoup4==4.12.3", "plotext==5.2.8"]
 
 [project.urls]
 Documentation = "https://github.com/luxedo/esb/README.md"

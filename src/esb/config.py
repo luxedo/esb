@@ -31,8 +31,10 @@ class ESBConfig:
     first_year = 2015
     first_day = 1
     last_day = 25
-    max_parts = 2
     parts = (1, 2)
+    part_1 = 1
+    part_2 = 2
+    max_parts = 2
     blank_dash = package_root / blank_dir / "README.md"
     blank_report = package_root / blank_dir / "REPORT.md"
     truncate_answer = 512

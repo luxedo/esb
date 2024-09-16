@@ -159,10 +159,7 @@ class TestMetricPrefix:
             ("Gm", MetricPrefix.giga),
             ("Mm", MetricPrefix.mega),
             ("km", MetricPrefix.kilo),
-            ("hm", MetricPrefix.hecto),
             ("m", MetricPrefix._),  # noqa: SLF001
-            ("dm", MetricPrefix.deci),
-            ("cm", MetricPrefix.centi),
             ("mm", MetricPrefix.milli),
             ("μm", MetricPrefix.micro),
             ("nm", MetricPrefix.nano),
@@ -183,11 +180,7 @@ class TestMetricPrefix:
             ("gigameters", MetricPrefix.giga),
             ("megameters", MetricPrefix.mega),
             ("kilometers", MetricPrefix.kilo),
-            ("hectometers", MetricPrefix.hecto),
-            ("decameters", MetricPrefix.deca),
             ("meters", MetricPrefix._),  # noqa: SLF001
-            ("decimeters", MetricPrefix.deci),
-            ("centimeters", MetricPrefix.centi),
             ("millimeters", MetricPrefix.milli),
             ("micrometers", MetricPrefix.micro),
             ("nanometers", MetricPrefix.nano),

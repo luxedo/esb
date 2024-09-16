@@ -243,18 +243,30 @@ class ECAPuzzle(Table):
     day: int
     title: str
     url: str
-    pt1_answer: str | None
-    pt2_answer: str | None
+    answer_pt1: str | None
+    answer_pt2: str | None
+    solved_pt1: datetime | None
+    solved_pt2: datetime | None
 
     def get_answer(self, part: FPPart):
         match part:
             case 1:
-                return self.pt1_answer
+                return self.answer_pt1
             case 2:
-                return self.pt2_answer
+                return self.answer_pt2
             case _:
                 message = f"Part {part} does not exist"
                 raise KeyError(message)
+
+    def set_solved_date(self, part: FPPart):
+        if ((part == ESBConfig.part_1) and self.solved_pt1 is not None) or (
+            (part == ESBConfig.part_2) and self.solved_pt2 is not None
+        ):
+            return
+        now = datetime.now().astimezone()
+        self.update({f"solved_pt{part}": now})
+        if self.day == ESBConfig.last_day:  # Day 25 has only one star
+            self.update({"solved_pt2": now})
 
 
 @dataclass(unsafe_hash=True)
@@ -322,8 +334,10 @@ class ElvenCrisisArchive:
                                 day INTEGER NOT NULL,
                                 title TEXT,
                                 url TEXT,
-                                pt1_answer TEXT,
-                                pt2_answer TEXT,
+                                answer_pt1 TEXT,
+                                answer_pt2 TEXT,
+                                solved_pt1 TIMESTAMP,
+                                solved_pt2 TIMESTAMP,
                                 PRIMARY KEY (year, day)
                             )""",
         ECALanguage: """CREATE TABLE {table_name} (

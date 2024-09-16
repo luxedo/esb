@@ -26,10 +26,7 @@ class MetricPrefixAbbrev(Enum):
     G = 9
     M = 6
     k = 3
-    h = 2
     _ = 0
-    d = -1
-    c = -2
     m = -3
     μ = -6  # noqa: PLC2401
     n = -9
@@ -53,11 +50,7 @@ class MetricPrefix(Enum):
     giga = 9
     mega = 6
     kilo = 3
-    hecto = 2
-    deca = 1
     _ = 0
-    deci = -1
-    centi = -2
     milli = -3
     micro = -6
     nano = -9
@@ -111,6 +104,15 @@ class MetricPrefix(Enum):
         mantissa = value / math.pow(10, prefix)
         return mantissa, cls(prefix)
 
-    def format(self, value: float, suffix: str = "") -> str:
-        name = self.name if self is not self._ else ""
-        return f"{value} {name}{suffix}"
+    def format(self, value: float, suffix: str = "", *, precision=2, short=False) -> str:
+        match short:
+            case True:
+                name = MetricPrefixAbbrev(self.value).name if self is not self._ else ""
+            case False:
+                name = self.name if self is not self._ else ""
+        return f"{value:.{precision}f} {name}{suffix}"
+
+    @classmethod
+    def format_float(cls, value: float, suffix: str = "", *, precision=2, short=False) -> str:
+        mantissa, prefix = cls.from_float(value)
+        return prefix.format(mantissa, suffix, precision=precision, short=short)

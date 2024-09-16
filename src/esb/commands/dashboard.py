@@ -25,6 +25,7 @@ class Dashboard(Command):
 
     def execute(self):
         md_dash = MdDash(self.db, self.lang_map, self.repo_root)
+        md_dash.build_report(reset=self.reset)
         try:
             md_dash.build_dash(reset=self.reset)
             md_dash.build_report(reset=self.reset)

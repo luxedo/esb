@@ -68,14 +68,14 @@ class Show(Command):
 
         not_solved = "<'Not solved yet'>"
         oprint_info()
-        if dp.pt1_answer is not None:
-            oprint_info(f"Solution pt1: {dp.pt1_answer}")
+        if dp.answer_pt1 is not None:
+            oprint_info(f"Solution pt1: {dp.answer_pt1}")
         else:
             oprint_error(f"Solution pt1: {not_solved}")
 
         if day != ESBConfig.last_day:
-            if dp.pt2_answer is not None:
-                oprint_info(f"Solution pt2: {dp.pt2_answer}")
+            if dp.answer_pt2 is not None:
+                oprint_info(f"Solution pt2: {dp.answer_pt2}")
             else:
                 oprint_error(f"Solution pt2: {not_solved}")
 

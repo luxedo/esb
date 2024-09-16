@@ -16,8 +16,13 @@ from esb.lib.dash import CliDash
 
 
 class Status(Command):
+    full: bool
     esb_repo: bool = True
 
+    def __init__(self, *, full: bool = False):
+        super().__init__()
+        self.full = full
+
     def execute(self):
-        cli_dash = CliDash(self.db, self.lang_map)
+        cli_dash = CliDash(self.db, self.lang_map, full=self.full)
         oprint_info(cli_dash.build_dash())

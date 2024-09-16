@@ -1,6 +1,4 @@
-# Advent Of Code Solutions
-
-## ElfScript Brigade Technical Report
+# ELFSCRIPT BRIGADE TECHNICAL REPORT
 
 <!-- Do not delete - Report start -->
 <!-- Do not delete - Report end -->

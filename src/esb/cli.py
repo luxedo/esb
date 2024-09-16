@@ -176,7 +176,6 @@ def esb_parser() -> argparse.ArgumentParser:
     filter_arg = (
         ["-f", "--filter"],
         {
-            # "nargs": 1,
             "help": "Filters the tests with substring match",
         },
     )
@@ -191,6 +190,13 @@ def esb_parser() -> argparse.ArgumentParser:
     reset_arg = (
         ["--reset"],
         {"action": "store_true", "help": "Resets the dashboard"},
+    )
+    full_arg = (
+        ["-f", "--full"],
+        {
+            "action": "store_true",
+            "help": "Shows full report with plots",
+        },
     )
 
     # New
@@ -212,6 +218,7 @@ def esb_parser() -> argparse.ArgumentParser:
     set_arguments(parsers[Command.show], *show_test_arg)
 
     # Status
+    set_arguments(parsers[Command.status], *full_arg)
     # Test
     set_arguments(parsers[Command.test], *year_arg)
     set_arguments(parsers[Command.test], *day_arg)
@@ -264,7 +271,7 @@ def main():
         case Command.show:
             cmd = esb_commands.Show(args.year, args.day, show_input=args.show_input, show_test=args.show_test)
         case Command.status:
-            cmd = esb_commands.Status()
+            cmd = esb_commands.Status(full=args.full)
         case Command.run:
             cmd = esb_commands.Run(args.language, args.year, args.day, args.part, submit=args.submit)
         case Command.test:

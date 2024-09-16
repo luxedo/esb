@@ -31,7 +31,6 @@ This tool allows us _elves_ to:
 - [Installation](##installation)
 - [Usage](##usage)
 - [Currently supported languages](#currently-supported-languages)
-- [Dashboards](#dashboards)
 - [FAQ](#faq)
 - [Rules of Automation](#rules-of-automation)
 - [License](##license)
@@ -196,11 +195,6 @@ for each language and how to create your own boilerplate.
 - [_Create your own_](doc/BOILERPLATE.md)
 
 Any program that supports the [FIREPLACEv1](doc/FIREPLACEv1.0.md) prococol can use `esb` tooling.
-
-## Dashboards
-
-- Dash A
-- Dash B
 
 ## FAQ
 
