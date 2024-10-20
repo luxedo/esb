@@ -27,6 +27,8 @@ from esb.lib.paths import pad_day
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from bs4 import Tag
+
     from esb.protocol.fireplace import FPPart
 
 
@@ -105,6 +107,17 @@ class RudolphFetcher:
             raise ValueError(message)
         return res.read().decode("utf-8")
 
+    def get_text(self, element: Tag):
+        text = ""
+        if element.name:
+            if element.name in {"p", "pre"}:
+                text += "\n\n"
+            for child in element.children:
+                text += self.get_text(child.extract())  # type: ignore
+        else:
+            text += element.text
+        return text
+
     def fetch_statement(self, year: int, day: int) -> tuple[str, str, str | None, str | None]:
         route = self.st_route.format(year=year, day=day)
         body = self.aoc_get(self.host, route)
@@ -112,8 +125,8 @@ class RudolphFetcher:
         soup = BeautifulSoup(body, "html.parser")
         statement = ""
         for article in soup.find_all("article"):
-            for p in article.find_all(recursive=False):
-                statement += p.get_text() + "\n\n"
+            statement += self.get_text(article)
+        statement = re.sub(r"\n{3,}", "\n\n", statement)
         statement = "\n".join("\n".join(wrap(line, width=100)) for line in statement.strip().split("\n"))
 
         ans_re = re.compile("Your puzzle answer was")

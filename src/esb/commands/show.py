@@ -84,5 +84,5 @@ class Show(Command):
             oprint_info()
             oprint_info("Languages:")
         for eca_language in dl:
-            stars = int(eca_language.finished_pt1) + int(eca_language.finished_pt2)
+            stars = int(eca_language.solved_pt1 is not None) + int(eca_language.solved_pt2 is not None)
             oprint_info(f"{eca_language.language}: [yellow]{'*' * stars}[/yellow]")

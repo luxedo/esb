@@ -96,7 +96,7 @@ class BaseDash:
         langs = self.db.ECALanguage.fetch_all()
 
         def cmp_lang(s):
-            return s.finished_pt1 + s.finished_pt2
+            return int(s.solved_pt1 is not None) + int(s.solved_pt2 is not None)
 
         return {lang: self.count_stars(rows, cmp_lang) for lang, rows in self.groupby(langs, "language").items()}
 
@@ -207,6 +207,7 @@ class BaseDash:
 
     def plots(self) -> str:
         no_data = "\n-- No data --\n"
+        not_enough_data = "\n-- Not enough data. Run more solutions --\n"
         summary_msg = ""
 
         # AoC Solves
@@ -228,7 +229,7 @@ class BaseDash:
         languages = list(self.db.ECALanguage.fetch_all())
         languages_group = self.groupby(languages, "language")
         solves_per_language = {
-            lang: len([puzzle for puzzle in puzzles if puzzle.finished_pt2])
+            lang: len([puzzle for puzzle in puzzles if puzzle.solved_pt2 is not None])
             for lang, puzzles in languages_group.items()
         }
         if len(solves_per_language) != 0:
@@ -251,8 +252,12 @@ class BaseDash:
         xticks = [-7.5, -6, -4.5, -3, -1.5, 0, 1.5, 3, 4.5]
         xlabels = [MetricPrefix.format_float(10**i, "s", precision=0, short=True) for i in xticks]
         base_width = len(xticks)
+        min_stats_points = 3
         for year, times in correct_year_times.items():
             plt.clear_figure()
+            if len(times) < min_stats_points:
+                correct_year_plots += f"{not_enough_data}\n\n"
+                continue
             hist, edges = self.log_histogram(times, bins=base_width)
             plt.bar(edges, hist)
             plt.plot_size(base_width * 9, 20)

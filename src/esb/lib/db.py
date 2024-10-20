@@ -212,6 +212,10 @@ class Table:
                 raise ValueError(message)
             where_values = {k: v for k, v in d.items() if k in where}
 
+        if any(v is None for _, v in where_values.items()):
+            message = "Cannot update with empty fields. Please chose `where`"
+            raise ValueError(message)
+
         where_params = self.query_named_placeholders(where_values, sep=" AND ")
         set_params = self.query_named_placeholders(key, sep=", ")
 
@@ -258,15 +262,15 @@ class ECAPuzzle(Table):
                 message = f"Part {part} does not exist"
                 raise KeyError(message)
 
-    def set_solved_date(self, part: FPPart):
+    def set_solved(self, part: FPPart, answer: Any, now: datetime):
         if ((part == ESBConfig.part_1) and self.solved_pt1 is not None) or (
             (part == ESBConfig.part_2) and self.solved_pt2 is not None
         ):
             return
-        now = datetime.now().astimezone()
-        self.update({f"solved_pt{part}": now})
+        where = ["year", "day"]
+        self.update({f"solved_pt{part}": now, f"answer_pt{part}": str(answer)}, where)
         if self.day == ESBConfig.last_day:  # Day 25 has only one star
-            self.update({"solved_pt2": now})
+            self.update({"solved_pt2": now}, where)
 
 
 @dataclass(unsafe_hash=True)
@@ -274,23 +278,19 @@ class ECALanguage(Table):
     year: int
     day: int
     language: str
-    started: bool
-    finished_pt1: bool
-    finished_pt2: bool
+    solved_pt1: datetime | None
+    solved_pt2: datetime | None
 
-    def __post_init__(self):
-        super().__post_init__()
-        self.started = bool(self.started)
-        self.finished_pt1 = bool(self.finished_pt1)
-        self.finished_pt2 = bool(self.finished_pt2)
+    def set_solved(self, part: FPPart, now: datetime):
+        if ((part == ESBConfig.part_1) and self.solved_pt1 is not None) or (
+            (part == ESBConfig.part_2) and self.solved_pt2 is not None
+        ):
+            return
 
-    def set_solved(self, part: FPPart):
-        self.update({f"finished_pt{part}": True})
+        where = ["year", "day", "language"]
+        self.update({f"solved_pt{part}": now}, where)
         if self.day == ESBConfig.last_day:  # Day 25 has only one star
-            self.update({"finished_pt2": True})
-
-    def set_unsolved(self, part: FPPart):
-        self.update({f"finished_pt{part}": False})
+            self.update({f"solved_pt{part}": now}, where)
 
 
 @dataclass(unsafe_hash=True)
@@ -344,9 +344,8 @@ class ElvenCrisisArchive:
                                 year INTEGER NOT NULL,
                                 day INTEGER NOT NULL,
                                 language TEXT NOT NULL,
-                                started INT,
-                                finished_pt1 INT,
-                                finished_pt2 INT,
+                                solved_pt1 TIMESTAMP,
+                                solved_pt2 TIMESTAMP,
                                 PRIMARY KEY (year, day, language)
                             )""",
         ECARun: """CREATE TABLE {table_name} (

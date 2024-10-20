@@ -60,10 +60,18 @@ class Fetch(Command):
         [_, title, *_] = statement.split("---")
 
         input_file = self.cache_sled.path("input", year, day)
+
         if not force and input_file.is_file():
             eprint_info(f"Input for year {year} day {pad_day(day)} already cached")
             return
-        puzzle_input = rudolph.fetch_input(year, day)
+
+        try:
+            puzzle_input = rudolph.fetch_input(year, day)
+        except ValueError as err:
+            eprint_error(str(err))
+            eprint_error("Visit https://github.com/luxedo/esb/blob/main/doc/SESSION_COOKIE.md for more information")
+            sys.exit(2)
+
         input_file.parent.mkdir(parents=True, exist_ok=True)
         input_file.write_text(puzzle_input)
 

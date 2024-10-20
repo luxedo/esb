@@ -118,8 +118,9 @@ class Run(Command):
                 case RudolphSubmitStatus.SUCCESS:
                     eprint_info("Hooray! Found the answer!")
                     eprint_info(f"✔ Answer pt{part}: {attempt}")
-                    dl.set_solved(part)
-                    dp.set_solved_date(part)
+                    now = datetime.now().astimezone()
+                    dl.set_solved(part, now)
+                    dp.set_solved(part, attempt, now)
                     cmd = Dashboard()
                     cmd.execute()
                 case RudolphSubmitStatus.FAIL:
@@ -134,14 +135,18 @@ class Run(Command):
                         "Please fetch again to compare solutions.",
                     )
                     eprint_warn(f"Answer pt{part}: {attempt}")
+                    now = datetime.now().astimezone()
+                    dl.set_solved(part, now)
+                    dp.set_solved(part, attempt, now)
                 case RudolphSubmitStatus.ERROR:
                     eprint_warn("Unexpected error submitting")
                     eprint_warn(f"Answer pt{part}: {attempt}")
         elif answer is not None:
             if attempt == answer:
                 eprint_info(f"✔ Answer pt{part}: {attempt}")
-                dl.set_solved(part)
-                dp.set_solved_date(part)
+                now = datetime.now().astimezone()
+                dl.set_solved(part, now)
+                dp.set_solved(part, attempt, now)
             else:
                 eprint_error(f"✘ Answer pt{part}: {attempt}. Expected: {answer}")
         else:

@@ -61,13 +61,12 @@ class Start(Command):
                     f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. ' "Overwritting...",
                 )
                 day_language.delete()
-            case (self.db.ECALanguage(started=True), _):
+            case (self.db.ECALanguage(), _):
                 eprint_error(
                     f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. '
                     "If you wish to overwrite run the command with --force flag.",
                 )
                 return
-            # @TODO: Handle started=False
 
         lang_sled = LangSled.from_spec(self.repo_root, lang)
         cf = CodeFurnace(lang, lang_sled)
@@ -84,9 +83,8 @@ class Start(Command):
             year=year,
             day=day,
             language=lang.name,
-            started=True,
-            finished_pt1=False,
-            finished_pt2=False,
+            solved_pt1=None,
+            solved_pt2=None,
         ).insert()
         eprint_info(f"Started code for {lang.name}, year {year} day {pad_day(day)}")
         eprint_info(f"Open files at {lang_sled.day_dir(year, day)} and happy coding!")
