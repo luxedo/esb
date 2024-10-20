@@ -28,7 +28,7 @@ from esb.protocol.metric_prefix import MetricPrefix
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
     from pathlib import Path
-    from typing import Any
+    from typing import Any, Self
 
     from esb.lib.db import ECAPuzzle, ECARun, ElvenCrisisArchive, Table
     from esb.lib.langs import LangMap
@@ -45,6 +45,44 @@ class CorrectRun:
     part: int
     language: str
     time: float
+
+
+@dataclass
+class HTMLElement:
+    tag: str
+    content: str = ""
+    attributes: dict = field(default_factory=dict)
+    children: list[Self] = field(default_factory=list)
+
+    def add_child(self, child_element: Self) -> Self:
+        self.children.append(child_element)
+        return self
+
+    def add_children(self, childrens: Iterable[Self]) -> Self:
+        for child_element in childrens:
+            self.add_child(child_element)
+        return self
+
+    def __str__(self) -> str:
+        return self.render()
+
+    def render(self, indent=0) -> str:
+        indent_str = " " * indent
+        attrs = " ".join(f'{key}="{value}"' for key, value in self.attributes.items())
+        attrs_str = f" {attrs}" if attrs else ""
+        if self.children or self.content:
+            result = f"{indent_str}<{self.tag}{attrs_str}>"
+            if self.content:
+                result += f"{self.content}"
+                result += "\n".join(child.render(indent=indent + 2) for child in self.children)
+                result += f"</{self.tag}>"
+            else:
+                result += "\n"
+                result += "\n".join(child.render(indent=indent + 2) for child in self.children)
+                result += f"\n{indent_str}</{self.tag}>"
+        else:
+            result = f"{indent_str}<{self.tag}{attrs_str} />"
+        return result
 
 
 @dataclass
@@ -205,7 +243,7 @@ class BaseDash:
             )
         ]
 
-    def plots(self) -> str:
+    def plots(self, *, times_tables: bool = False) -> str:
         no_data = "\n-- No data --\n"
         not_enough_data = "\n-- Not enough data. Run more solutions --\n"
         summary_msg = ""
@@ -243,26 +281,26 @@ class BaseDash:
             solves_per_language_plot = no_data
 
         # Solve time per year
-        correct_year_plots = ""
+        year_plots = ""
         runs = list(self.db.ECARun.fetch_all())
         correct = self.correct_runs(runs, puzzles)
-        correct_year_times = self.sort_dict_by_key(
+        year_times = self.sort_dict_by_key(
             {year: [r.time for r in runs] for year, runs in self.groupby(correct, "year").items()}, ascending=False
         )
-        xticks = [-7.5, -6, -4.5, -3, -1.5, 0, 1.5, 3, 4.5]
-        xlabels = [MetricPrefix.format_float(10**i, "s", precision=0, short=True) for i in xticks]
-        base_width = len(xticks)
+        time_ticks = [-7.5, -6, -4.5, -3, -1.5, 0, 1.5, 3, 4.5]
+        time_labels = [MetricPrefix.format_float(10**i, "s", precision=0, short=True) for i in time_ticks]
+        base_width = len(time_ticks)
         min_stats_points = 3
-        for year, times in correct_year_times.items():
+        for year, times in year_times.items():
             plt.clear_figure()
             if len(times) < min_stats_points:
-                correct_year_plots += f"{not_enough_data}\n\n"
+                year_plots += f"{not_enough_data}\n\n"
                 continue
             hist, edges = self.log_histogram(times, bins=base_width)
             plt.bar(edges, hist)
             plt.plot_size(base_width * 9, 20)
-            plt.xlim(min(xticks), max(xticks))
-            plt.xticks(xticks, xlabels)
+            plt.xlim(min(time_ticks), max(time_ticks))
+            plt.xticks(time_ticks, time_labels)
             times_mean = mean(times)
             times_stdev = stdev(times)
             times_median = median(times)
@@ -272,12 +310,70 @@ class BaseDash:
             plt.vline(log10(times_mean))
             plt.vline(log10(times_median))
             plt.title(f"Year {year} - mean: {times_mean_str}; stdev: {times_stdev_str}; median: {times_median_str}")
-            correct_year_time_plot = self.strip_ansi(plt.build())
-            correct_year_plots += f"{correct_year_time_plot}\n\n"
+            year_time_plot = self.strip_ansi(plt.build())
+            year_plots += f"{year_time_plot}\n\n"
 
-        if not correct_year_plots:
-            correct_year_plots = no_data
+        if not year_plots:
+            year_plots = no_data
 
+        detailed_times = self.sort_dict_by_key(
+            {
+                year: {day: [r.time for r in runs] for day, runs in self.groupby(year_runs, "day").items()}
+                for year, year_runs in self.groupby(correct, "year").items()
+            },
+            ascending=False,
+        )
+        detailed_plots = ""
+        for year, year_runs in detailed_times.items():
+            plt.clear_figure()
+            plt.plot_size(base_width * 9.3, 20)
+            plt.title(f"Year {year}")
+            plt.xlim(0, ESBConfig.last_day)
+            plt.xticks(range(1, 26))
+            plt.ylim(min(time_ticks), max(time_ticks))
+            plt.yticks(time_ticks, time_labels)
+
+            run_data = [
+                (day, mean(times), stdev(times)) for day, times in year_runs.items() if len(times) >= min_stats_points
+            ]
+            days, day_means, day_means_log, day_std = list(
+                zip(*[(d, ts, log10(ts), std) for d, ts, std in run_data], strict=False)
+            )
+            plt.scatter(days, day_means_log)
+            detailed_plots += f"\n```\n{self.strip_ansi(plt.build())}\n```\n"
+
+            if times_tables:
+                mean_map = dict(
+                    zip(
+                        days,
+                        (MetricPrefix.format_float(m, "s", precision=3, short=True) for m in day_means),
+                        strict=False,
+                    )
+                )
+                std_map = dict(
+                    zip(
+                        days,
+                        (MetricPrefix.format_float(m, "s", precision=3, short=True) for m in day_std),
+                        strict=False,
+                    )
+                )
+
+                rows = []
+                for s in [range(1, 6), range(6, 11), range(11, 16), range(16, 21), range(21, 26)]:
+                    rows.extend([
+                        HTMLElement("tr")
+                        .add_child(HTMLElement("th", content="day"))
+                        .add_children([HTMLElement("th", content=pad_day(i)) for i in s]),
+                        HTMLElement("tr")
+                        .add_child(HTMLElement("td", content="mean"))
+                        .add_children([HTMLElement("td", content=mean_map.get(i, "--")) for i in s]),
+                        HTMLElement("tr")
+                        .add_child(HTMLElement("td", content="std"))
+                        .add_children([HTMLElement("td", content=std_map.get(i, "--")) for i in s]),
+                        HTMLElement("tr").add_child(HTMLElement("td", attributes={"colspan": 7})),
+                    ])
+                table = HTMLElement("table").add_children(rows)
+                detailed_plots += f"\n{table!s}\n"
         summary_msg += (
             "## General Statistics\n"
             f"```\n"
@@ -286,25 +382,11 @@ class BaseDash:
             f"```\n"
             "\n## Solutions timing\n"
             f"```\n"
-            f"{correct_year_plots.rstrip()}\n"
+            f"{year_plots.rstrip()}\n"
             "```\n"
+            "\n## Detailed Running times\n"
+            f"{detailed_plots}\n"
         )
-
-        # Detailed solves
-        # Waiting for `plotext` next release with `box`
-        # summary_msg += f"Detailed Running times\n\n"
-        # correct_detailed_times = self.sort_dict_by_key(
-        #     {
-        #         year: {day: runs for day, runs in self.groupby(year_runs, "day").items()}
-        #         for year, year_runs in self.groupby(correct, "year").items()
-        #     },
-        #     ascending=False
-        # )
-        # for year, year_runs in correct_detailed_times.items():
-        #     for day, runs in year_runs.items():
-        #         summary_msg += f"{year} {day}\n"
-        #         plt.clear_figure()
-        #         plt.box(...)
 
         return summary_msg
 
@@ -384,7 +466,7 @@ class MdDash(BaseDash):
         self.validate_tags(template)
 
         brigadista = self.brigadista()
-        plots_str = self.plots()
+        plots_str = self.plots(times_tables=True)
 
         report_msg = f"{brigadista}\n\n{plots_str}"
 
