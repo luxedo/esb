@@ -48,7 +48,7 @@ class CorrectRun:
 
 
 @dataclass
-class HTMLElement:
+class HTML:
     tag: str
     content: str = ""
     attributes: dict = field(default_factory=dict)
@@ -359,20 +359,21 @@ class BaseDash:
                 )
 
                 rows = []
-                for s in [range(1, 6), range(6, 11), range(11, 16), range(16, 21), range(21, 26)]:
+                columns = [range(i, i + 5) for i in range(1, 26, 5)]
+                for s in columns:
                     rows.extend([
-                        HTMLElement("tr")
-                        .add_child(HTMLElement("th", content="day"))
-                        .add_children([HTMLElement("th", content=pad_day(i)) for i in s]),
-                        HTMLElement("tr")
-                        .add_child(HTMLElement("td", content="mean"))
-                        .add_children([HTMLElement("td", content=mean_map.get(i, "--")) for i in s]),
-                        HTMLElement("tr")
-                        .add_child(HTMLElement("td", content="std"))
-                        .add_children([HTMLElement("td", content=std_map.get(i, "--")) for i in s]),
-                        HTMLElement("tr").add_child(HTMLElement("td", attributes={"colspan": 7})),
+                        HTML("tr")
+                        .add_child(HTML("th", content="day"))
+                        .add_children([HTML("th", content=pad_day(i)) for i in s]),
+                        HTML("tr")
+                        .add_child(HTML("td", content="mean"))
+                        .add_children([HTML("td", content=mean_map.get(i, "--")) for i in s]),
+                        HTML("tr")
+                        .add_child(HTML("td", content="std"))
+                        .add_children([HTML("td", content=std_map.get(i, "--")) for i in s]),
+                        HTML("tr").add_child(HTML("td", attributes={"colspan": 7})),
                     ])
-                table = HTMLElement("table").add_children(rows)
+                table = HTML("table").add_children(rows)
                 detailed_plots += f"\n{table!s}\n"
         summary_msg += (
             "## General Statistics\n"
@@ -494,62 +495,51 @@ class MdDash(BaseDash):
         lang_stars = self.fetch_lang_stars()
 
         ret = {}
-        days_6 = range(1, 7)
-        days_12 = range(7, 13)
-        days_18 = range(13, 19)
-        days_24 = range(19, 25)
-        days_25 = range(25, 26)
         for year, days in year_stars.items():
-            table_6 = self.build_stars_table(year, days, lang_stars, days_6)
-            table_12 = self.build_stars_table(year, days, lang_stars, days_12)
-            table_18 = self.build_stars_table(year, days, lang_stars, days_18)
-            table_24 = self.build_stars_table(year, days, lang_stars, days_24)
-            table_25 = self.build_stars_table(year, days, lang_stars, days_25)
-            table_25 = table_25.replace("<th>", '<th colspan=6 align="center">')
-            table_25 = table_25.replace("<td>", '<td colspan=6 align="center">')
+            columns = [range(i, i + 6) for i in range(1, 25, 6)]
+            rows = [row for s in columns for row in self.build_stars_row(year, days, lang_stars, s)]
+            last_day_rows = list(
+                self.build_stars_row(
+                    year, days, lang_stars, [ESBConfig.last_day], td_attributes={"colspan": 6, "align": "center"}
+                )
+            )
+            last_day_rows.pop()
+            table = HTML("table").add_children(rows).add_children(last_day_rows)
+
             solved = [v == ESBConfig.max_parts for v in days.values()]
             year_title = f"### {year} ({sum(solved)}/{ESBConfig.last_day})"
             if all(solved) and len(set(days.keys())) == ESBConfig.last_day:
                 year_title += " ⭐"
-            ret[year] = (
-                f"\n{year_title}\n\n"
-                f"<table>\n"
-                f"{table_6}"
-                f"<tr><td colspan=6></tr></td>"
-                f"{table_12}"
-                f"<tr><td colspan=6></tr></td>"
-                f"{table_18}"
-                f"<tr><td colspan=6></tr></td>"
-                f"{table_24}"
-                f"<tr><td colspan=6></tr></td>"
-                f"{table_25}"
-                "\n</table>\n"
-            )
+
+            ret[year] = f"\n{year_title}\n\n" f"{table!s}"
         return ret
 
-    def build_stars_table(
+    def build_stars_row(
         self,
         year: int,
         days: dict[int, int],
         lang_stars: LangStars,
         subset: Iterable[int],
-    ):
-        table_base = """
-  {langs_rows}
-  <tr>{stars_row}</tr>
-  <tr>{days_row}</tr>
-  """
+        td_attributes: dict[str, Any] | None = None,
+    ) -> Iterable[HTML]:
+        td_attributes = {} if td_attributes is None else td_attributes
+        lang_stars_str = [
+            "⭐⭐" if days.get(day) == self.SOLVED_PT2 else "⭐☆" if days.get(day) == self.SOLVED_PT1 else "☆ ☆"
+            for day in subset
+        ]
+        return [
+            *self.build_lang_rows(year, lang_stars, subset, td_attributes),
+            HTML("tr").add_children([HTML("td", content=stars, attributes=td_attributes) for stars in lang_stars_str]),
+            HTML("tr").add_children([
+                HTML("th", content=f"{pad_day(day)}", attributes=td_attributes) for day in subset
+            ]),
+            HTML("tr").add_child(HTML("td", attributes={"colspan": len(list(subset)), **td_attributes})),
+        ]
 
-        star_map = {
-            day: "⭐⭐" if stars == self.SOLVED_PT2 else "⭐☆" if stars == self.SOLVED_PT1 else "☆ ☆"
-            for day, stars in days.items()
-        }
-        star_row = "".join([f"<td>{star_map.get(day, '☆ ☆')}</td>" for day in subset])
-        days_row = "".join(f"<th>{pad_day(day)}</th>" for day in subset)
-        langs_rows = "\n".join(self.build_lang_rows(year, lang_stars, subset))
-        return table_base.format(langs_rows=langs_rows, stars_row=star_row, days_row=days_row)
-
-    def build_lang_rows(self, year: int, lang_stars: LangStars, subset: Iterable[int]) -> list[str]:
+    def build_lang_rows(
+        self, year: int, lang_stars: LangStars, subset: Iterable[int], td_attributes: dict[str, Any] | None = None
+    ) -> Iterable[HTML]:
+        td_attributes = {} if td_attributes is None else td_attributes
         langs = []
         for lang, years in lang_stars.items():
             if year not in years or sum(years[year].values()) == 0:
@@ -563,6 +553,6 @@ class MdDash(BaseDash):
                 else "☐ ☐"
                 for day, stars in years[year].items()
             }
-            lang_row = "".join([f"<td>{lang_star_map.get(day, '☐ ☐')}</td>" for day in subset])
-            langs.append(f"<tr>{lang_row}</tr>")
+            lang_row = [HTML("td", content=lang_star_map.get(day, "☐ ☐"), attributes=td_attributes) for day in subset]
+            langs.append(HTML("tr").add_children(lang_row))
         return langs
