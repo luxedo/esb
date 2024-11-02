@@ -1,0 +1,49 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2017            #
+#           Day: 01             #
+#################################
+[test.test_01]
+part = 1
+input = "1122"
+answer = 3
+
+[test.test_02]
+part = 1
+input = "1111"
+answer = 4
+
+[test.test_03]
+part = 1
+input = "1234"
+answer = 0
+
+[test.test_04]
+part = 1
+input = "91212129"
+answer = 9
+
+[test.test_05]
+part = 2
+input = "1212"
+answer = 6
+
+[test.test_06]
+part = 2
+input = "1221"
+answer = 0
+
+[test.test_07]
+part = 2
+input = "123425"
+answer = 4
+
+[test.test_08]
+part = 2
+input = "123123"
+answer = 12
+
+[test.test_09]
+part = 2
+input = "12131415"
+answer = 4
