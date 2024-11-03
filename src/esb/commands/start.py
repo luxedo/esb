@@ -85,6 +85,6 @@ class Start(Command):
             language=lang.name,
             solved_pt1=None,
             solved_pt2=None,
-        ).insert()
+        ).insert(replace=True)
         eprint_info(f"Started code for {lang.name}, year {year} day {pad_day(day)}")
         eprint_info(f"Open files at {lang_sled.day_dir(year, day)} and happy coding!")

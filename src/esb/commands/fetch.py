@@ -79,9 +79,13 @@ class Fetch(Command):
         if not force and tests_file.is_file():
             eprint_info(f"Tests for year {year} day {pad_day(day)} already cached")
         else:
-            tests_input = rudolph.fetch_tests(year, day)
-            tests_file.parent.mkdir(parents=True, exist_ok=True)
-            tests_file.write_text(tests_input)
+            try:
+                tests_input = rudolph.fetch_tests(year, day)
+            except ValueError:
+                eprint_error("Could not fetch tests. Perhaps they're not available yet.")
+            else:
+                tests_file.parent.mkdir(parents=True, exist_ok=True)
+                tests_file.write_text(tests_input)
 
         eprint_info(f"Fetched year {year} day {pad_day(day)}!")
         self.db.ECAPuzzle(

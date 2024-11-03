@@ -113,7 +113,7 @@ class RudolphFetcher:
             if element.name in {"p", "pre"}:
                 text += "\n\n"
             for child in element.children:
-                text += self.get_text(child.extract())  # type: ignore
+                text += self.get_text(child)  # type: ignore
         else:
             text += element.text
         return text
@@ -125,6 +125,7 @@ class RudolphFetcher:
         soup = BeautifulSoup(body, "html.parser")
         statement = ""
         for article in soup.find_all("article"):
+            statement += "\n"
             statement += self.get_text(article)
         statement = re.sub(r"\n{3,}", "\n\n", statement)
         statement = "\n".join("\n".join(wrap(line, width=100)) for line in statement.strip().split("\n"))

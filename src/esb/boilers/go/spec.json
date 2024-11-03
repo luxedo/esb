@@ -1,0 +1,11 @@
+{
+  "name": "go",
+  "files": {
+    "go.mod": "go.mod",
+    "main.go": "main.go"
+  },
+  "run_command": ["go", "run", "main.go"],
+  "build_command": ["go", "mod", "tidy"],
+  "symbol": "[cyan1]g[/cyan1]",
+  "emoji": "🐹"
+}

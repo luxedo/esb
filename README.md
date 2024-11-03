@@ -190,6 +190,7 @@ for each language and how to create your own boilerplate.
 - Python
 - Rust
 - Elixir
+- Go
 - [_Create your own_](doc/BOILERPLATE.md)
 
 Any program that supports the [FIREPLACEv1](doc/FIREPLACEv1.0.md) prococol can use `esb` tooling.

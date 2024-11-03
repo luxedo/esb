@@ -44,7 +44,7 @@ def _v1_run(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn, part: FPPart, ar
 
 
 def v1_run(solve_pt1: AocSolutionFn, solve_pt2: AocSolutionFn):
-    parser = argparse.ArgumentParser("Elf Script Brigade python solution runner")
+    parser = argparse.ArgumentParser("Elf Script Brigade Python solution runner")
     parser.add_argument(
         "-p",
         "--part",
