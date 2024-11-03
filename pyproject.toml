@@ -32,7 +32,7 @@ classifiers = [
 dependencies = ["rich==13.7.0", "beautifulsoup4==4.12.3", "plotext==5.3.2"]
 
 [project.urls]
-Documentation = "https://github.com/luxedo/esb/README.md"
+Documentation = "https://github.com/luxedo/esb/blob/main/README.md"
 Repository = "https://github.com/luxedo/esb.git"
 Issues = "https://github.com/luxedo/esb/issues"
 Source = "https://github.com/luxedo/esb"

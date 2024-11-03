@@ -4,7 +4,7 @@
 >
 > This tool transforms Advent of Code into a CLI adventure
 
-<img src="doc/assets/logo/png/logo-color-small.png" alt="ElfScript Brigade Logo"/>
+<img src="https://raw.githubusercontent.com/luxedo/esb/refs/heads/main/doc/assets/logo/png/logo-color-small.png" alt="ElfScript Brigade Logo"/>
 
 [![PyPI - Version](https://img.shields.io/pypi/v/esb.svg)](https://pypi.org/project/esb) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/esb.svg)](https://pypi.org/project/esb) [![License: GPL v3](https://img.shields.io/badge/License-GPL_v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/luxedo/esb/publish.yml) ![Codecov](https://img.shields.io/codecov/c/github/luxedo/esb) ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/luxedo/esb)
 
