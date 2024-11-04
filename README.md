@@ -12,7 +12,7 @@
 
 In the bureaucratic workshop of Santa's IT department, where the spirit of Christmas and the magic of coding converge, a special group of coding elves emerged known as the **ElfScript Brigade**. These skilled and whimsical elves were bestowed with the mission of safeguarding the joyous essence of Christmas through the power of scripting and coding.
 
-`esb` is a CLI tool to help us _elves_ to save Christmas for the [Advent Of Code](https://adventofcode.com/) yearly events (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
+`esb` is a CLI tool to help us elves save Christmas for the yearly [Advent of Code](https://adventofcode.com/) events. (Thank you, [Eric! 😉](https://twitter.com/ericwastl))
 
 This tool allows us _elves_ to:
 
