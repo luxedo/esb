@@ -1,0 +1,10 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 15             #
+#################################
+[test.test_01]
+part = 1
+input = """Disc #1 has 5 positions; at time=0, it is at position 4.
+Disc #2 has 2 positions; at time=0, it is at position 1."""
+answer = 5
