@@ -3,7 +3,7 @@ package main
 * ElfScript Brigade
 *
 * Advent Of Code {year} Day {day}
-* Rust Solution
+* Go Solution
 *
 * {problem_title}
 *
