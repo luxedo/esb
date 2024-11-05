@@ -1,0 +1,14 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 19             #
+#################################
+[test.test_01]
+part = 1
+input = 5
+answer = 3
+
+[test.test_02]
+part = 2
+input = 5
+answer = 2

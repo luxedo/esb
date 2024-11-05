@@ -1,0 +1,34 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 17             #
+#################################
+[test.test_01]
+part = 1
+input = "ihgpwlah"
+answer = "DDRRRD"
+
+[test.test_02]
+part = 1
+input = "kglvqrro"
+answer = "DDUDRLRRUDRD"
+
+[test.test_03]
+part = 1
+input = "ulqzkmiv"
+answer = "DRURDRUDDLLDLUURRDULRLDUUDDDRR"
+
+[test.test_04]
+part = 2
+input = "ihgpwlah"
+answer = 370
+
+[test.test_05]
+part = 2
+input = "kglvqrro"
+answer = 492
+
+[test.test_06]
+part = 2
+input = "ulqzkmiv"
+answer = 830

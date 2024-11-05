@@ -1,0 +1,14 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2016            #
+#           Day: 21             #
+#################################
+[test.test_01]
+part = 1
+input = "abcde"
+answer = "decab"
+
+[test.test_02]
+part = 2
+input = "decab"
+answer = "abcde"
