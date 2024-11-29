@@ -111,7 +111,7 @@ class Command(ABC):
         if len(tests) == 0:
             ts = CacheTestSled(self.repo_root)
             day_dir = ts.day_dir(year, day)
-            eprint_error(f"Could not find tests for year {year} day {pad_day(day)}")
+            eprint_error(f"Could not find tests for year {year} day {pad_day(day)} part {part}")
             eprint_error(f"Create tests at: {day_dir!s}")
 
         if filter_test is not None:
@@ -156,5 +156,6 @@ class Command(ABC):
                 eprint_error(f'Test {test_name} is missing one of the following keys: "input", "answer" or "part"')
                 continue
             if c["part"] == part:
+                c["input"] = str(c["input"])
                 tests.append((test_name, c))
         return tests
