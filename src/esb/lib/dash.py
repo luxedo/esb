@@ -404,9 +404,9 @@ class CliDash(BaseDash):
         for year, days in year_stars.items():
             year_title = self.build_year_str(year, days)
             langs_str = self.build_lang_stars_str(lang_stars, year)
-            stars_str = f'[yellow]{self.build_stars_str(days, "*")}[/yellow]'
+            stars_str = f"[yellow]{self.build_stars_str(days, '*')}[/yellow]"
             days_str = " ".join([f"{pad_day(day)}" for day in range(1, 26)])
-            sep_str = f'[yellow]{"=".join(["==" for _ in range(1, 26)])}[/yellow]'
+            sep_str = f"[yellow]{'='.join(['==' for _ in range(1, 26)])}[/yellow]"
             ret[year] = f"{year_title}\n{langs_str}\n{stars_str}\n{days_str}\n{sep_str}\n"
         return ret
 
@@ -456,7 +456,7 @@ class MdDash(BaseDash):
             years_summary_str += f"\n{ys[year]}"
 
         brigadista = self.brigadista()
-        summary_msg = f"{brigadista}\n" "\n## SERVICE STARS\n" f"{years_summary_str}\n"
+        summary_msg = f"{brigadista}\n\n## SERVICE STARS\n{years_summary_str}\n"
 
         final_text = self.paste_text(template, summary_msg)
         self.readme.write_text(final_text)
@@ -511,7 +511,7 @@ class MdDash(BaseDash):
             if all(solved) and len(set(days.keys())) == ESBConfig.last_day:
                 year_title += " ⭐"
 
-            ret[year] = f"\n{year_title}\n\n" f"{table!s}"
+            ret[year] = f"\n{year_title}\n\n{table!s}"
         return ret
 
     def build_stars_row(

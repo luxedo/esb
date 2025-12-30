@@ -142,7 +142,7 @@ class Command(ABC):
 
     @staticmethod
     def load_tests(filename: Path, part: FPPart) -> list[tuple[str, dict]]:
-        cases_str = filename.read_text()
+        cases_str = filename.read_text(encoding="utf-8")
         try:
             cases = tomllib.loads(cases_str).get("test", {})
         except tomllib.TOMLDecodeError:

@@ -1,6 +1,7 @@
 __pycache__
 .coverage*
 cobertura.xml
+coverage.xml
 .mypy_cache
 .pytest_cache
 .ruff_cache

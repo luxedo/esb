@@ -159,7 +159,7 @@ class TestMetricPrefix:
             ("Gm", MetricPrefix.giga),
             ("Mm", MetricPrefix.mega),
             ("km", MetricPrefix.kilo),
-            ("m", MetricPrefix._),  # noqa: SLF001
+            ("m", MetricPrefix._),
             ("mm", MetricPrefix.milli),
             ("μm", MetricPrefix.micro),
             ("nm", MetricPrefix.nano),
@@ -180,7 +180,7 @@ class TestMetricPrefix:
             ("gigameters", MetricPrefix.giga),
             ("megameters", MetricPrefix.mega),
             ("kilometers", MetricPrefix.kilo),
-            ("meters", MetricPrefix._),  # noqa: SLF001
+            ("meters", MetricPrefix._),
             ("millimeters", MetricPrefix.milli),
             ("micrometers", MetricPrefix.micro),
             ("nanometers", MetricPrefix.nano),
@@ -212,7 +212,7 @@ class TestMetricPrefix:
     @pytest.mark.parametrize(
         ("test_value", "answer"),
         [
-            (MetricPrefix._, 0),  # noqa: SLF001
+            (MetricPrefix._, 0),
             (MetricPrefix.nano, -9),
             (MetricPrefix.kilo, 3),
         ],
@@ -223,7 +223,7 @@ class TestMetricPrefix:
     @pytest.mark.parametrize(
         ("test_value", "answer"),
         [
-            (0, MetricPrefix._),  # noqa: SLF001
+            (0, MetricPrefix._),
             (-9, MetricPrefix.nano),
             (3, MetricPrefix.kilo),
         ],
@@ -234,7 +234,7 @@ class TestMetricPrefix:
     @pytest.mark.parametrize(
         ("test_value", "sample_value", "answer"),
         [
-            (MetricPrefix._, sample_value, sample_value),  # noqa: SLF001
+            (MetricPrefix._, sample_value, sample_value),
             (MetricPrefix.nano, sample_value, sample_value * 1e-9),
             (MetricPrefix.kilo, sample_value, sample_value * 1e3),
         ],
@@ -245,7 +245,7 @@ class TestMetricPrefix:
     @pytest.mark.parametrize(
         ("test_value", "answer_mantissa", "answer_exponent"),
         [
-            (sample_value, sample_value, MetricPrefix._),  # noqa: SLF001
+            (sample_value, sample_value, MetricPrefix._),
             (sample_value * 1e3, sample_value, MetricPrefix.kilo),
             (sample_value * 1e-9, sample_value, MetricPrefix.nano),
         ],
@@ -275,7 +275,7 @@ class TestMetricPrefix:
     @pytest.mark.parametrize(
         ("test_value", "sample_value", "answer"),
         [
-            (MetricPrefix._, sample_value, f"{sample_value} meters"),  # noqa: SLF001
+            (MetricPrefix._, sample_value, f"{sample_value} meters"),
             (MetricPrefix.nano, sample_value, f"{sample_value} nanometers"),
             (MetricPrefix.kilo, sample_value, f"{sample_value} kilometers"),
         ],

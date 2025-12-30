@@ -17,6 +17,7 @@ from itertools import product
 
 from esb.commands.base import Command, eprint_error, eprint_info, eprint_warn
 from esb.commands.dashboard import Dashboard
+from esb.commands.fetch import Fetch
 from esb.config import ESBConfig
 from esb.lib.fetch import RudolphFetcher, RudolphSubmitStatus
 from esb.lib.langs import LangRunner, LangSpec
@@ -43,6 +44,7 @@ class Run(Command):
         self.parts = parts
         self.submit = submit
         self.load_from_arg_cache()
+        self.fetch_cmd = Fetch(years, days)
 
     def execute(self):
         for year, day, part in product(self.years, self.days, self.parts):
@@ -123,6 +125,7 @@ class Run(Command):
                     dp.set_solved(part, attempt, now)
                     cmd = Dashboard()
                     cmd.execute()
+                    self.fetch_cmd.fetch_statement(rudolph, year, day)
                 case RudolphSubmitStatus.FAIL:
                     eprint_info("That's not the correct answer :'(")
                     eprint_error(f"✘ Answer pt{part}: {attempt}")
@@ -131,8 +134,7 @@ class Run(Command):
                     eprint_warn(f"Answer pt{part}: {attempt}")
                 case RudolphSubmitStatus.ALREADY_COMPLETE:
                     eprint_info(
-                        "Puzzle already solved but solution not fetched yet. "
-                        "Please fetch again to compare solutions.",
+                        "Puzzle already solved but solution not fetched yet. Please fetch again to compare solutions.",
                     )
                     eprint_warn(f"Answer pt{part}: {attempt}")
                     now = datetime.now().astimezone()

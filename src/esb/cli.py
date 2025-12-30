@@ -38,11 +38,11 @@ def aoc_year(value: str):
         if ivalue > now.year:
             message = f"{value} is not a valid AoC year. Please try from 2015 up to {now.year - 1}."
             raise argparse.ArgumentTypeError(message)
-
-        return ivalue
     except ValueError as exc:
         message = f"{value} is not a valid AoC year"
         raise argparse.ArgumentTypeError(message) from exc
+    else:
+        return ivalue
 
 
 def aoc_day(value: str):
@@ -58,11 +58,11 @@ def aoc_day(value: str):
         if ivalue > ESBConfig.last_day:
             message = f"{value} is not a valid AoC day. Please try from 1 up to 25."
             raise argparse.ArgumentTypeError(message)
-
-        return ivalue
     except ValueError as exc:
         message = f"{value} is not a valid AoC day"
         raise argparse.ArgumentTypeError(message) from exc
+    else:
+        return ivalue
 
 
 def aoc_part(value: str):
@@ -74,11 +74,11 @@ def aoc_part(value: str):
         if ivalue not in ESBConfig.parts:
             message = f"{value} is not a valid AoC part. Please chose 1 or/and 2."
             raise argparse.ArgumentTypeError(message)
-
-        return ivalue
     except ValueError as exc:
         message = f"{value} is not a valid AoC part"
         raise argparse.ArgumentTypeError(message) from exc
+    else:
+        return ivalue
 
 
 class AocLangAction(argparse.Action):

@@ -69,11 +69,15 @@ cov-xml = [
 ]
 check = "mypy --install-types --non-interactive {args:src/esb tests}"
 
+[tool.hatch.envs.hatch-static-analysis]
+dependencies = ["ruff>=0.14.0"]
+config-path = "ruff.toml"
+
 [tool.mypy]
 exclude = ["esb/boilers"]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.11", "3.12"]
+python = ["3.11", "3.12", "3.13", "3.14"]
 
 [tool.coverage.run]
 source_pkgs = ["esb", "tests"]
@@ -96,15 +100,3 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 show_missing = true
-
-[tool.ruff]
-line-length = 120
-include = ["pyproject.toml", "src/esb/*.py", "tests/**/*.py"]
-exclude = ["src/esb/boilers"]
-
-[tool.ruff.format]
-preview = true
-
-[tool.ruff.lint]
-preview = true
-ignore = ["TRY", "ARG002"]

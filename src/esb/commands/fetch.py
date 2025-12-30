@@ -37,6 +37,16 @@ class Fetch(Command):
         for year, day in product(self.years, self.days):
             self.fetch_day(year, day, force=self.force)
 
+    def fetch_statement(self, rudolph: RudolphFetcher, year: int, day: int) -> tuple[str, str | None, str | None, str]:
+        url, statement, answer_pt1, answer_pt2 = rudolph.fetch_statement(year, day)
+
+        st_file = self.cache_sled.path("statement", year, day)
+        st_file.parent.mkdir(parents=True, exist_ok=True)
+        st_file.write_text(statement)
+
+        [_, title, *_] = statement.split("---")
+        return url, answer_pt1, answer_pt2, title
+
     def fetch_day(self, year: int, day: int, *, force: bool = False):
         dp = self.db.ECAPuzzle.find_single({"year": year, "day": day})
         if not force and dp is not None and dp.answer_pt2 is not None:
@@ -51,13 +61,7 @@ class Fetch(Command):
 
         rudolph = RudolphFetcher(self.repo_root)
 
-        url, statement, answer_pt1, answer_pt2 = rudolph.fetch_statement(year, day)
-
-        st_file = self.cache_sled.path("statement", year, day)
-        st_file.parent.mkdir(parents=True, exist_ok=True)
-        st_file.write_text(statement)
-
-        [_, title, *_] = statement.split("---")
+        url, answer_pt1, answer_pt2, title = self.fetch_statement(rudolph, year, day)
 
         input_file = self.cache_sled.path("input", year, day)
 

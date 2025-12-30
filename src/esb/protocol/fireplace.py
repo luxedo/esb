@@ -86,17 +86,14 @@ class FPResult:
 
 
 # @TODO: type this
-async def _read_output(stream, threshold: int, print_stream) -> str:
+async def _read_output(stream, print_stream=None) -> str:
     ret = ""
-    lines = 0
-    while line := await stream.readline():
-        line = line.decode("utf-8")
-        ret += line
-        if lines == threshold:
-            print_stream.write(ret)
-        elif lines > threshold:
-            print_stream.write(line)
-        lines += 1
+    while chunk := await stream.read(4096):
+        chunk = chunk.decode("utf-8")
+        ret += chunk
+        if print_stream is not None:
+            print_stream.write(chunk)
+            print_stream.flush()
     return ret
 
 
@@ -106,6 +103,7 @@ async def _exec_protocol_command(cmd: list[str], cwd: Path, day_input_text: str)
         cwd=cwd,
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
     )
 
     if proc.stdin is None:
@@ -113,9 +111,15 @@ async def _exec_protocol_command(cmd: list[str], cwd: Path, day_input_text: str)
         raise RuntimeError(message)
 
     proc.stdin.write(day_input_text.encode())
+    await proc.stdin.drain()
     proc.stdin.close()
 
-    return await asyncio.gather(proc.wait(), _read_output(proc.stdout, threshold=2, print_stream=sys.stdout))
+    stdout_task = _read_output(proc.stdout, print_stream=sys.stdout)
+    stderr_task = _read_output(proc.stderr)
+    returncode, stdout, stderr = await asyncio.gather(proc.wait(), stdout_task, stderr_task)
+    sys.stderr.write(stderr)
+    sys.stderr.flush()
+    return returncode, stdout
 
 
 def parse_running_time(running_time_line: str) -> tuple[int, MetricPrefix]:
@@ -137,7 +141,7 @@ def exec_protocol_from_file(
 ) -> FPResult:
     if not day_input.is_file():
         return FPResult(status=FPStatus.InputDoesNotExists)
-    day_input_text = day_input.read_text()
+    day_input_text = day_input.read_text(encoding="utf-8")
     return exec_protocol(command, part, args, cwd, day_input_text)
 
 

@@ -58,7 +58,7 @@ class Start(Command):
                 pass
             case (self.db.ECALanguage(), True):
                 eprint_warn(
-                    f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. ' "Overwritting...",
+                    f'Code for "{lang.name}" year {year} day {pad_day(day)} has already started. Overwritting...',
                 )
                 day_language.delete()
             case (self.db.ECALanguage(), _):

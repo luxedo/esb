@@ -19,7 +19,7 @@ from textwrap import wrap
 from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 
 from esb import __version__
 from esb.lib.paths import pad_day

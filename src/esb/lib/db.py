@@ -290,7 +290,7 @@ class ECALanguage(Table):
         where = ["year", "day", "language"]
         self.update({f"solved_pt{part}": now}, where)
         if self.day == ESBConfig.last_day:  # Day 25 has only one star
-            self.update({f"solved_pt{part}": now}, where)
+            self.update({"solved_pt2": now}, where)
 
 
 @dataclass(unsafe_hash=True)
