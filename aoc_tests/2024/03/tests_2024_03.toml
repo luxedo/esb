@@ -1,0 +1,19 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2024            #
+#           Day: 03             #
+#################################
+[test.test_01]
+part = 1
+input = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"
+answer = 161
+
+[test.test_02]
+part = 2
+input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
+answer = 48
+
+[test.test_03]
+part = 2
+input = "mul(1,2)don't()mul(3,4)do()mul(5,6)do()mul(7,8)"
+answer = 48

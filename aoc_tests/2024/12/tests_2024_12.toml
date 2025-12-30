@@ -1,0 +1,93 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2024            #
+#           Day: 12             #
+#################################
+[test.test_01]
+part = 1
+input = """AAAA
+BBCD
+BBCC
+EEEC
+"""
+answer = 140
+
+[test.test_02]
+part = 1
+input = """OOOOO
+OXOXO
+OOOOO
+OXOXO
+OOOOO
+"""
+answer = 772
+
+[test.test_03]
+part = 1
+input = """RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE
+"""
+answer = 1930
+
+[test.test_04]
+part = 2
+input = """AAAA
+BBCD
+BBCC
+EEEC
+"""
+answer = 80
+
+[test.test_05]
+part = 2
+input = """OOOOO
+OXOXO
+OOOOO
+OXOXO
+OOOOO
+"""
+answer = 436
+
+[test.test_06]
+part = 2
+input = """EEEEE
+EXXXX
+EEEEE
+EXXXX
+EEEEE
+"""
+answer = 236
+
+[test.test_07]
+part = 2
+input = """AAAAAA
+AAABBA
+AAABBA
+ABBAAA
+ABBAAA
+AAAAAA
+"""
+answer = 368
+
+[test.test_08]
+part = 2
+input = """RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE
+"""
+answer = 1206

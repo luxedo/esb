@@ -1,0 +1,37 @@
+#################################
+#     Advent of Code Tests      #
+#         Year: 2025            #
+#           Day: 01             #
+#################################
+[test.test_01]
+part = 1
+input = """L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82"""
+answer = 3
+
+[test.test_02]
+part = 2
+input = """L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82"""
+answer = 6
+
+[test.test_03]
+part = 2
+input = "L1000"
+answer = 10
