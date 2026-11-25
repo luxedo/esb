@@ -23,7 +23,7 @@ defmodule Year{year}Day{day} do
 
   def start do
     # 🎅🎄❄️☃️🎁🦌
-    # Bright christmas lights HERE
+    # Bright Christmas lights HERE
     v1_run(&solve_pt1/2, &solve_pt2/2)
   end
 end

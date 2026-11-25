@@ -7,7 +7,7 @@ name = "esb"
 dynamic = ["version"]
 description = 'Script your way to rescue Christmas as part of the ElfScript Brigade team.'
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { file = "LICENSE.md" }
 scripts = { esb = "esb.cli:main" }
 keywords = ["Advent of Code", "CLI", "AoC", "Elf", "Elves", "ElfScript Brigade"]

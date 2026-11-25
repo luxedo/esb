@@ -32,8 +32,7 @@ class ESBConfig:
     # AoC
     first_year = 2015
     first_day = 1
-    last_day = 25
-    all_days = tuple(range(first_day, last_day + 1))
+    last_days = {d: 25 for d in range(2015, 2025)} | {2025: 12}
     parts = (1, 2)
     part_1 = 1
     part_2 = 2
@@ -43,3 +42,7 @@ class ESBConfig:
     blank_dash = package_root / blank_dir / "README.md"
     blank_report = package_root / blank_dir / "REPORT.md"
     truncate_answer = 512
+
+    # Methods
+    def all_days(self, year):
+        return tuple(range(self.first_day, self.last_days[year] + 1))

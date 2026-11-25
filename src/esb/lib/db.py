@@ -13,9 +13,9 @@ from __future__ import annotations
 
 import sqlite3
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from esb.config import ESBConfig
 from esb.protocol.metric_prefix import MetricPrefix
@@ -23,10 +23,12 @@ from esb.protocol.metric_prefix import MetricPrefix
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
-    from typing import Any, ClassVar, Self
+    from typing import Any, Self
 
     from esb.protocol.fireplace import FPPart
 
+
+sqlite3.register_adapter(datetime, lambda val: val.isoformat())
 
 @dataclass
 class SqlConnection:
@@ -68,12 +70,14 @@ class Table:
     This class depends on an SqlConnection as
     """
 
-    _sql: SqlConnection = field(init=False, hash=False, repr=False)
-    _bound: bool = field(init=False, hash=False, repr=False)
+    _sql: ClassVar[SqlConnection]
+    _bound: ClassVar[bool]
     _columns: set[str] = field(init=False, hash=False, repr=False)
 
     def __post_init__(self):
-        self._columns = set(self.__annotations__.keys())
+        dc_fields = {f.name for f in fields(self) if not f.name.startswith("_")}
+        inst_attrs = {k for k in self.__dict__ if not k.startswith("_")}
+        self._columns = dc_fields | inst_attrs
 
     def to_dict(self) -> dict[str, Any]:
         return {column: getattr(self, column, None) for column in self._columns}
@@ -212,7 +216,7 @@ class Table:
                 raise ValueError(message)
             where_values = {k: v for k, v in d.items() if k in where}
 
-        if any(v is None for _, v in where_values.items()):
+        if any(v is None for v in where_values.values()):
             message = "Cannot update with empty fields. Please chose `where`"
             raise ValueError(message)
 
@@ -269,7 +273,7 @@ class ECAPuzzle(Table):
             return
         where = ["year", "day"]
         self.update({f"solved_pt{part}": now, f"answer_pt{part}": str(answer)}, where)
-        if self.day == ESBConfig.last_day:  # Day 25 has only one star
+        if self.day == ESBConfig.last_days[self.year]:  # Day 25 has only one star
             self.update({"solved_pt2": now}, where)
 
 
@@ -289,7 +293,7 @@ class ECALanguage(Table):
 
         where = ["year", "day", "language"]
         self.update({f"solved_pt{part}": now}, where)
-        if self.day == ESBConfig.last_day:  # Day 25 has only one star
+        if self.day == ESBConfig.last_days[self.year]:  # Day 25 has only one star
             self.update({"solved_pt2": now}, where)
 
 

@@ -26,6 +26,6 @@ func solve_pt2(input_data string, args []string) (interface{}, error) {
 
 func main() {
   // 🎅🎄❄️☃️🎁🦌
-  // Bright christmas lights HERE
+  // Bright Christmas lights HERE
   esb_fireplace.V1Run(solve_pt1, solve_pt2)
 }

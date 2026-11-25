@@ -73,7 +73,7 @@ class Show(Command):
         else:
             oprint_error(f"Solution pt1: {not_solved}")
 
-        if day != ESBConfig.last_day:
+        if day != ESBConfig.last_days[year]:
             if dp.answer_pt2 is not None:
                 oprint_info(f"Solution pt2: {dp.answer_pt2}")
             else:

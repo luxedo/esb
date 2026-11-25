@@ -7,6 +7,6 @@
   "symbol": "[purple]e[/purple]",
   "emoji": "⚗️",
   "base": true,
-  "build_command": ["mix", "compile"],
+  "build_command": ["mix", "compile", "--all-warnings", "--warnings-as-errors"],
   "install": ["mix", "deps.get"]
 }

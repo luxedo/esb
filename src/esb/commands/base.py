@@ -12,11 +12,11 @@ Script your way to rescue Christmas as part of the ElfScript Brigade team.
 from __future__ import annotations
 
 import sys
-import tomllib
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import tomllib
 from rich.console import Console
 from rich.theme import Theme
 

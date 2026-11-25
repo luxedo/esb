@@ -118,7 +118,7 @@ class BaseDash:
         stats = self.db.ECAPuzzle.fetch_all()
 
         def cmp_year(s):
-            if s.day == ESBConfig.last_day and s.answer_pt1 is not None:  # Day 25 has only one star
+            if s.day == ESBConfig.last_days[s.year] and s.answer_pt1 is not None:  # Day 25 has only one star
                 return self.SOLVED_PT2
             return (
                 self.SOLVED_NONE
@@ -141,7 +141,7 @@ class BaseDash:
     @staticmethod
     def build_year_str(year: int, days: DayStars) -> str:
         solved_all = (
-            all(v == ESBConfig.max_parts for v in days.values()) and len(set(days.keys())) == ESBConfig.last_day
+            all(v == ESBConfig.max_parts for v in days.values()) and len(set(days.keys())) == ESBConfig.last_days[year]
         )
         return f"[yellow]* {year}[/yellow]" if solved_all else f"[yellow]  {year}[/yellow]"
 
@@ -328,7 +328,7 @@ class BaseDash:
             plt.clear_figure()
             plt.plot_size(base_width * 9.3, 20)
             plt.title(f"Year {year}")
-            plt.xlim(0, ESBConfig.last_day)
+            plt.xlim(0, ESBConfig.last_days[year])
             plt.xticks(range(1, 26))
             plt.ylim(min(time_ticks), max(time_ticks))
             plt.yticks(time_ticks, time_labels)
@@ -500,15 +500,15 @@ class MdDash(BaseDash):
             rows = [row for s in columns for row in self.build_stars_row(year, days, lang_stars, s)]
             last_day_rows = list(
                 self.build_stars_row(
-                    year, days, lang_stars, [ESBConfig.last_day], td_attributes={"colspan": 6, "align": "center"}
+                    year, days, lang_stars, [ESBConfig.last_days[year]], td_attributes={"colspan": 6, "align": "center"}
                 )
             )
             last_day_rows.pop()
             table = HTML("table").add_children(rows).add_children(last_day_rows)
 
             solved = [v == ESBConfig.max_parts for v in days.values()]
-            year_title = f"### {year} ({sum(solved)}/{ESBConfig.last_day})"
-            if all(solved) and len(set(days.keys())) == ESBConfig.last_day:
+            year_title = f"### {year} ({sum(solved)}/{ESBConfig.last_days[year]})"
+            if all(solved) and len(set(days.keys())) == ESBConfig.last_days[year]:
                 year_title += " ⭐"
 
             ret[year] = f"\n{year_title}\n\n{table!s}"

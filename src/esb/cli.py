@@ -47,7 +47,7 @@ def aoc_year(value: str):
 
 def aoc_day(value: str):
     if value == "all":
-        return list(range(ESBConfig.first_day, ESBConfig.last_day + 1))
+        return list(range(ESBConfig.first_day, ESBConfig.last_days[2024] + 1))
 
     try:
         ivalue = int(value)
@@ -55,7 +55,7 @@ def aoc_day(value: str):
             message = f"{value} is not a valid AoC day. Please try from 1 onwards."
             raise argparse.ArgumentTypeError(message)
 
-        if ivalue > ESBConfig.last_day:
+        if ivalue > ESBConfig.last_days[2024]:
             message = f"{value} is not a valid AoC day. Please try from 1 up to 25."
             raise argparse.ArgumentTypeError(message)
     except ValueError as exc:

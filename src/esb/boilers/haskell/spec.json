@@ -1,0 +1,12 @@
+{
+  "name": "haskell",
+  "files": {
+    "app/Main.hs": "app/Main.hs",
+    "aoc.cabal": "aoc.cabal"
+  },
+  "run_command": ["cabal", "run", "-v0", "--", "solve"],
+  "symbol": "[purple3]λ[/purple3]",
+  "emoji": "🦄",
+  "base": true,
+  "install": ["cabal", "build"]
+}

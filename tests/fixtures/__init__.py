@@ -8,18 +8,22 @@ ESB - Script your way to rescue Christmas as part of the ElfScript Brigade team.
 [Advent Of Code](https://adventofcode.com/) yearly events
 (Thank you [Eric 😉!](https://twitter.com/ericwastl)).
 """
+from __future__ import annotations
 
 import io
 import os
 import unittest
-from collections.abc import Iterable
 from itertools import cycle
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 from esb.lib.db import ElvenCrisisArchive
 from esb.lib.fetch import RudolphFetcher
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class TestWithTemporaryDirectory(unittest.TestCase):
